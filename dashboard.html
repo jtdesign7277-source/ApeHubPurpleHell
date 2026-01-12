@@ -1,0 +1,2095 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Dashboard | ApeHub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #0a0a0f;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Instrument Sans', sans-serif;
+      color: #fff;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ============================================
+       MAIN CONTAINER
+       ============================================ */
+    .dashboard-container {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 0;
+      padding-bottom: 100px;
+    }
+
+    /* ============================================
+       TOP BAR - Clock Left, Welcome Right
+       ============================================ */
+    .top-bar {
+      padding: 60px 24px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .clock-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .time-row {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .current-time {
+      font-size: 28px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -1px;
+      color: #fff;
+    }
+
+    .time-period {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.4);
+      font-weight: 500;
+    }
+
+    .market-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .status-dot.open {
+      background: #00d775;
+      box-shadow: 0 0 8px #00d775;
+    }
+
+    .status-dot.closed {
+      background: #ff4757;
+      box-shadow: 0 0 8px #ff4757;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .status-text {
+      font-size: 11px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    .countdown {
+      font-size: 11px;
+      font-weight: 600;
+      color: #a855f7;
+      font-variant-numeric: tabular-nums;
+      transition: color 0.3s ease;
+    }
+
+    .countdown.closing {
+      color: #ff4757;
+    }
+
+    .countdown.opening {
+      color: #00d775;
+    }
+
+    .countdown-label {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.3);
+    }
+
+    .welcome {
+      font-size: 15px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.6);
+      text-align: right;
+    }
+
+    .welcome span {
+      color: #a855f7;
+      font-weight: 600;
+    }
+
+    /* ============================================
+       INDICES STRIP
+       ============================================ */
+    .indices-section {
+      padding: 0 0 32px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .indices-header {
+      padding: 0 24px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .indices-title {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.35);
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .market-status-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.4);
+      font-weight: 500;
+    }
+
+    .market-status-badge .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #00d775;
+    }
+
+    .indices-scroll {
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+      padding: 0 24px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .indices-scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    .index-item {
+      flex: 0 0 auto;
+      min-width: 120px;
+      padding: 0 20px 0 0;
+      border-right: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .index-item:last-child {
+      border-right: none;
+      padding-right: 0;
+    }
+
+    .index-item:first-child {
+      padding-left: 0;
+    }
+
+    .index-name {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.4);
+      font-weight: 500;
+      margin-bottom: 4px;
+      letter-spacing: 0.3px;
+    }
+
+    .index-value {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 2px;
+    }
+
+    .index-change {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .index-change.up {
+      color: #00d775;
+    }
+
+    .index-change.down {
+      color: #ff4757;
+    }
+
+    .market-price {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 2px;
+    }
+
+    .market-change {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .market-change.up {
+      color: #00d775;
+    }
+
+    .market-change.down {
+      color: #ff4757;
+    }
+
+    /* ============================================
+       WATCHLIST SECTION
+       ============================================ */
+    .watchlist-section {
+      padding: 32px 24px 24px;
+    }
+
+    .wl-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 24px;
+    }
+
+    .wl-title-section {
+      flex: 1;
+    }
+
+    .wl-list-name {
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.35);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .wl-total-value {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .wl-total-amount {
+      font-size: 32px;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: -1px;
+    }
+
+    .wl-total-change {
+      font-size: 14px;
+      font-weight: 600;
+      color: #00d775;
+    }
+
+    .wl-total-change.down {
+      color: #ff4757;
+    }
+
+    /* Gunmetal shiny stars for hidden values */
+    .hidden-stars {
+      background: linear-gradient(135deg, #2a2d33 0%, #4a4f5a 25%, #6b7280 50%, #4a4f5a 75%, #2a2d33 100%);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gunmetalShine 3s ease-in-out infinite;
+      text-shadow: none;
+      font-weight: 400;
+      letter-spacing: 2px;
+    }
+
+    @keyframes gunmetalShine {
+      0%, 100% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+    }
+
+    .wl-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .wl-eye-btn {
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.3);
+      cursor: pointer;
+      padding: 8px;
+      transition: all 0.2s;
+    }
+
+    .wl-eye-btn:hover {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .wl-eye-btn .eye-open {
+      display: block;
+    }
+
+    .wl-eye-btn .eye-closed {
+      display: none;
+    }
+
+    .wl-eye-btn.hidden .eye-open {
+      display: none;
+    }
+
+    .wl-eye-btn.hidden .eye-closed {
+      display: block;
+    }
+
+    /* Watchlist collapse toggle */
+    .wl-collapse-row {
+      display: flex;
+      justify-content: center;
+      padding: 8px 0;
+    }
+
+    .wl-collapse-btn {
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.3);
+      cursor: pointer;
+      padding: 4px 16px;
+      transition: all 0.3s;
+    }
+
+    .wl-collapse-btn:hover {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .wl-collapse-btn.collapsed {
+      transform: rotate(180deg);
+    }
+
+    /* ============================================
+       SEARCH BAR
+       ============================================ */
+    .wl-search-container {
+      position: relative;
+      margin-bottom: 24px;
+    }
+
+    .wl-search-input {
+      width: 100%;
+      padding: 14px 20px;
+      padding-left: 48px;
+      padding-right: 48px;
+      border: none;
+      border-radius: 14px;
+      font-size: 15px;
+      background: rgba(255, 255, 255, 0.06);
+      color: #fff;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .wl-search-input::placeholder {
+      color: rgba(255, 255, 255, 0.3);
+    }
+
+    .wl-search-input:focus {
+      background: rgba(255, 255, 255, 0.1);
+      box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.3);
+    }
+
+    .wl-search-icon {
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(255, 255, 255, 0.3);
+      pointer-events: none;
+    }
+
+    .wl-search-clear {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.3);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 50%;
+      display: none;
+      transition: color 0.2s;
+    }
+
+    .wl-search-clear:hover {
+      color: #fff;
+    }
+
+    .wl-search-clear.visible {
+      display: block;
+    }
+
+    /* ============================================
+       SEARCH RESULTS DROPDOWN
+       ============================================ */
+    .wl-search-results {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      right: 0;
+      background: #1a1a1f;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      max-height: 400px;
+      overflow-y: auto;
+      z-index: 100;
+      display: none;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    }
+
+    .wl-search-results.visible {
+      display: block;
+    }
+
+    .wl-search-result {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .wl-search-result:last-child {
+      border-bottom: none;
+    }
+
+    .wl-search-result:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .wl-result-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .wl-result-symbol {
+      font-weight: 700;
+      font-size: 15px;
+      color: #fff;
+    }
+
+    .wl-result-name {
+      font-size: 13px;
+      color: #888;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .wl-result-sparkline {
+      width: 80px;
+      height: 30px;
+    }
+
+    .wl-result-price-col {
+      text-align: right;
+      min-width: 70px;
+    }
+
+    .wl-result-price {
+      font-weight: 600;
+      font-size: 15px;
+      color: #fff;
+    }
+
+    .wl-result-change {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-top: 4px;
+      display: inline-block;
+    }
+
+    .wl-result-change.up {
+      background: #00d775;
+      color: #000;
+    }
+
+    .wl-result-change.down {
+      background: #ff4757;
+      color: #fff;
+    }
+
+    /* Star button */
+    .wl-star-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 50%;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 4px;
+    }
+
+    .wl-star-btn:hover {
+      background: rgba(255, 215, 0, 0.15);
+    }
+
+    .wl-star-btn svg {
+      width: 22px;
+      height: 22px;
+      transition: all 0.2s;
+    }
+
+    .wl-star-btn .star-empty {
+      color: #555;
+    }
+
+    .wl-star-btn .star-filled {
+      color: #FFD700;
+      display: none;
+    }
+
+    .wl-star-btn.active .star-empty {
+      display: none;
+    }
+
+    .wl-star-btn.active .star-filled {
+      display: block;
+    }
+
+    /* No results */
+    .wl-no-results {
+      padding: 30px;
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+    }
+
+    /* ============================================
+       WATCHLIST LABEL
+       ============================================ */
+    .watchlist-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .watchlist-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.35);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    /* ============================================
+       STOCK LIST (Main Watchlist)
+       ============================================ */
+    .wl-stock-list {
+      max-height: 2000px;
+      overflow: hidden;
+      transition: max-height 0.4s ease, opacity 0.3s ease;
+    }
+
+    .wl-stock-list.collapsed {
+      max-height: 0;
+      opacity: 0;
+    }
+
+    .wl-stock-row {
+      display: grid;
+      grid-template-columns: 1fr 80px auto 24px;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      transition: background 0.2s;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .wl-stock-row:active {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .wl-stock-row:last-child {
+      border-bottom: none;
+    }
+
+    .wl-stock-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .wl-stock-symbol {
+      font-weight: 600;
+      font-size: 16px;
+      color: #fff;
+      letter-spacing: -0.3px;
+    }
+
+    .wl-stock-name {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.4);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .wl-stock-sparkline {
+      width: 80px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .wl-stock-price-col {
+      text-align: right;
+      min-width: 80px;
+    }
+
+    .wl-stock-price {
+      font-weight: 600;
+      font-size: 16px;
+      color: #fff;
+    }
+
+    .wl-stock-change {
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .wl-stock-change.up {
+      color: #00d775;
+    }
+
+    .wl-stock-change.down {
+      color: #ff4757;
+    }
+
+    /* Remove button */
+    .wl-remove-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      opacity: 0.3;
+      transition: all 0.2s;
+      color: rgba(255, 255, 255, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .wl-stock-row:hover .wl-remove-btn {
+      opacity: 1;
+    }
+
+    .wl-remove-btn:hover {
+      color: #ff4757;
+    }
+
+    /* ============================================
+       EMPTY STATE
+       ============================================ */
+    .wl-empty {
+      padding: 60px 24px;
+      text-align: center;
+      color: #666;
+    }
+
+    .wl-empty-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.3;
+    }
+
+    .wl-empty h3 {
+      font-size: 18px;
+      color: #888;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .wl-empty p {
+      font-size: 14px;
+      color: #555;
+    }
+
+    /* ============================================
+       TOAST
+       ============================================ */
+    .wl-toast {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #1d1d1f;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      z-index: 1000;
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+
+    .wl-toast.visible {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .wl-toast.success {
+      border-left: 3px solid #00d775;
+    }
+
+    .wl-toast.removed {
+      border-left: 3px solid #ff4757;
+    }
+
+    /* ============================================
+       MODAL
+       ============================================ */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 2000;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .modal-overlay.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-content {
+      background: #1a1a1f;
+      border-radius: 24px 24px 0 0;
+      width: 100%;
+      max-width: 500px;
+      padding: 24px;
+      padding-bottom: calc(24px + env(safe-area-inset-bottom));
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+    }
+
+    .modal-overlay.visible .modal-content {
+      transform: translateY(0);
+    }
+
+    .modal-handle {
+      width: 40px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 2px;
+      margin: 0 auto 20px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 24px;
+    }
+
+    .modal-stock-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .modal-symbol {
+      font-size: 24px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .modal-name {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .modal-price-info {
+      text-align: right;
+    }
+
+    .modal-current-price {
+      font-size: 20px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .modal-price-change {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .modal-price-change.up {
+      color: #00d775;
+    }
+
+    .modal-price-change.down {
+      color: #ff4757;
+    }
+
+    .modal-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .form-input {
+      background: rgba(255, 255, 255, 0.06);
+      border: none;
+      border-radius: 12px;
+      padding: 16px;
+      font-size: 18px;
+      font-weight: 600;
+      color: #fff;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .form-input::placeholder {
+      color: rgba(255, 255, 255, 0.25);
+    }
+
+    .form-input:focus {
+      background: rgba(255, 255, 255, 0.1);
+      box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.3);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .position-summary {
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 8px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+    }
+
+    .summary-row:not(:last-child) {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .summary-label {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .summary-value {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .summary-value.gain {
+      color: #00d775;
+    }
+
+    .summary-value.loss {
+      color: #ff4757;
+    }
+
+    .modal-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .modal-btn {
+      padding: 16px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .modal-btn-cancel {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+
+    .modal-btn-cancel:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .modal-btn-save {
+      background: #a855f7;
+      color: #fff;
+    }
+
+    .modal-btn-save:hover {
+      background: #9333ea;
+    }
+
+    /* ============================================
+       BOTTOM NAV
+       ============================================ */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #0a0a0f;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 0 28px;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: #666;
+      text-decoration: none;
+      font-size: 11px;
+      transition: color 0.2s;
+    }
+
+    .nav-item.active {
+      color: #a855f7;
+    }
+
+    .nav-item svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* ============================================
+       SCROLLBAR
+       ============================================ */
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+    }
+
+    /* Safe area for iOS */
+    @supports (padding-bottom: env(safe-area-inset-bottom)) {
+      .dashboard-container {
+        padding-bottom: calc(100px + env(safe-area-inset-bottom));
+      }
+      .bottom-nav {
+        padding-bottom: calc(12px + env(safe-area-inset-bottom));
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div class="clock-left">
+        <div class="time-row">
+          <span class="current-time" id="currentTime">00:00:00</span>
+          <span class="time-period" id="timePeriod">AM</span>
+        </div>
+        <div class="market-row">
+          <div class="status-dot" id="statusDot"></div>
+          <span class="status-text" id="statusText">Closed</span>
+          <span class="countdown" id="countdown">00:00:00</span>
+          <span class="countdown-label" id="countdownLabel">until open</span>
+        </div>
+      </div>
+      <div class="welcome">Welcome, <span>User</span></div>
+    </div>
+
+    <!-- Indices Strip -->
+    <div class="indices-section">
+      <div class="indices-header">
+        <span class="indices-title">Markets</span>
+        <div class="market-status-badge">
+          <span class="dot" id="marketDot"></span>
+          <span id="marketStatusText">Closed</span>
+        </div>
+      </div>
+      <div class="indices-scroll">
+        <div class="index-item">
+          <div class="index-name">S&P 500</div>
+          <div class="index-value">5,918.25</div>
+          <div class="index-change up">+0.87%</div>
+        </div>
+        <div class="index-item">
+          <div class="index-name">DOW</div>
+          <div class="index-value">42,840.26</div>
+          <div class="index-change up">+1.24%</div>
+        </div>
+        <div class="index-item">
+          <div class="index-name">NASDAQ</div>
+          <div class="index-value">19,572.60</div>
+          <div class="index-change down">-0.32%</div>
+        </div>
+        <div class="index-item">
+          <div class="index-name">RUSSELL</div>
+          <div class="index-value">2,279.45</div>
+          <div class="index-change up">+1.52%</div>
+        </div>
+        <div class="index-item">
+          <div class="index-name">NYSE</div>
+          <div class="index-value">19,245.80</div>
+          <div class="index-change up">+0.65%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Watchlist Section -->
+    <div class="watchlist-section">
+      <div class="wl-header">
+        <div class="wl-title-section">
+          <div class="wl-list-name">Portfolio</div>
+          <div class="wl-total-value" onclick="toggleValueDisplay()">
+            <span class="wl-total-amount" id="watchlist-total-value">$0.00</span>
+            <span class="wl-total-change" id="watchlist-change">+$0.00 (0.00%)</span>
+          </div>
+        </div>
+        <div class="wl-header-actions">
+          <button class="wl-eye-btn" id="eye-btn" onclick="toggleHideValues()">
+            <svg class="eye-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            <svg class="eye-closed" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+              <line x1="1" y1="1" x2="23" y2="23"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Search -->
+      <div class="wl-search-container">
+        <svg class="wl-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="M21 21l-4.35-4.35"/>
+        </svg>
+        <input 
+          type="text" 
+          class="wl-search-input" 
+          id="search-input"
+          placeholder="Search stocks..."
+          autocomplete="off"
+        />
+        <button class="wl-search-clear" id="search-clear" onclick="clearSearch()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+        
+        <!-- Search Results -->
+        <div class="wl-search-results" id="search-results"></div>
+      </div>
+
+      <!-- Watchlist Label with Collapse -->
+      <div class="watchlist-label-row">
+        <span class="watchlist-label">Watchlist</span>
+        <button class="wl-collapse-btn" id="collapse-btn" onclick="toggleCollapse()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="18 15 12 9 6 15"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Stock List -->
+      <div class="wl-stock-list" id="watchlist-content">
+        <div class="wl-empty">
+          <div class="wl-empty-icon">⭐</div>
+          <h3>Your watchlist is empty</h3>
+          <p>Search for stocks and tap the star to add them</p>
+        </div>
+      </div>
+
+    </div> <!-- end watchlist-section -->
+
+  </div>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <a href="LandingPurple%20_%20DailyEdgeFinance.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>Home</span>
+    </a>
+    <a href="#" class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+      </svg>
+      <span>Watchlist</span>
+    </a>
+    <a href="#" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/>
+        <path d="M21 21l-4.35-4.35"/>
+      </svg>
+      <span>Search</span>
+    </a>
+    <a href="#" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+  <!-- Toast -->
+  <div class="wl-toast" id="toast"></div>
+
+  <!-- Stock Modal -->
+  <div class="modal-overlay" id="stock-modal">
+    <div class="modal-content">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <div class="modal-stock-info">
+          <span class="modal-symbol" id="modal-symbol">AAPL</span>
+          <span class="modal-name" id="modal-name">Apple Inc.</span>
+        </div>
+        <div class="modal-price-info">
+          <div class="modal-current-price" id="modal-price">$248.13</div>
+          <div class="modal-price-change up" id="modal-change">+2.34%</div>
+        </div>
+      </div>
+      <div class="modal-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Shares</label>
+            <input type="number" class="form-input" id="modal-shares" placeholder="0" min="0" step="any">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Avg Cost</label>
+            <input type="number" class="form-input" id="modal-cost" placeholder="$0.00" min="0" step="0.01">
+          </div>
+        </div>
+        <div class="position-summary">
+          <div class="summary-row">
+            <span class="summary-label">Market Value</span>
+            <span class="summary-value" id="modal-market-value">$0.00</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Total Cost</span>
+            <span class="summary-value" id="modal-total-cost">$0.00</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Total Return</span>
+            <span class="summary-value" id="modal-return">$0.00</span>
+          </div>
+        </div>
+        <div class="modal-buttons">
+          <button class="modal-btn modal-btn-cancel" onclick="closeModal()">Cancel</button>
+          <button class="modal-btn modal-btn-save" onclick="savePosition()">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ============================================
+    // STOCK DATABASE
+    // ============================================
+    const stockDatabase = [
+      // Tech Giants
+      { symbol: 'AAPL', name: 'Apple Inc.', price: 248.13, changePercent: 2.34, trend: 'up' },
+      { symbol: 'MSFT', name: 'Microsoft Corporation', price: 438.92, changePercent: -0.87, trend: 'down' },
+      { symbol: 'GOOGL', name: 'Alphabet Inc.', price: 191.24, changePercent: 1.56, trend: 'up' },
+      { symbol: 'GOOG', name: 'Alphabet Inc. Class C', price: 192.85, changePercent: 1.48, trend: 'up' },
+      { symbol: 'AMZN', name: 'Amazon.com Inc.', price: 225.94, changePercent: 3.21, trend: 'up' },
+      { symbol: 'TSLA', name: 'Tesla Inc.', price: 394.36, changePercent: -2.15, trend: 'down' },
+      { symbol: 'META', name: 'Meta Platforms Inc.', price: 617.12, changePercent: 1.89, trend: 'up' },
+      { symbol: 'NVDA', name: 'NVIDIA Corporation', price: 140.14, changePercent: 4.52, trend: 'up' },
+      { symbol: 'AVGO', name: 'Broadcom Inc.', price: 232.45, changePercent: 2.18, trend: 'up' },
+      { symbol: 'ORCL', name: 'Oracle Corporation', price: 178.32, changePercent: 1.23, trend: 'up' },
+      { symbol: 'CRM', name: 'Salesforce Inc.', price: 342.18, changePercent: -0.54, trend: 'down' },
+      { symbol: 'ADBE', name: 'Adobe Inc.', price: 478.92, changePercent: 0.87, trend: 'up' },
+      { symbol: 'AMD', name: 'Advanced Micro Devices', price: 124.56, changePercent: 3.42, trend: 'up' },
+      { symbol: 'INTC', name: 'Intel Corporation', price: 19.84, changePercent: -1.56, trend: 'down' },
+      { symbol: 'QCOM', name: 'Qualcomm Inc.', price: 158.73, changePercent: 1.92, trend: 'up' },
+      { symbol: 'TXN', name: 'Texas Instruments', price: 192.45, changePercent: 0.68, trend: 'up' },
+      { symbol: 'IBM', name: 'IBM Corporation', price: 224.18, changePercent: 0.34, trend: 'up' },
+      { symbol: 'NOW', name: 'ServiceNow Inc.', price: 1024.56, changePercent: 2.14, trend: 'up' },
+      { symbol: 'INTU', name: 'Intuit Inc.', price: 628.34, changePercent: 1.45, trend: 'up' },
+      { symbol: 'CSCO', name: 'Cisco Systems Inc.', price: 58.92, changePercent: 0.23, trend: 'up' },
+      { symbol: 'MU', name: 'Micron Technology', price: 87.45, changePercent: 2.87, trend: 'up' },
+      { symbol: 'AMAT', name: 'Applied Materials', price: 178.23, changePercent: 1.98, trend: 'up' },
+      { symbol: 'LRCX', name: 'Lam Research Corp', price: 72.34, changePercent: 2.12, trend: 'up' },
+      { symbol: 'KLAC', name: 'KLA Corporation', price: 678.45, changePercent: 1.76, trend: 'up' },
+      { symbol: 'SNPS', name: 'Synopsys Inc.', price: 512.34, changePercent: 0.89, trend: 'up' },
+      { symbol: 'CDNS', name: 'Cadence Design Systems', price: 298.76, changePercent: 1.23, trend: 'up' },
+      { symbol: 'MRVL', name: 'Marvell Technology', price: 118.45, changePercent: 3.21, trend: 'up' },
+      { symbol: 'NXPI', name: 'NXP Semiconductors', price: 234.56, changePercent: 1.45, trend: 'up' },
+      { symbol: 'ON', name: 'ON Semiconductor', price: 68.92, changePercent: 2.34, trend: 'up' },
+      { symbol: 'MCHP', name: 'Microchip Technology', price: 58.23, changePercent: -0.87, trend: 'down' },
+      
+      // Financials
+      { symbol: 'JPM', name: 'JPMorgan Chase & Co.', price: 252.32, changePercent: 0.76, trend: 'up' },
+      { symbol: 'V', name: 'Visa Inc.', price: 318.45, changePercent: 0.45, trend: 'up' },
+      { symbol: 'MA', name: 'Mastercard Inc.', price: 528.67, changePercent: 0.82, trend: 'up' },
+      { symbol: 'BAC', name: 'Bank of America Corp', price: 45.23, changePercent: 2.15, trend: 'up' },
+      { symbol: 'WFC', name: 'Wells Fargo & Co.', price: 72.45, changePercent: 1.23, trend: 'up' },
+      { symbol: 'GS', name: 'Goldman Sachs Group', price: 612.34, changePercent: 1.87, trend: 'up' },
+      { symbol: 'MS', name: 'Morgan Stanley', price: 128.45, changePercent: 1.45, trend: 'up' },
+      { symbol: 'C', name: 'Citigroup Inc.', price: 78.92, changePercent: 0.98, trend: 'up' },
+      { symbol: 'BLK', name: 'BlackRock Inc.', price: 1045.67, changePercent: 0.67, trend: 'up' },
+      { symbol: 'SCHW', name: 'Charles Schwab Corp', price: 78.34, changePercent: 1.12, trend: 'up' },
+      { symbol: 'AXP', name: 'American Express Co.', price: 298.45, changePercent: 1.34, trend: 'up' },
+      { symbol: 'SPGI', name: 'S&P Global Inc.', price: 512.34, changePercent: 0.56, trend: 'up' },
+      { symbol: 'CME', name: 'CME Group Inc.', price: 228.45, changePercent: 0.34, trend: 'up' },
+      { symbol: 'ICE', name: 'Intercontinental Exchange', price: 156.78, changePercent: 0.45, trend: 'up' },
+      { symbol: 'PNC', name: 'PNC Financial Services', price: 198.34, changePercent: 0.87, trend: 'up' },
+      { symbol: 'USB', name: 'U.S. Bancorp', price: 52.45, changePercent: 0.67, trend: 'up' },
+      { symbol: 'TFC', name: 'Truist Financial Corp', price: 42.34, changePercent: 0.45, trend: 'up' },
+      { symbol: 'COF', name: 'Capital One Financial', price: 178.92, changePercent: 1.56, trend: 'up' },
+      { symbol: 'BK', name: 'Bank of New York Mellon', price: 82.34, changePercent: 0.78, trend: 'up' },
+      { symbol: 'AIG', name: 'American Intl Group', price: 78.45, changePercent: 0.56, trend: 'up' },
+      { symbol: 'MET', name: 'MetLife Inc.', price: 82.34, changePercent: 0.67, trend: 'up' },
+      { symbol: 'PRU', name: 'Prudential Financial', price: 118.45, changePercent: 0.89, trend: 'up' },
+      { symbol: 'ALL', name: 'Allstate Corporation', price: 198.34, changePercent: 0.45, trend: 'up' },
+      { symbol: 'TRV', name: 'Travelers Companies', price: 268.45, changePercent: 0.34, trend: 'up' },
+      { symbol: 'CB', name: 'Chubb Limited', price: 298.34, changePercent: 0.56, trend: 'up' },
+      { symbol: 'AON', name: 'Aon plc', price: 378.45, changePercent: 0.67, trend: 'up' },
+      { symbol: 'MMC', name: 'Marsh McLennan Cos', price: 228.34, changePercent: 0.45, trend: 'up' },
+      { symbol: 'PYPL', name: 'PayPal Holdings Inc.', price: 88.92, changePercent: 2.34, trend: 'up' },
+      { symbol: 'SQ', name: 'Block Inc.', price: 92.45, changePercent: 3.12, trend: 'up' },
+      { symbol: 'COIN', name: 'Coinbase Global Inc.', price: 278.34, changePercent: 5.67, trend: 'up' },
+      { symbol: 'HOOD', name: 'Robinhood Markets', price: 42.34, changePercent: 4.23, trend: 'up' },
+      { symbol: 'SOFI', name: 'SoFi Technologies', price: 16.78, changePercent: 3.45, trend: 'up' },
+      
+      // Healthcare
+      { symbol: 'UNH', name: 'UnitedHealth Group', price: 502.34, changePercent: -1.24, trend: 'down' },
+      { symbol: 'JNJ', name: 'Johnson & Johnson', price: 146.75, changePercent: 0.18, trend: 'up' },
+      { symbol: 'LLY', name: 'Eli Lilly and Co.', price: 782.45, changePercent: 2.34, trend: 'up' },
+      { symbol: 'PFE', name: 'Pfizer Inc.', price: 26.34, changePercent: -0.87, trend: 'down' },
+      { symbol: 'ABBV', name: 'AbbVie Inc.', price: 178.92, changePercent: 0.67, trend: 'up' },
+      { symbol: 'MRK', name: 'Merck & Co. Inc.', price: 98.45, changePercent: 0.45, trend: 'up' },
+      { symbol: 'TMO', name: 'Thermo Fisher Scientific', price: 512.34, changePercent: 1.23, trend: 'up' },
+      { symbol: 'ABT', name: 'Abbott Laboratories', price: 118.92, changePercent: 0.56, trend: 'up' },
+      { symbol: 'DHR', name: 'Danaher Corporation', price: 248.45, changePercent: 0.78, trend: 'up' },
+      { symbol: 'BMY', name: 'Bristol-Myers Squibb', price: 52.34, changePercent: -0.34, trend: 'down' },
+      { symbol: 'AMGN', name: 'Amgen Inc.', price: 268.92, changePercent: 0.89, trend: 'up' },
+      { symbol: 'GILD', name: 'Gilead Sciences Inc.', price: 92.45, changePercent: 0.56, trend: 'up' },
+      { symbol: 'VRTX', name: 'Vertex Pharmaceuticals', price: 428.34, changePercent: 1.45, trend: 'up' },
+      { symbol: 'REGN', name: 'Regeneron Pharma', price: 712.45, changePercent: 0.67, trend: 'up' },
+      { symbol: 'ISRG', name: 'Intuitive Surgical', price: 578.34, changePercent: 1.89, trend: 'up' },
+      { symbol: 'MDT', name: 'Medtronic plc', price: 88.92, changePercent: 0.34, trend: 'up' },
+      { symbol: 'SYK', name: 'Stryker Corporation', price: 398.45, changePercent: 0.78, trend: 'up' },
+      { symbol: 'BSX', name: 'Boston Scientific Corp', price: 92.34, changePercent: 1.12, trend: 'up' },
+      { symbol: 'ELV', name: 'Elevance Health Inc.', price: 412.45, changePercent: -0.56, trend: 'down' },
+      { symbol: 'CI', name: 'Cigna Group', price: 298.34, changePercent: 0.67, trend: 'up' },
+      { symbol: 'HUM', name: 'Humana Inc.', price: 278.92, changePercent: -0.89, trend: 'down' },
+      { symbol: 'CVS', name: 'CVS Health Corp.', price: 52.34, changePercent: 0.45, trend: 'up' },
+      { symbol: 'MCK', name: 'McKesson Corporation', price: 578.45, changePercent: 0.67, trend: 'up' },
+      { symbol: 'ZTS', name: 'Zoetis Inc.', price: 168.34, changePercent: 0.89, trend: 'up' },
+      { symbol: 'MRNA', name: 'Moderna Inc.', price: 42.45, changePercent: 4.56, trend: 'up' },
+      { symbol: 'BIIB', name: 'Biogen Inc.', price: 158.34, changePercent: 1.23, trend: 'up' },
+      
+      // Consumer
+      { symbol: 'WMT', name: 'Walmart Inc.', price: 92.18, changePercent: -0.32, trend: 'down' },
+      { symbol: 'PG', name: 'Procter & Gamble Co.', price: 168.92, changePercent: 0.62, trend: 'up' },
+      { symbol: 'KO', name: 'Coca-Cola Company', price: 62.45, changePercent: 0.34, trend: 'up' },
+      { symbol: 'PEP', name: 'PepsiCo Inc.', price: 148.92, changePercent: 0.56, trend: 'up' },
+      { symbol: 'COST', name: 'Costco Wholesale Corp', price: 978.34, changePercent: 1.23, trend: 'up' },
+      { symbol: 'HD', name: 'Home Depot Inc.', price: 412.56, changePercent: 1.87, trend: 'up' },
+      { symbol: 'MCD', name: 'McDonald\'s Corporation', price: 298.45, changePercent: 0.67, trend: 'up' },
+      { symbol: 'NKE', name: 'Nike Inc.', price: 72.34, changePercent: -1.23, trend: 'down' },
+      { symbol: 'SBUX', name: 'Starbucks Corporation', price: 112.45, changePercent: 0.89, trend: 'up' },
+      { symbol: 'DIS', name: 'Walt Disney Company', price: 118.92, changePercent: 1.45, trend: 'up' },
+      { symbol: 'NFLX', name: 'Netflix Inc.', price: 912.34, changePercent: 2.34, trend: 'up' },
+      { symbol: 'CMCSA', name: 'Comcast Corporation', price: 42.45, changePercent: 0.56, trend: 'up' },
+      { symbol: 'T', name: 'AT&T Inc.', price: 22.34, changePercent: 0.34, trend: 'up' },
+      { symbol: 'VZ', name: 'Verizon Communications', price: 42.92, changePercent: 0.45, trend: 'up' },
+      { symbol: 'TMUS', name: 'T-Mobile US Inc.', price: 248.34, changePercent: 0.78, trend: 'up' },
+      { symbol: 'LOW', name: 'Lowe\'s Companies Inc.', price: 268.45, changePercent: 1.12, trend: 'up' },
+      { symbol: 'TGT', name: 'Target Corporation', price: 128.92, changePercent: 0.67, trend: 'up' },
+      { symbol: 'TJX', name: 'TJX Companies Inc.', price: 122.34, changePercent: 0.89, trend: 'up' },
+      { symbol: 'BKNG', name: 'Booking Holdings Inc.', price: 5124.56, changePercent: 1.56, trend: 'up' },
+      { symbol: 'MAR', name: 'Marriott International', price: 278.92, changePercent: 0.78, trend: 'up' },
+      { symbol: 'HLT', name: 'Hilton Worldwide', price: 258.34, changePercent: 0.67, trend: 'up' },
+      { symbol: 'ABNB', name: 'Airbnb Inc.', price: 142.45, changePercent: 2.34, trend: 'up' },
+      { symbol: 'UBER', name: 'Uber Technologies', price: 68.92, changePercent: 1.89, trend: 'up' },
+      { symbol: 'LYFT', name: 'Lyft Inc.', price: 14.56, changePercent: 2.45, trend: 'up' },
+      { symbol: 'DASH', name: 'DoorDash Inc.', price: 178.34, changePercent: 3.12, trend: 'up' },
+      { symbol: 'SPOT', name: 'Spotify Technology', price: 498.92, changePercent: 2.67, trend: 'up' },
+      { symbol: 'ROKU', name: 'Roku Inc.', price: 82.34, changePercent: 3.45, trend: 'up' },
+      { symbol: 'GM', name: 'General Motors Co.', price: 52.45, changePercent: 1.23, trend: 'up' },
+      { symbol: 'F', name: 'Ford Motor Company', price: 10.92, changePercent: 0.89, trend: 'up' },
+      { symbol: 'RIVN', name: 'Rivian Automotive', price: 12.34, changePercent: 4.56, trend: 'up' },
+      { symbol: 'LCID', name: 'Lucid Group Inc.', price: 2.45, changePercent: 3.78, trend: 'up' },
+      { symbol: 'YUM', name: 'Yum! Brands Inc.', price: 138.92, changePercent: 0.56, trend: 'up' },
+      { symbol: 'CMG', name: 'Chipotle Mexican Grill', price: 62.34, changePercent: 1.45, trend: 'up' },
+      { symbol: 'DPZ', name: 'Domino\'s Pizza Inc.', price: 478.92, changePercent: 0.89, trend: 'up' },
+      { symbol: 'LULU', name: 'Lululemon Athletica', price: 398.34, changePercent: 1.23, trend: 'up' },
+      { symbol: 'ROST', name: 'Ross Stores Inc.', price: 158.92, changePercent: 0.67, trend: 'up' },
+      { symbol: 'DG', name: 'Dollar General Corp', price: 78.34, changePercent: -0.89, trend: 'down' },
+      { symbol: 'DLTR', name: 'Dollar Tree Inc.', price: 68.92, changePercent: -0.56, trend: 'down' },
+      { symbol: 'EL', name: 'Estée Lauder Cos', price: 68.34, changePercent: 1.23, trend: 'up' },
+      { symbol: 'CL', name: 'Colgate-Palmolive Co.', price: 98.92, changePercent: 0.45, trend: 'up' },
+      { symbol: 'KMB', name: 'Kimberly-Clark Corp', price: 138.34, changePercent: 0.34, trend: 'up' },
+      { symbol: 'GIS', name: 'General Mills Inc.', price: 62.92, changePercent: 0.23, trend: 'up' },
+      { symbol: 'K', name: 'Kellanova', price: 82.34, changePercent: 0.56, trend: 'up' },
+      { symbol: 'HSY', name: 'Hershey Company', price: 168.92, changePercent: 0.67, trend: 'up' },
+      { symbol: 'MDLZ', name: 'Mondelez International', price: 68.34, changePercent: 0.45, trend: 'up' },
+      { symbol: 'KHC', name: 'Kraft Heinz Company', price: 32.92, changePercent: 0.34, trend: 'up' },
+      { symbol: 'STZ', name: 'Constellation Brands', price: 228.34, changePercent: 0.78, trend: 'up' },
+      { symbol: 'TAP', name: 'Molson Coors Beverage', price: 58.92, changePercent: 0.45, trend: 'up' },
+      { symbol: 'BUD', name: 'Anheuser-Busch InBev', price: 52.34, changePercent: 0.56, trend: 'up' },
+      { symbol: 'DEO', name: 'Diageo plc', price: 118.92, changePercent: 0.34, trend: 'up' },
+      { symbol: 'PM', name: 'Philip Morris Intl', price: 128.34, changePercent: 0.67, trend: 'up' },
+      { symbol: 'MO', name: 'Altria Group Inc.', price: 52.92, changePercent: 0.45, trend: 'up' },
+      
+      // Industrials
+      { symbol: 'CAT', name: 'Caterpillar Inc.', price: 398.34, changePercent: 1.23, trend: 'up' },
+      { symbol: 'DE', name: 'Deere & Company', price: 478.92, changePercent: 0.89, trend: 'up' },
+      { symbol: 'BA', name: 'Boeing Company', price: 178.34, changePercent: -2.34, trend: 'down' },
+      { symbol: 'HON', name: 'Honeywell International', price: 228.92, changePercent: 0.67, trend: 'up' },
+      { symbol: 'UNP', name: 'Union Pacific Corp', price: 248.34, changePercent: 0.56, trend: 'up' },
+      { symbol: 'RTX', name: 'RTX Corporation', price: 128.92, changePercent: 0.78, trend: 'up' },
+      { symbol: 'LMT', name: 'Lockheed Martin Corp', price: 512.34, changePercent: 0.45, trend: 'up' },
+      { symbol: 'GE', name: 'GE Aerospace', price: 192.92, changePercent: 1.56, trend: 'up' },
+      { symbol: 'MMM', name: '3M Company', price: 138.34, changePercent: 0.67, trend: 'up' },
+      { symbol: 'UPS', name: 'United Parcel Service', price: 128.92, changePercent: 0.45, trend: 'up' },
+      { symbol: 'FDX', name: 'FedEx Corporation', price: 278.34, changePercent: 0.89, trend: 'up' },
+      { symbol: 'GD', name: 'General Dynamics Corp', price: 298.92, changePercent: 0.56, trend: 'up' },
+      { symbol: 'NOC', name: 'Northrop Grumman Corp', price: 478.34, changePercent: 0.67, trend: 'up' },
+      { symbol: 'WM', name: 'Waste Management Inc.', price: 228.92, changePercent: 0.78, trend: 'up' },
+      { symbol: 'RSG', name: 'Republic Services Inc.', price: 218.34, changePercent: 0.56, trend: 'up' },
+      { symbol: 'CSX', name: 'CSX Corporation', price: 38.92, changePercent: 0.45, trend: 'up' },
+      { symbol: 'NSC', name: 'Norfolk Southern Corp', price: 268.34, changePercent: 0.67, trend: 'up' },
+      { symbol: 'EMR', name: 'Emerson Electric Co.', price: 128.92, changePercent: 0.78, trend: 'up' },
+      { symbol: 'ETN', name: 'Eaton Corporation plc', price: 348.34, changePercent: 1.23, trend: 'up' },
+      { symbol: 'ITW', name: 'Illinois Tool Works', price: 268.92, changePercent: 0.56, trend: 'up' },
+      { symbol: 'PH', name: 'Parker-Hannifin Corp', price: 678.34, changePercent: 0.89, trend: 'up' },
+      { symbol: 'ROK', name: 'Rockwell Automation', price: 278.92, changePercent: 0.67, trend: 'up' },
+      { symbol: 'CMI', name: 'Cummins Inc.', price: 368.34, changePercent: 0.78, trend: 'up' },
+      { symbol: 'PCAR', name: 'PACCAR Inc.', price: 108.92, changePercent: 0.89, trend: 'up' },
+      { symbol: 'DAL', name: 'Delta Air Lines Inc.', price: 62.34, changePercent: 1.45, trend: 'up' },
+      { symbol: 'UAL', name: 'United Airlines Holdings', price: 108.92, changePercent: 1.67, trend: 'up' },
+      { symbol: 'AAL', name: 'American Airlines Group', price: 18.34, changePercent: 2.34, trend: 'up' },
+      { symbol: 'LUV', name: 'Southwest Airlines Co.', price: 38.92, changePercent: 1.23, trend: 'up' },
+      
+      // Energy
+      { symbol: 'XOM', name: 'Exxon Mobil Corp', price: 108.34, changePercent: 0.78, trend: 'up' },
+      { symbol: 'CVX', name: 'Chevron Corporation', price: 148.92, changePercent: 0.56, trend: 'up' },
+      { symbol: 'COP', name: 'ConocoPhillips', price: 98.34, changePercent: 0.89, trend: 'up' },
+      { symbol: 'SLB', name: 'Schlumberger Limited', price: 42.92, changePercent: 1.23, trend: 'up' },
+      { symbol: 'EOG', name: 'EOG Resources Inc.', price: 128.34, changePercent: 0.67, trend: 'up' },
+      { symbol: 'PXD', name: 'Pioneer Natural Resources', price: 228.92, changePercent: 0.78, trend: 'up' },
+      { symbol: 'MPC', name: 'Marathon Petroleum', price: 158.34, changePercent: 0.89, trend: 'up' },
+      { symbol: 'VLO', name: 'Valero Energy Corp', price: 138.92, changePercent: 0.67, trend: 'up' },
+      { symbol: 'PSX', name: 'Phillips 66', price: 128.34, changePercent: 0.56, trend: 'up' },
+      { symbol: 'OXY', name: 'Occidental Petroleum', price: 48.92, changePercent: 1.45, trend: 'up' },
+      { symbol: 'HAL', name: 'Halliburton Company', price: 28.34, changePercent: 1.23, trend: 'up' },
+      { symbol: 'BKR', name: 'Baker Hughes Company', price: 42.92, changePercent: 0.89, trend: 'up' },
+      { symbol: 'DVN', name: 'Devon Energy Corp', price: 38.34, changePercent: 1.12, trend: 'up' },
+      { symbol: 'FANG', name: 'Diamondback Energy', price: 178.92, changePercent: 0.78, trend: 'up' },
+      { symbol: 'HES', name: 'Hess Corporation', price: 148.34, changePercent: 0.67, trend: 'up' },
+      { symbol: 'KMI', name: 'Kinder Morgan Inc.', price: 28.92, changePercent: 0.45, trend: 'up' },
+      { symbol: 'WMB', name: 'Williams Companies', price: 58.34, changePercent: 0.56, trend: 'up' },
+      { symbol: 'OKE', name: 'ONEOK Inc.', price: 98.92, changePercent: 0.67, trend: 'up' },
+      { symbol: 'ENPH', name: 'Enphase Energy Inc.', price: 68.34, changePercent: 3.45, trend: 'up' },
+      { symbol: 'FSLR', name: 'First Solar Inc.', price: 198.92, changePercent: 2.34, trend: 'up' },
+      
+      // Utilities & Real Estate
+      { symbol: 'NEE', name: 'NextEra Energy Inc.', price: 78.34, changePercent: 0.56, trend: 'up' },
+      { symbol: 'DUK', name: 'Duke Energy Corp', price: 112.92, changePercent: 0.34, trend: 'up' },
+      { symbol: 'SO', name: 'Southern Company', price: 88.34, changePercent: 0.45, trend: 'up' },
+      { symbol: 'D', name: 'Dominion Energy Inc.', price: 58.92, changePercent: 0.34, trend: 'up' },
+      { symbol: 'AEP', name: 'American Electric Power', price: 98.34, changePercent: 0.56, trend: 'up' },
+      { symbol: 'SRE', name: 'Sempra Energy', price: 88.92, changePercent: 0.45, trend: 'up' },
+      { symbol: 'XEL', name: 'Xcel Energy Inc.', price: 68.34, changePercent: 0.34, trend: 'up' },
+      { symbol: 'EXC', name: 'Exelon Corporation', price: 42.92, changePercent: 0.45, trend: 'up' },
+      { symbol: 'PEG', name: 'Public Service Enterprise', price: 88.34, changePercent: 0.56, trend: 'up' },
+      { symbol: 'ED', name: 'Consolidated Edison', price: 98.92, changePercent: 0.34, trend: 'up' },
+      { symbol: 'AWK', name: 'American Water Works', price: 128.34, changePercent: 0.45, trend: 'up' },
+      { symbol: 'AMT', name: 'American Tower Corp', price: 198.92, changePercent: 0.67, trend: 'up' },
+      { symbol: 'CCI', name: 'Crown Castle Inc.', price: 98.34, changePercent: 0.56, trend: 'up' },
+      { symbol: 'PLD', name: 'Prologis Inc.', price: 118.92, changePercent: 0.78, trend: 'up' },
+      { symbol: 'EQIX', name: 'Equinix Inc.', price: 978.34, changePercent: 0.89, trend: 'up' },
+      { symbol: 'SPG', name: 'Simon Property Group', price: 168.92, changePercent: 0.67, trend: 'up' },
+      { symbol: 'O', name: 'Realty Income Corp', price: 58.34, changePercent: 0.45, trend: 'up' },
+      { symbol: 'WELL', name: 'Welltower Inc.', price: 138.92, changePercent: 0.56, trend: 'up' },
+      { symbol: 'AVB', name: 'AvalonBay Communities', price: 228.34, changePercent: 0.67, trend: 'up' },
+      { symbol: 'EQR', name: 'Equity Residential', price: 72.92, changePercent: 0.45, trend: 'up' },
+      { symbol: 'DLR', name: 'Digital Realty Trust', price: 178.34, changePercent: 0.89, trend: 'up' },
+      { symbol: 'PSA', name: 'Public Storage', price: 338.92, changePercent: 0.56, trend: 'up' },
+      { symbol: 'VICI', name: 'VICI Properties Inc.', price: 32.34, changePercent: 0.67, trend: 'up' },
+      
+      // Materials
+      { symbol: 'LIN', name: 'Linde plc', price: 458.34, changePercent: 0.78, trend: 'up' },
+      { symbol: 'APD', name: 'Air Products & Chemicals', price: 298.92, changePercent: 0.56, trend: 'up' },
+      { symbol: 'SHW', name: 'Sherwin-Williams Co.', price: 348.34, changePercent: 0.89, trend: 'up' },
+      { symbol: 'ECL', name: 'Ecolab Inc.', price: 248.92, changePercent: 0.67, trend: 'up' },
+      { symbol: 'FCX', name: 'Freeport-McMoRan Inc.', price: 42.34, changePercent: 2.34, trend: 'up' },
+      { symbol: 'NEM', name: 'Newmont Corporation', price: 42.92, changePercent: 1.56, trend: 'up' },
+      { symbol: 'NUE', name: 'Nucor Corporation', price: 148.34, changePercent: 1.23, trend: 'up' },
+      { symbol: 'STLD', name: 'Steel Dynamics Inc.', price: 128.92, changePercent: 1.45, trend: 'up' },
+      { symbol: 'DOW', name: 'Dow Inc.', price: 48.34, changePercent: 0.89, trend: 'up' },
+      { symbol: 'DD', name: 'DuPont de Nemours', price: 78.92, changePercent: 0.67, trend: 'up' },
+      { symbol: 'PPG', name: 'PPG Industries Inc.', price: 128.34, changePercent: 0.56, trend: 'up' },
+      { symbol: 'VMC', name: 'Vulcan Materials Co.', price: 278.92, changePercent: 0.78, trend: 'up' },
+      { symbol: 'MLM', name: 'Martin Marietta Materials', price: 598.34, changePercent: 0.89, trend: 'up' },
+      { symbol: 'GOLD', name: 'Barrick Gold Corp', price: 18.92, changePercent: 1.67, trend: 'up' },
+      { symbol: 'AEM', name: 'Agnico Eagle Mines', price: 88.34, changePercent: 1.45, trend: 'up' },
+      
+      // Other Notable
+      { symbol: 'BRK.B', name: 'Berkshire Hathaway B', price: 478.34, changePercent: 0.56, trend: 'up' },
+      { symbol: 'SPY', name: 'SPDR S&P 500 ETF', price: 608.92, changePercent: 0.78, trend: 'up' },
+      { symbol: 'QQQ', name: 'Invesco QQQ Trust', price: 528.34, changePercent: 1.23, trend: 'up' },
+      { symbol: 'IWM', name: 'iShares Russell 2000', price: 228.92, changePercent: 0.89, trend: 'up' },
+      { symbol: 'DIA', name: 'SPDR Dow Jones ETF', price: 438.34, changePercent: 0.45, trend: 'up' },
+      { symbol: 'VTI', name: 'Vanguard Total Stock', price: 298.92, changePercent: 0.67, trend: 'up' },
+      { symbol: 'VOO', name: 'Vanguard S&P 500 ETF', price: 558.34, changePercent: 0.78, trend: 'up' },
+      { symbol: 'ARKK', name: 'ARK Innovation ETF', price: 58.92, changePercent: 2.34, trend: 'up' },
+      { symbol: 'XLF', name: 'Financial Select SPDR', price: 48.34, changePercent: 0.89, trend: 'up' },
+      { symbol: 'XLE', name: 'Energy Select SPDR', price: 88.92, changePercent: 0.67, trend: 'up' },
+      { symbol: 'XLK', name: 'Technology Select SPDR', price: 238.34, changePercent: 1.12, trend: 'up' },
+      { symbol: 'XLV', name: 'Health Care Select SPDR', price: 148.92, changePercent: 0.56, trend: 'up' },
+      { symbol: 'PLTR', name: 'Palantir Technologies', price: 78.34, changePercent: 4.56, trend: 'up' },
+      { symbol: 'SNOW', name: 'Snowflake Inc.', price: 178.92, changePercent: 2.34, trend: 'up' },
+      { symbol: 'DDOG', name: 'Datadog Inc.', price: 138.34, changePercent: 1.89, trend: 'up' },
+      { symbol: 'NET', name: 'Cloudflare Inc.', price: 118.92, changePercent: 2.45, trend: 'up' },
+      { symbol: 'CRWD', name: 'CrowdStrike Holdings', price: 358.34, changePercent: 1.67, trend: 'up' },
+      { symbol: 'ZS', name: 'Zscaler Inc.', price: 198.92, changePercent: 1.45, trend: 'up' },
+      { symbol: 'PANW', name: 'Palo Alto Networks', price: 188.34, changePercent: 1.23, trend: 'up' },
+      { symbol: 'FTNT', name: 'Fortinet Inc.', price: 98.92, changePercent: 1.56, trend: 'up' },
+      { symbol: 'WDAY', name: 'Workday Inc.', price: 268.34, changePercent: 0.89, trend: 'up' },
+      { symbol: 'VEEV', name: 'Veeva Systems Inc.', price: 218.92, changePercent: 0.78, trend: 'up' },
+      { symbol: 'TTD', name: 'Trade Desk Inc.', price: 128.34, changePercent: 2.12, trend: 'up' },
+      { symbol: 'TEAM', name: 'Atlassian Corporation', price: 258.92, changePercent: 1.34, trend: 'up' },
+      { symbol: 'SHOP', name: 'Shopify Inc.', price: 112.34, changePercent: 2.67, trend: 'up' },
+      { symbol: 'SQ', name: 'Block Inc.', price: 92.45, changePercent: 3.12, trend: 'up' },
+      { symbol: 'MELI', name: 'MercadoLibre Inc.', price: 2078.34, changePercent: 1.89, trend: 'up' },
+      { symbol: 'SE', name: 'Sea Limited', price: 118.92, changePercent: 3.45, trend: 'up' },
+      { symbol: 'ZM', name: 'Zoom Video Comms', price: 78.34, changePercent: 1.23, trend: 'up' },
+      { symbol: 'DOCU', name: 'DocuSign Inc.', price: 88.92, changePercent: 1.56, trend: 'up' },
+      { symbol: 'OKTA', name: 'Okta Inc.', price: 98.34, changePercent: 1.78, trend: 'up' },
+      { symbol: 'MDB', name: 'MongoDB Inc.', price: 268.92, changePercent: 2.34, trend: 'up' },
+      { symbol: 'TWLO', name: 'Twilio Inc.', price: 118.34, changePercent: 2.12, trend: 'up' },
+      { symbol: 'U', name: 'Unity Software Inc.', price: 28.92, changePercent: 3.56, trend: 'up' },
+      { symbol: 'RBLX', name: 'Roblox Corporation', price: 58.34, changePercent: 4.23, trend: 'up' },
+      { symbol: 'SNAP', name: 'Snap Inc.', price: 12.92, changePercent: 2.89, trend: 'up' },
+      { symbol: 'PINS', name: 'Pinterest Inc.', price: 38.34, changePercent: 1.67, trend: 'up' },
+      { symbol: 'ETSY', name: 'Etsy Inc.', price: 58.92, changePercent: 1.45, trend: 'up' },
+      { symbol: 'W', name: 'Wayfair Inc.', price: 48.34, changePercent: 2.34, trend: 'up' },
+      { symbol: 'CHWY', name: 'Chewy Inc.', price: 32.92, changePercent: 1.89, trend: 'up' },
+      { symbol: 'PATH', name: 'UiPath Inc.', price: 14.34, changePercent: 2.12, trend: 'up' },
+      { symbol: 'AI', name: 'C3.ai Inc.', price: 38.92, changePercent: 4.56, trend: 'up' },
+      { symbol: 'SMCI', name: 'Super Micro Computer', price: 38.34, changePercent: 5.67, trend: 'up' },
+      { symbol: 'ARM', name: 'Arm Holdings plc', price: 168.92, changePercent: 3.45, trend: 'up' },
+      { symbol: 'IONQ', name: 'IonQ Inc.', price: 48.34, changePercent: 6.78, trend: 'up' },
+      { symbol: 'RGTI', name: 'Rigetti Computing', price: 18.92, changePercent: 8.45, trend: 'up' },
+    ];
+
+    let watchlist = JSON.parse(localStorage.getItem('watchlist')) || [];
+    let positions = JSON.parse(localStorage.getItem('positions')) || {};
+    let currentEditSymbol = null;
+
+    // ============================================
+    // MODAL FUNCTIONS
+    // ============================================
+    function openModal(symbol) {
+      const stock = watchlist.find(s => s.symbol === symbol) || stockDatabase.find(s => s.symbol === symbol);
+      if (!stock) return;
+      
+      currentEditSymbol = symbol;
+      const position = positions[symbol] || { shares: 0, avgCost: 0 };
+      const isUp = stock.changePercent >= 0;
+      
+      document.getElementById('modal-symbol').textContent = stock.symbol;
+      document.getElementById('modal-name').textContent = stock.name;
+      document.getElementById('modal-price').textContent = '$' + stock.price.toFixed(2);
+      
+      const changeEl = document.getElementById('modal-change');
+      changeEl.textContent = (isUp ? '+' : '') + stock.changePercent.toFixed(2) + '%';
+      changeEl.className = 'modal-price-change ' + (isUp ? 'up' : 'down');
+      
+      document.getElementById('modal-shares').value = position.shares || '';
+      document.getElementById('modal-cost').value = position.avgCost || '';
+      
+      updateModalCalculations();
+      
+      document.getElementById('stock-modal').classList.add('visible');
+    }
+
+    function closeModal() {
+      document.getElementById('stock-modal').classList.remove('visible');
+      currentEditSymbol = null;
+    }
+
+    function updateModalCalculations() {
+      const shares = parseFloat(document.getElementById('modal-shares').value) || 0;
+      const avgCost = parseFloat(document.getElementById('modal-cost').value) || 0;
+      const stock = stockDatabase.find(s => s.symbol === currentEditSymbol);
+      
+      if (!stock) return;
+      
+      const marketValue = shares * stock.price;
+      const totalCost = shares * avgCost;
+      const totalReturn = marketValue - totalCost;
+      const isGain = totalReturn >= 0;
+      
+      document.getElementById('modal-market-value').textContent = '$' + marketValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      document.getElementById('modal-total-cost').textContent = '$' + totalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      
+      const returnEl = document.getElementById('modal-return');
+      returnEl.textContent = (isGain ? '+' : '') + '$' + totalReturn.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      returnEl.className = 'summary-value ' + (isGain ? 'gain' : 'loss');
+    }
+
+    function savePosition() {
+      const shares = parseFloat(document.getElementById('modal-shares').value) || 0;
+      const avgCost = parseFloat(document.getElementById('modal-cost').value) || 0;
+      
+      if (shares > 0) {
+        positions[currentEditSymbol] = { shares, avgCost };
+      } else {
+        delete positions[currentEditSymbol];
+      }
+      
+      localStorage.setItem('positions', JSON.stringify(positions));
+      closeModal();
+      renderWatchlist();
+      showToast('Position saved', 'success');
+    }
+
+    // Modal input listeners
+    document.getElementById('modal-shares').addEventListener('input', updateModalCalculations);
+    document.getElementById('modal-cost').addEventListener('input', updateModalCalculations);
+
+    // Close modal on overlay click
+    document.getElementById('stock-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'stock-modal') {
+        closeModal();
+      }
+    });
+
+    // ============================================
+    // SPARKLINE GENERATOR
+    // ============================================
+    function generateSparkline(trend, width = 80, height = 30) {
+      const points = [];
+      const numPoints = 25;
+      let value = 50;
+      
+      for (let i = 0; i < numPoints; i++) {
+        const trendBias = trend === 'up' ? 0.5 : -0.5;
+        value += (Math.random() - 0.5 + trendBias) * 5;
+        value = Math.max(10, Math.min(90, value));
+        points.push({ x: (i / (numPoints - 1)) * width, y: height - (value / 100) * height });
+      }
+      
+      const pathData = points.map((p, i) => (i === 0 ? `M ${p.x},${p.y}` : `L ${p.x},${p.y}`)).join(' ');
+      const color = trend === 'up' ? '#00d775' : '#ff4757';
+      
+      return `
+        <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+          <defs>
+            <linearGradient id="grad-${trend}-${Math.random()}" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color:${color};stop-opacity:0.3" />
+              <stop offset="100%" style="stop-color:${color};stop-opacity:0" />
+            </linearGradient>
+          </defs>
+          <path d="${pathData} L ${width},${height} L 0,${height} Z" fill="url(#grad-${trend}-${Math.random()})" opacity="0.5"/>
+          <path d="${pathData}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="${points[points.length-1].x}" cy="${points[points.length-1].y}" r="2.5" fill="${color}"/>
+        </svg>
+      `;
+    }
+
+    // ============================================
+    // CLOCK & MARKET STATUS
+    // ============================================
+    function updateClock() {
+      const now = new Date();
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+      const seconds = now.getSeconds();
+      
+      const hours12 = hours % 12 || 12;
+      const period = hours < 12 ? 'AM' : 'PM';
+      
+      const timeString = `${hours12.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      
+      document.getElementById('currentTime').textContent = timeString;
+      document.getElementById('timePeriod').textContent = period;
+      
+      updateMarketStatus(now);
+    }
+
+    function updateMarketStatus(now) {
+      const day = now.getDay();
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+      const currentMinutes = hours * 60 + minutes;
+      
+      const marketOpen = 9 * 60 + 30;
+      const marketClose = 16 * 60;
+      
+      const statusDot = document.getElementById('statusDot');
+      const statusText = document.getElementById('statusText');
+      const countdown = document.getElementById('countdown');
+      const countdownLabel = document.getElementById('countdownLabel');
+      const marketDot = document.getElementById('marketDot');
+      const marketStatusText = document.getElementById('marketStatusText');
+      
+      if (day === 0 || day === 6) {
+        statusDot.className = 'status-dot closed';
+        statusText.textContent = 'Weekend';
+        if (marketDot) marketDot.style.background = '#ff4757';
+        marketStatusText.textContent = 'Closed';
+        
+        const daysUntilMonday = day === 0 ? 1 : 2;
+        const targetTime = new Date(now);
+        targetTime.setDate(targetTime.getDate() + daysUntilMonday);
+        targetTime.setHours(9, 30, 0, 0);
+        
+        const diff = targetTime - now;
+        countdown.textContent = formatCountdown(diff);
+        countdownLabel.textContent = 'until Monday';
+        return;
+      }
+      
+      if (currentMinutes >= marketOpen && currentMinutes < marketClose) {
+        statusDot.className = 'status-dot open';
+        statusText.textContent = 'Open';
+        if (marketDot) marketDot.style.background = '#00d775';
+        marketStatusText.textContent = 'Open';
+        
+        const closeTime = new Date(now);
+        closeTime.setHours(16, 0, 0, 0);
+        const diff = closeTime - now;
+        countdown.textContent = formatCountdown(diff);
+        countdownLabel.textContent = 'until close';
+        
+        // Red for last 10 minutes before close (3:50pm - 4:00pm)
+        const minutesUntilClose = (marketClose - currentMinutes);
+        if (minutesUntilClose <= 10) {
+          countdown.className = 'countdown closing';
+        } else {
+          countdown.className = 'countdown';
+        }
+      } else {
+        statusDot.className = 'status-dot closed';
+        statusText.textContent = 'Closed';
+        if (marketDot) marketDot.style.background = '#ff4757';
+        marketStatusText.textContent = 'Closed';
+        
+        const openTime = new Date(now);
+        if (currentMinutes >= marketClose) {
+          openTime.setDate(openTime.getDate() + 1);
+        }
+        openTime.setHours(9, 30, 0, 0);
+        
+        while (openTime.getDay() === 0 || openTime.getDay() === 6) {
+          openTime.setDate(openTime.getDate() + 1);
+        }
+        
+        const diff = openTime - now;
+        countdown.textContent = formatCountdown(diff);
+        countdownLabel.textContent = 'until open';
+        
+        // Green for last 10 minutes before open (9:20am - 9:30am)
+        const minutesUntilOpen = diff / 1000 / 60;
+        if (minutesUntilOpen <= 10 && minutesUntilOpen > 0) {
+          countdown.className = 'countdown opening';
+        } else {
+          countdown.className = 'countdown';
+        }
+      }
+    }
+
+    function formatCountdown(ms) {
+      if (ms < 0) return '00:00:00';
+      
+      const totalSeconds = Math.floor(ms / 1000);
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+      
+      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    // ============================================
+    // SEARCH
+    // ============================================
+    const searchInput = document.getElementById('search-input');
+    const searchResults = document.getElementById('search-results');
+    const searchClear = document.getElementById('search-clear');
+
+    searchInput.addEventListener('focus', () => {
+      showSearchResults(stockDatabase);
+    });
+
+    searchInput.addEventListener('input', (e) => {
+      const query = e.target.value.trim().toUpperCase();
+      
+      if (query.length > 0) {
+        searchClear.classList.add('visible');
+        const results = stockDatabase.filter(stock => 
+          stock.symbol.includes(query) || 
+          stock.name.toUpperCase().includes(query)
+        );
+        showSearchResults(results);
+      } else {
+        searchClear.classList.remove('visible');
+        showSearchResults(stockDatabase);
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.wl-search-container')) {
+        searchResults.classList.remove('visible');
+      }
+    });
+
+    function clearSearch() {
+      searchInput.value = '';
+      searchClear.classList.remove('visible');
+      searchResults.classList.remove('visible');
+      searchInput.focus();
+    }
+
+    function showSearchResults(stocks) {
+      if (stocks.length === 0) {
+        searchResults.innerHTML = '<div class="wl-no-results">No stocks found</div>';
+      } else {
+        searchResults.innerHTML = stocks.map(stock => {
+          const isInWatchlist = watchlist.some(s => s.symbol === stock.symbol);
+          const isUp = stock.changePercent >= 0;
+          
+          return `
+            <div class="wl-search-result" onclick="event.stopPropagation()">
+              <div class="wl-result-info">
+                <span class="wl-result-symbol">${stock.symbol}</span>
+                <span class="wl-result-name">${stock.name}</span>
+              </div>
+              <div class="wl-result-sparkline">
+                ${generateSparkline(stock.trend, 80, 30)}
+              </div>
+              <div class="wl-result-price-col">
+                <div class="wl-result-price">$${stock.price.toFixed(2)}</div>
+                <div class="wl-result-change ${isUp ? 'up' : 'down'}">
+                  ${isUp ? '+' : ''}${stock.changePercent.toFixed(2)}%
+                </div>
+              </div>
+              <button class="wl-star-btn ${isInWatchlist ? 'active' : ''}" onclick="toggleWatchlist('${stock.symbol}', this)">
+                <svg class="star-empty" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+                <svg class="star-filled" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+              </button>
+            </div>
+          `;
+        }).join('');
+      }
+      searchResults.classList.add('visible');
+    }
+
+    // ============================================
+    // WATCHLIST
+    // ============================================
+    function toggleWatchlist(symbol, buttonEl) {
+      const stockIndex = watchlist.findIndex(s => s.symbol === symbol);
+      
+      if (stockIndex > -1) {
+        watchlist.splice(stockIndex, 1);
+        buttonEl.classList.remove('active');
+        showToast(`${symbol} removed`, 'removed');
+      } else {
+        const stock = stockDatabase.find(s => s.symbol === symbol);
+        if (stock) {
+          watchlist.push(stock);
+          buttonEl.classList.add('active');
+          showToast(`${symbol} added`, 'success');
+          
+          // Close dropdown after adding
+          searchResults.classList.remove('visible');
+          searchInput.value = '';
+          searchInput.blur();
+          searchClear.classList.remove('visible');
+        }
+      }
+      
+      localStorage.setItem('watchlist', JSON.stringify(watchlist));
+      renderWatchlist();
+    }
+
+    function removeFromWatchlist(symbol) {
+      watchlist = watchlist.filter(s => s.symbol !== symbol);
+      localStorage.setItem('watchlist', JSON.stringify(watchlist));
+      renderWatchlist();
+      showToast(`${symbol} removed`, 'removed');
+    }
+
+    function renderWatchlist() {
+      const container = document.getElementById('watchlist-content');
+      
+      if (watchlist.length === 0) {
+        container.innerHTML = `
+          <div class="wl-empty">
+            <div class="wl-empty-icon">⭐</div>
+            <h3>Your watchlist is empty</h3>
+            <p>Search for stocks and tap the star to add them</p>
+          </div>
+        `;
+        updatePortfolioTotal();
+        return;
+      }
+      
+      container.innerHTML = watchlist.map(stock => {
+        const isUp = stock.changePercent >= 0;
+        const position = positions[stock.symbol];
+        const hasPosition = position && position.shares > 0;
+        const shares = hasPosition ? position.shares : 0;
+        const sharesDisplay = valuesHidden ? '<span class="hidden-stars">★★★</span>' : (shares + ' shares');
+        
+        return `
+          <div class="wl-stock-row" onclick="openModal('${stock.symbol}')">
+            <div class="wl-stock-info">
+              <span class="wl-stock-symbol">${stock.symbol}</span>
+              <span class="wl-stock-name">${hasPosition ? sharesDisplay : stock.name}</span>
+            </div>
+            <div class="wl-stock-sparkline">
+              ${generateSparkline(stock.trend, 80, 32)}
+            </div>
+            <div class="wl-stock-price-col">
+              <div class="wl-stock-change ${isUp ? 'up' : 'down'}">
+                ${isUp ? '+' : ''}${stock.changePercent.toFixed(2)}%
+              </div>
+              <div class="wl-stock-price">$${stock.price.toFixed(2)}</div>
+            </div>
+            <button class="wl-remove-btn" onclick="event.stopPropagation(); removeFromWatchlist('${stock.symbol}')" title="Remove">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+        `;
+      }).join('');
+      
+      updatePortfolioTotal();
+    }
+
+    function updatePortfolioTotal() {
+      let totalMarketValue = 0;
+      let totalCost = 0;
+      
+      watchlist.forEach(stock => {
+        const position = positions[stock.symbol];
+        if (position && position.shares > 0) {
+          totalMarketValue += position.shares * stock.price;
+          totalCost += position.shares * position.avgCost;
+        }
+      });
+      
+      const totalReturn = totalMarketValue - totalCost;
+      const returnPercent = totalCost > 0 ? ((totalReturn / totalCost) * 100) : 0;
+      const isGain = totalReturn >= 0;
+      
+      const valueEl = document.getElementById('watchlist-total-value');
+      const changeEl = document.getElementById('watchlist-change');
+      
+      // If hidden, show stars with gunmetal shine
+      if (valuesHidden) {
+        valueEl.innerHTML = '<span class="hidden-stars">★★★★★</span>';
+        changeEl.innerHTML = '<span class="hidden-stars">★★★★</span>';
+        changeEl.className = 'wl-total-change';
+        return;
+      }
+      
+      // Display total value or percentage based on toggle
+      if (showPercentage && totalCost > 0) {
+        valueEl.textContent = (isGain ? '+' : '') + returnPercent.toFixed(2) + '%';
+      } else {
+        valueEl.textContent = '$' + totalMarketValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
+      
+      // Display change with both $ and %
+      if (totalCost > 0) {
+        if (showPercentage) {
+          changeEl.textContent = (isGain ? '+' : '') + '$' + Math.abs(totalReturn).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        } else {
+          changeEl.textContent = (isGain ? '+' : '') + '$' + totalReturn.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' (' + (isGain ? '+' : '') + returnPercent.toFixed(2) + '%)';
+        }
+        changeEl.className = 'wl-total-change ' + (isGain ? '' : 'down');
+      } else {
+        changeEl.textContent = '+$0.00 (0.00%)';
+        changeEl.className = 'wl-total-change';
+      }
+    }
+
+    function toggleCollapse() {
+      const stockList = document.getElementById('watchlist-content');
+      const collapseBtn = document.getElementById('collapse-btn');
+      
+      stockList.classList.toggle('collapsed');
+      collapseBtn.classList.toggle('collapsed');
+    }
+
+    // ============================================
+    // HIDE VALUES (EYE TOGGLE)
+    // ============================================
+    let valuesHidden = localStorage.getItem('valuesHidden') === 'true';
+
+    function toggleHideValues() {
+      valuesHidden = !valuesHidden;
+      localStorage.setItem('valuesHidden', valuesHidden);
+      applyHiddenState();
+    }
+
+    function applyHiddenState() {
+      const eyeBtn = document.getElementById('eye-btn');
+      
+      if (valuesHidden) {
+        eyeBtn.classList.add('hidden');
+      } else {
+        eyeBtn.classList.remove('hidden');
+      }
+      
+      // Re-render to apply masking
+      renderWatchlist();
+    }
+
+    // ============================================
+    // VALUE DISPLAY TOGGLE ($ vs %)
+    // ============================================
+    let showPercentage = localStorage.getItem('showPercentage') === 'true';
+
+    function toggleValueDisplay() {
+      showPercentage = !showPercentage;
+      localStorage.setItem('showPercentage', showPercentage);
+      updateWatchlistTotal();
+    }
+
+    // ============================================
+    // MARKET SPARKLINES
+    // ============================================
+    function renderMarketSparklines() {
+      const markets = [
+        { id: 'sp500-spark', trend: 'up' },
+        { id: 'dow-spark', trend: 'up' },
+        { id: 'nasdaq-spark', trend: 'down' },
+        { id: 'russell-spark', trend: 'up' },
+        { id: 'nyse-spark', trend: 'up' }
+      ];
+      
+      markets.forEach(market => {
+        const container = document.getElementById(market.id);
+        if (container) {
+          container.innerHTML = generateSparkline(market.trend, 110, 30);
+        }
+      });
+    }
+
+    // ============================================
+    // TOAST
+    // ============================================
+    function showToast(message, type) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = 'wl-toast ' + type;
+      setTimeout(() => toast.classList.add('visible'), 10);
+      setTimeout(() => toast.classList.remove('visible'), 2500);
+    }
+
+    // ============================================
+    // INITIALIZE
+    // ============================================
+    document.addEventListener('DOMContentLoaded', function() {
+      updateClock();
+      setInterval(updateClock, 1000);
+      renderMarketSparklines();
+      renderWatchlist();
+      applyHiddenState();
+    });
+  </script>
+</body>
+</html>
