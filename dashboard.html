@@ -14,12 +14,47 @@
       box-sizing: border-box;
     }
 
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #111118;
+      --bg-card: rgba(255, 255, 255, 0.03);
+      --bg-card-hover: rgba(255, 255, 255, 0.06);
+      --text-primary: #fff;
+      --text-secondary: rgba(255, 255, 255, 0.6);
+      --text-muted: rgba(255, 255, 255, 0.4);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-light: rgba(255, 255, 255, 0.06);
+      --accent: #a855f7;
+      --accent-glow: rgba(168, 85, 247, 0.3);
+      --nav-bg: rgba(10, 10, 15, 0.95);
+      --card-bg: #16161d;
+      --input-bg: rgba(255, 255, 255, 0.08);
+    }
+
+    [data-theme="light"] {
+      --bg-primary: #f8f9fa;
+      --bg-secondary: #ffffff;
+      --bg-card: rgba(0, 0, 0, 0.04);
+      --bg-card-hover: rgba(0, 0, 0, 0.08);
+      --text-primary: #1a1a2e;
+      --text-secondary: #4a4a5a;
+      --text-muted: #6b6b7b;
+      --border-color: rgba(0, 0, 0, 0.12);
+      --border-light: rgba(0, 0, 0, 0.08);
+      --accent: #7c3aed;
+      --accent-glow: rgba(124, 58, 237, 0.15);
+      --nav-bg: rgba(255, 255, 255, 0.95);
+      --card-bg: #ffffff;
+      --input-bg: #f0f0f5;
+    }
+
     body {
-      background: #0a0a0f;
+      background: var(--bg-primary);
       min-height: 100vh;
       font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Instrument Sans', sans-serif;
-      color: #fff;
+      color: var(--text-primary);
       -webkit-font-smoothing: antialiased;
+      transition: background 0.3s ease, color 0.3s ease;
     }
 
     /* ============================================
@@ -59,12 +94,12 @@
       font-weight: 600;
       font-variant-numeric: tabular-nums;
       letter-spacing: -1px;
-      color: #fff;
+      color: var(--text-primary);
     }
 
     .time-period {
       font-size: 12px;
-      color: rgba(255, 255, 255, 0.4);
+      color: var(--text-muted);
       font-weight: 500;
     }
 
@@ -99,13 +134,13 @@
     .status-text {
       font-size: 11px;
       font-weight: 500;
-      color: rgba(255, 255, 255, 0.4);
+      color: var(--text-muted);
     }
 
     .countdown {
       font-size: 11px;
       font-weight: 600;
-      color: #a855f7;
+      color: var(--accent);
       font-variant-numeric: tabular-nums;
       transition: color 0.3s ease;
     }
@@ -120,19 +155,452 @@
 
     .countdown-label {
       font-size: 11px;
-      color: rgba(255, 255, 255, 0.3);
+      color: var(--text-muted);
     }
 
     .welcome {
       font-size: 15px;
       font-weight: 500;
-      color: rgba(255, 255, 255, 0.6);
+      color: var(--text-secondary);
       text-align: right;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      padding: 8px 12px;
+      border-radius: 12px;
+      margin: -8px -12px;
+    }
+
+    .welcome:hover {
+      background: var(--accent-glow);
+    }
+
+    .welcome:active {
+      transform: scale(0.98);
     }
 
     .welcome span {
-      color: #a855f7;
+      color: var(--accent);
       font-weight: 600;
+    }
+
+    /* ============================================
+       USER PROFILE PANEL
+       ============================================ */
+    .profile-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .profile-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .profile-panel {
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 100%;
+      max-width: 380px;
+      height: 100%;
+      background: var(--bg-primary);
+      z-index: 1000;
+      transition: right 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      display: flex;
+      flex-direction: column;
+      border-left: 1px solid var(--border-color);
+    }
+
+    .profile-panel.active {
+      right: 0;
+    }
+
+    .profile-header {
+      padding: 50px 20px 16px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .profile-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .profile-close {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--bg-card);
+      border: none;
+      color: var(--text-primary);
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;\n    }
+    }
+
+    .profile-close:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .profile-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+    }
+
+    .profile-avatar-section {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      margin-bottom: 16px;
+    }
+
+    .profile-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #a855f7, #7c3aed);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 600;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .profile-user-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .profile-name {
+      font-size: 17px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 2px;
+    }
+
+    .profile-handle {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .profile-info-section {
+      margin-bottom: 16px;
+    }
+
+    .profile-info-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.4);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    .profile-info-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .profile-info-item:last-child {
+      border-bottom: none;
+    }
+
+    .profile-info-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: rgba(168, 85, 247, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #a855f7;
+      font-size: 18px;
+    }
+
+    .profile-info-content {
+      flex: 1;
+    }
+
+    .profile-info-label {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.4);
+      margin-bottom: 2px;
+    }
+
+    .profile-info-value {
+      font-size: 15px;
+      font-weight: 500;
+      color: #fff;
+    }
+
+    /* ============================================
+       SUPPORT CHAT WIDGET
+       ============================================ */
+    .support-section {
+      background: rgba(168, 85, 247, 0.08);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .support-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .support-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #a855f7, #7c3aed);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .support-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .support-subtitle {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .chat-messages {
+      max-height: 200px;
+      overflow-y: auto;
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .chat-message {
+      padding: 12px 14px;
+      border-radius: 16px;
+      max-width: 85%;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .chat-message.support {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+    }
+
+    .chat-message.user {
+      background: #a855f7;
+      color: #fff;
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+
+    .chat-message-time {
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.4);
+      margin-top: 4px;
+    }
+
+    .chat-input-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .chat-input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 12px 16px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .chat-input:focus {
+      border-color: #a855f7;
+      background: rgba(168, 85, 247, 0.1);
+    }
+
+    .chat-input::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    .chat-send {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #a855f7;
+      border: none;
+      color: #fff;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .chat-send:hover {
+      background: #9333ea;
+      transform: scale(1.05);
+    }
+
+    .chat-send:active {
+      transform: scale(0.95);
+    }
+
+    .profile-logout {
+      width: 100%;
+      padding: 16px;
+      background: rgba(255, 71, 87, 0.1);
+      border: 1px solid rgba(255, 71, 87, 0.2);
+      border-radius: 12px;
+      color: #ff4757;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .profile-logout:hover {
+      background: rgba(255, 71, 87, 0.2);
+    }
+
+    /* Theme Toggle */
+    .theme-section {
+      margin-bottom: 16px;
+    }
+
+    .theme-toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 0;
+    }
+
+    .theme-toggle-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .theme-toggle-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: rgba(168, 85, 247, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .theme-toggle-label {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .theme-toggle-sublabel {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .theme-switch {
+      position: relative;
+      width: 52px;
+      height: 28px;
+    }
+
+    .theme-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .theme-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 28px;
+      transition: all 0.3s ease;
+    }
+
+    .theme-slider:before {
+      position: absolute;
+      content: "";
+      height: 22px;
+      width: 22px;
+      left: 3px;
+      bottom: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .theme-switch input:checked + .theme-slider {
+      background: #a855f7;
+    }
+
+    .theme-switch input:checked + .theme-slider:before {
+      transform: translateX(24px);
+    }
+
+    .theme-icons {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 16px;
+    }
+
+    .theme-icon-dark, .theme-icon-light {
+      opacity: 0.4;
+      transition: opacity 0.3s ease;
+    }
+
+    [data-theme="dark"] .theme-icon-dark,
+    [data-theme="light"] .theme-icon-light {
+      opacity: 1;
     }
 
     /* ============================================
@@ -1003,8 +1471,8 @@
       bottom: 0;
       left: 0;
       right: 0;
-      background: #0a0a0f;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      background: var(--bg-primary);
+      border-top: 1px solid var(--border-color);
       display: flex;
       justify-content: space-around;
       padding: 12px 0 28px;
@@ -1017,14 +1485,14 @@
       flex-direction: column;
       align-items: center;
       gap: 4px;
-      color: #666;
+      color: var(--text-muted);
       text-decoration: none;
       font-size: 11px;
       transition: color 0.2s;
     }
 
     .nav-item.active {
-      color: #a855f7;
+      color: var(--accent);
     }
 
     .nav-item svg {
@@ -1076,7 +1544,93 @@
           <span class="countdown-label" id="countdownLabel">until open</span>
         </div>
       </div>
-      <div class="welcome">Welcome, <span>User</span></div>
+      <div class="welcome" onclick="openProfile()">Welcome, <span id="userName">User</span></div>
+    </div>
+
+    <!-- User Profile Panel -->
+    <div class="profile-overlay" id="profileOverlay" onclick="closeProfile()"></div>
+    <div class="profile-panel" id="profilePanel">
+      <div class="profile-header">
+        <span class="profile-title">Profile</span>
+        <button class="profile-close" onclick="closeProfile()">×</button>
+      </div>
+      <div class="profile-content">
+        <div class="profile-avatar-section">
+          <div class="profile-avatar" id="profileAvatar">U</div>
+          <div class="profile-user-info">
+            <div class="profile-name" id="profileName">User</div>
+            <div class="profile-handle">@user</div>
+          </div>
+        </div>
+        
+        <div class="profile-info-section">
+          <div class="profile-info-title">Account Information</div>
+          <div class="profile-info-item">
+            <div class="profile-info-icon">👤</div>
+            <div class="profile-info-content">
+              <div class="profile-info-label">Full Name</div>
+              <div class="profile-info-value" id="infoName">User</div>
+            </div>
+          </div>
+          <div class="profile-info-item">
+            <div class="profile-info-icon">✉️</div>
+            <div class="profile-info-content">
+              <div class="profile-info-label">Email Address</div>
+              <div class="profile-info-value" id="infoEmail">user@example.com</div>
+            </div>
+          </div>
+          <div class="profile-info-item">
+            <div class="profile-info-icon">📅</div>
+            <div class="profile-info-content">
+              <div class="profile-info-label">Member Since</div>
+              <div class="profile-info-value" id="infoJoined">January 12, 2026</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="theme-section">
+          <div class="profile-info-title">Appearance</div>
+          <div class="theme-toggle-row">
+            <div class="theme-toggle-left">
+              <div class="theme-toggle-icon">🎨</div>
+              <div>
+                <div class="theme-toggle-label">Theme</div>
+                <div class="theme-toggle-sublabel" id="themeLabel">Dark mode</div>
+              </div>
+            </div>
+            <div class="theme-icons">
+              <span class="theme-icon-dark">🌙</span>
+              <label class="theme-switch">
+                <input type="checkbox" id="themeToggle" onchange="toggleTheme()">
+                <span class="theme-slider"></span>
+              </label>
+              <span class="theme-icon-light">☀️</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="support-section">
+          <div class="support-header">
+            <div class="support-icon">💬</div>
+            <div>
+              <div class="support-title">Support Chat</div>
+              <div class="support-subtitle">We typically reply within minutes</div>
+            </div>
+          </div>
+          <div class="chat-messages" id="chatMessages">
+            <div class="chat-message support">
+              Hi! 👋 Welcome to ApeHub support. How can I help you today?
+              <div class="chat-message-time">Support Team</div>
+            </div>
+          </div>
+          <div class="chat-input-row">
+            <input type="text" class="chat-input" id="chatInput" placeholder="Type your message..." onkeypress="handleChatKeypress(event)">
+            <button class="chat-send" onclick="sendSupportMessage()">➤</button>
+          </div>
+        </div>
+
+        <button class="profile-logout" onclick="handleLogout()">Sign Out</button>
+      </div>
     </div>
 
     <!-- Indices Strip -->
@@ -2081,6 +2635,160 @@
     }
 
     // ============================================
+    // USER PROFILE PANEL
+    // ============================================
+    const userProfile = {
+      name: 'User',
+      email: 'user@example.com',
+      joinDate: 'January 12, 2026'
+    };
+
+    function loadUserProfile() {
+      const saved = localStorage.getItem('apehub_user_profile');
+      if (saved) {
+        const data = JSON.parse(saved);
+        Object.assign(userProfile, data);
+      }
+      updateProfileDisplay();
+    }
+
+    function updateProfileDisplay() {
+      const initial = userProfile.name.charAt(0).toUpperCase();
+      document.getElementById('userName').textContent = userProfile.name;
+      document.getElementById('profileAvatar').textContent = initial;
+      document.getElementById('profileName').textContent = userProfile.name;
+      document.getElementById('infoName').textContent = userProfile.name;
+      document.getElementById('infoEmail').textContent = userProfile.email;
+      document.getElementById('infoJoined').textContent = userProfile.joinDate;
+    }
+
+    function openProfile() {
+      document.getElementById('profileOverlay').classList.add('active');
+      document.getElementById('profilePanel').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeProfile() {
+      document.getElementById('profileOverlay').classList.remove('active');
+      document.getElementById('profilePanel').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    // ============================================
+    // SUPPORT CHAT
+    // ============================================
+    let chatMessages = [];
+
+    function loadChatMessages() {
+      const saved = localStorage.getItem('apehub_support_chat');
+      if (saved) {
+        chatMessages = JSON.parse(saved);
+        renderChatMessages();
+      }
+    }
+
+    function saveChatMessages() {
+      localStorage.setItem('apehub_support_chat', JSON.stringify(chatMessages));
+    }
+
+    function renderChatMessages() {
+      const container = document.getElementById('chatMessages');
+      container.innerHTML = `
+        <div class="chat-message support">
+          Hi! 👋 Welcome to ApeHub support. How can I help you today?
+          <div class="chat-message-time">Support Team</div>
+        </div>
+      `;
+      
+      chatMessages.forEach(msg => {
+        const div = document.createElement('div');
+        div.className = `chat-message ${msg.type}`;
+        div.innerHTML = `
+          ${msg.text}
+          <div class="chat-message-time">${msg.time}</div>
+        `;
+        container.appendChild(div);
+      });
+      
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function sendSupportMessage() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const now = new Date();
+      const time = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+
+      // Add user message
+      chatMessages.push({ type: 'user', text, time });
+      input.value = '';
+      renderChatMessages();
+      saveChatMessages();
+
+      // Simulate support response after delay
+      setTimeout(() => {
+        const responses = [
+          "Thanks for reaching out! I've noted your concern and our team will look into it.",
+          "Got it! We appreciate your feedback. Is there anything else I can help with?",
+          "Thank you for your message! Our team typically responds within 24 hours for detailed inquiries.",
+          "I understand. Let me check on that for you. You'll receive an update via email shortly.",
+          "Thanks for letting us know! We're always working to improve ApeHub."
+        ];
+        const response = responses[Math.floor(Math.random() * responses.length)];
+        const responseTime = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        
+        chatMessages.push({ type: 'support', text: response, time: 'Support Team' });
+        renderChatMessages();
+        saveChatMessages();
+      }, 1500);
+    }
+
+    function handleChatKeypress(e) {
+      if (e.key === 'Enter') {
+        sendSupportMessage();
+      }
+    }
+
+    function handleLogout() {
+      if (confirm('Are you sure you want to sign out?')) {
+        showToast('Signed out successfully', 'success');
+        closeProfile();
+      }
+    }
+
+    // ============================================
+    // THEME SWITCHING
+    // ============================================
+    function loadTheme() {
+      const savedTheme = localStorage.getItem('apehub_theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      const toggle = document.getElementById('themeToggle');
+      const label = document.getElementById('themeLabel');
+      if (toggle) {
+        toggle.checked = savedTheme === 'light';
+      }
+      if (label) {
+        label.textContent = savedTheme === 'light' ? 'Light mode' : 'Dark mode';
+      }
+    }
+
+    function toggleTheme() {
+      const toggle = document.getElementById('themeToggle');
+      const newTheme = toggle.checked ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('apehub_theme', newTheme);
+      document.getElementById('themeLabel').textContent = newTheme === 'light' ? 'Light mode' : 'Dark mode';
+    }
+
+    // Load theme immediately to prevent flash
+    (function() {
+      const savedTheme = localStorage.getItem('apehub_theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
+
+    // ============================================
     // INITIALIZE
     // ============================================
     document.addEventListener('DOMContentLoaded', function() {
@@ -2089,6 +2797,9 @@
       renderMarketSparklines();
       renderWatchlist();
       applyHiddenState();
+      loadUserProfile();
+      loadChatMessages();
+      loadTheme();
     });
   </script>
 </body>

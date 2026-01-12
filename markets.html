@@ -11,12 +11,47 @@
       box-sizing: border-box;
     }
 
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #111118;
+      --bg-card: rgba(255, 255, 255, 0.03);
+      --bg-card-hover: rgba(255, 255, 255, 0.06);
+      --text-primary: #fff;
+      --text-secondary: rgba(255, 255, 255, 0.6);
+      --text-muted: rgba(255, 255, 255, 0.4);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-light: rgba(255, 255, 255, 0.06);
+      --accent: #a855f7;
+      --accent-glow: rgba(168, 85, 247, 0.3);
+      --nav-bg: rgba(10, 10, 15, 0.95);
+      --card-bg: #16161d;
+      --input-bg: rgba(255, 255, 255, 0.08);
+    }
+
+    [data-theme="light"] {
+      --bg-primary: #f8f9fa;
+      --bg-secondary: #ffffff;
+      --bg-card: rgba(0, 0, 0, 0.04);
+      --bg-card-hover: rgba(0, 0, 0, 0.08);
+      --text-primary: #1a1a2e;
+      --text-secondary: #4a4a5a;
+      --text-muted: #6b6b7b;
+      --border-color: rgba(0, 0, 0, 0.12);
+      --border-light: rgba(0, 0, 0, 0.08);
+      --accent: #7c3aed;
+      --accent-glow: rgba(124, 58, 237, 0.15);
+      --nav-bg: rgba(255, 255, 255, 0.95);
+      --card-bg: #ffffff;
+      --input-bg: #f0f0f5;
+    }
+
     body {
-      background: #0a0a0f;
+      background: var(--bg-primary);
       min-height: 100vh;
       font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Instrument Sans', sans-serif;
-      color: #fff;
+      color: var(--text-primary);
       -webkit-font-smoothing: antialiased;
+      transition: background 0.3s ease, color 0.3s ease;
     }
 
     .container {
@@ -38,16 +73,16 @@
     .page-title {
       font-size: 28px;
       font-weight: 700;
-      color: #fff;
+      color: var(--text-primary);
     }
 
     .page-title span {
-      color: #a855f7;
+      color: var(--accent);
     }
 
     .date-badge {
       font-size: 12px;
-      color: rgba(255, 255, 255, 0.5);
+      color: var(--text-muted);
     }
 
     /* Region Tabs */
@@ -55,7 +90,7 @@
       display: flex;
       gap: 0;
       margin: 0 24px 24px;
-      background: rgba(255, 255, 255, 0.05);
+      background: var(--bg-card);
       border-radius: 12px;
       padding: 4px;
     }
@@ -68,13 +103,13 @@
       border-radius: 10px;
       font-size: 14px;
       font-weight: 600;
-      color: rgba(255, 255, 255, 0.5);
+      color: var(--text-muted);
       cursor: pointer;
       transition: all 0.2s;
     }
 
     .region-tab.active {
-      background: #a855f7;
+      background: var(--accent);
       color: #fff;
     }
 
@@ -97,7 +132,7 @@
     .section-title {
       font-size: 18px;
       font-weight: 700;
-      color: #fff;
+      color: var(--text-primary);
       display: flex;
       align-items: center;
       gap: 8px;
@@ -107,7 +142,7 @@
       width: 16px;
       height: 16px;
       transition: transform 0.3s ease;
-      color: rgba(255, 255, 255, 0.4);
+      color: var(--text-muted);
     }
 
     .section-header.collapsed .section-chevron {
@@ -130,7 +165,7 @@
     .section-badge {
       font-size: 11px;
       font-weight: 600;
-      color: #a855f7;
+      color: var(--accent);
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
@@ -145,8 +180,8 @@
     }
 
     .market-card {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
       border-radius: 16px;
       padding: 16px;
     }
@@ -161,7 +196,7 @@
     .market-name {
       font-size: 12px;
       font-weight: 600;
-      color: rgba(255, 255, 255, 0.5);
+      color: var(--text-muted);
     }
 
     .market-status {
@@ -178,7 +213,7 @@
     .market-value {
       font-size: 20px;
       font-weight: 700;
-      color: #fff;
+      color: var(--text-primary);
       margin-bottom: 4px;
     }
 
@@ -215,20 +250,20 @@
       gap: 12px;
       align-items: center;
       padding: 14px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      border-bottom: 1px solid var(--border-light);
     }
 
     .stock-rank {
       width: 24px;
       height: 24px;
-      background: rgba(168, 85, 247, 0.1);
+      background: var(--accent-glow);
       border-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 11px;
       font-weight: 700;
-      color: #a855f7;
+      color: var(--accent);
     }
 
     .stock-info {
@@ -241,12 +276,12 @@
     .stock-symbol {
       font-size: 15px;
       font-weight: 700;
-      color: #fff;
+      color: var(--text-primary);
     }
 
     .stock-name {
       font-size: 12px;
-      color: rgba(255, 255, 255, 0.4);
+      color: var(--text-muted);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -255,7 +290,7 @@
     .stock-price {
       font-size: 15px;
       font-weight: 600;
-      color: #fff;
+      color: var(--text-primary);
       text-align: right;
     }
 
@@ -346,18 +381,21 @@
     /* Gainers/Losers Toggle */
     .toggle-container {
       display: flex;
-      gap: 0;
+      gap: 6px;
       margin: 0 24px 16px;
       background: rgba(255, 255, 255, 0.05);
-      border-radius: 10px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
       padding: 4px;
     }
 
     .toggle-btn {
       flex: 1;
       padding: 10px 16px;
-      background: transparent;
-      border: none;
+      background: rgba(10, 10, 15, 0.8);
+      border: 2px solid transparent;
       border-radius: 8px;
       font-size: 13px;
       font-weight: 600;
@@ -367,12 +405,17 @@
     }
 
     .toggle-btn.active {
-      background: #00d775;
-      color: #fff;
+      background: rgba(0, 215, 117, 0.1);
+      border-color: #00d775;
+      color: #00d775;
+      box-shadow: 0 0 12px rgba(0, 215, 117, 0.4), inset 0 0 8px rgba(0, 215, 117, 0.1);
     }
 
     .toggle-btn.active.losers {
-      background: #ff4757;
+      background: rgba(255, 71, 87, 0.1);
+      border-color: #ff4757;
+      color: #ff4757;
+      box-shadow: 0 0 12px rgba(255, 71, 87, 0.4), inset 0 0 8px rgba(255, 71, 87, 0.1);
     }
 
     /* Volume Badge */
@@ -388,8 +431,8 @@
       bottom: 0;
       left: 0;
       right: 0;
-      background: #0a0a0f;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      background: var(--bg-primary);
+      border-top: 1px solid var(--border-color);
       display: flex;
       justify-content: space-around;
       padding: 12px 0;
@@ -404,12 +447,12 @@
       align-items: center;
       gap: 4px;
       text-decoration: none;
-      color: rgba(255, 255, 255, 0.4);
+      color: var(--text-muted);
       transition: all 0.2s;
     }
 
     .nav-item.active {
-      color: #a855f7;
+      color: var(--accent);
     }
 
     .nav-item svg {
@@ -1076,6 +1119,12 @@
         </div>
       `).join('');
     }
+
+    // Load theme
+    (function() {
+      const savedTheme = localStorage.getItem('apehub_theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
   </script>
 </body>
 </html>

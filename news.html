@@ -11,12 +11,47 @@
       box-sizing: border-box;
     }
 
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #111118;
+      --bg-card: rgba(255, 255, 255, 0.03);
+      --bg-card-hover: rgba(255, 255, 255, 0.06);
+      --text-primary: #fff;
+      --text-secondary: rgba(255, 255, 255, 0.6);
+      --text-muted: rgba(255, 255, 255, 0.4);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-light: rgba(255, 255, 255, 0.06);
+      --accent: #a855f7;
+      --accent-glow: rgba(168, 85, 247, 0.3);
+      --nav-bg: rgba(10, 10, 15, 0.95);
+      --card-bg: #16161d;
+      --input-bg: rgba(255, 255, 255, 0.08);
+    }
+
+    [data-theme="light"] {
+      --bg-primary: #f8f9fa;
+      --bg-secondary: #ffffff;
+      --bg-card: rgba(0, 0, 0, 0.04);
+      --bg-card-hover: rgba(0, 0, 0, 0.08);
+      --text-primary: #1a1a2e;
+      --text-secondary: #4a4a5a;
+      --text-muted: #6b6b7b;
+      --border-color: rgba(0, 0, 0, 0.12);
+      --border-light: rgba(0, 0, 0, 0.08);
+      --accent: #7c3aed;
+      --accent-glow: rgba(124, 58, 237, 0.15);
+      --nav-bg: rgba(255, 255, 255, 0.95);
+      --card-bg: #ffffff;
+      --input-bg: #f0f0f5;
+    }
+
     body {
-      background: #0a0a0f;
+      background: var(--bg-primary);
       min-height: 100vh;
       font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Instrument Sans', sans-serif;
-      color: #fff;
+      color: var(--text-primary);
       -webkit-font-smoothing: antialiased;
+      transition: background 0.3s ease, color 0.3s ease;
     }
 
     .container {
@@ -38,11 +73,11 @@
     .page-title {
       font-size: 28px;
       font-weight: 700;
-      color: #fff;
+      color: var(--text-primary);
     }
 
     .page-title span {
-      color: #a855f7;
+      color: var(--accent);
     }
 
     .ai-badge {
@@ -60,7 +95,7 @@
       padding: 0 24px;
       margin-bottom: 20px;
       font-size: 12px;
-      color: rgba(255, 255, 255, 0.4);
+      color: var(--text-muted);
     }
 
     .last-updated span {
@@ -78,20 +113,20 @@
 
     .category-tab {
       padding: 10px 12px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
       border-radius: 20px;
       font-size: 12px;
       font-weight: 500;
-      color: rgba(255, 255, 255, 0.6);
+      color: var(--text-secondary);
       white-space: nowrap;
       cursor: pointer;
       transition: all 0.2s;
     }
 
     .category-tab.active {
-      background: #a855f7;
-      border-color: #a855f7;
+      background: var(--accent);
+      border-color: var(--accent);
       color: #fff;
     }
 
@@ -101,8 +136,8 @@
     }
 
     .news-card {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
       border-radius: 16px;
       padding: 20px;
       margin-bottom: 16px;
@@ -111,7 +146,7 @@
 
     .news-card:active {
       transform: scale(0.98);
-      background: rgba(255, 255, 255, 0.04);
+      background: var(--bg-card-hover);
     }
 
     .news-card-header {
@@ -141,13 +176,13 @@
 
     .source-name {
       font-size: 12px;
-      color: rgba(255, 255, 255, 0.5);
+      color: var(--text-muted);
       font-weight: 500;
     }
 
     .news-time {
       font-size: 11px;
-      color: rgba(255, 255, 255, 0.3);
+      color: var(--text-muted);
     }
 
     .news-title {
@@ -155,13 +190,13 @@
       font-weight: 600;
       line-height: 1.4;
       margin-bottom: 10px;
-      color: #fff;
+      color: var(--text-primary);
     }
 
     .news-summary {
       font-size: 14px;
       line-height: 1.5;
-      color: rgba(255, 255, 255, 0.5);
+      color: var(--text-secondary);
       margin-bottom: 16px;
     }
 
@@ -174,10 +209,10 @@
 
     .news-tag {
       padding: 4px 10px;
-      background: rgba(168, 85, 247, 0.1);
+      background: var(--accent-glow);
       border-radius: 12px;
       font-size: 11px;
-      color: #a855f7;
+      color: var(--accent);
       font-weight: 500;
     }
 
@@ -1010,8 +1045,8 @@
       bottom: 0;
       left: 0;
       right: 0;
-      background: #0a0a0f;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      background: var(--bg-primary);
+      border-top: 1px solid var(--border-color);
       display: flex;
       justify-content: space-around;
       padding: 12px 0;
@@ -1026,12 +1061,12 @@
       align-items: center;
       gap: 4px;
       text-decoration: none;
-      color: rgba(255, 255, 255, 0.4);
+      color: var(--text-muted);
       transition: all 0.2s;
     }
 
     .nav-item.active {
-      color: #a855f7;
+      color: var(--accent);
     }
 
     .nav-item svg {
@@ -2312,6 +2347,12 @@
     }
     updateTime();
     setInterval(updateTime, 60000);
+
+    // Load theme
+    (function() {
+      const savedTheme = localStorage.getItem('apehub_theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
   </script>
 </body>
 </html>

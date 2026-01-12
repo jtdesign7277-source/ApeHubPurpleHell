@@ -11,12 +11,47 @@
       box-sizing: border-box;
     }
 
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #111118;
+      --bg-card: rgba(255, 255, 255, 0.03);
+      --bg-card-hover: rgba(255, 255, 255, 0.06);
+      --text-primary: #fff;
+      --text-secondary: rgba(255, 255, 255, 0.6);
+      --text-muted: rgba(255, 255, 255, 0.4);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-light: rgba(255, 255, 255, 0.06);
+      --accent: #a855f7;
+      --accent-glow: rgba(168, 85, 247, 0.3);
+      --nav-bg: rgba(10, 10, 15, 0.95);
+      --card-bg: #16161d;
+      --input-bg: rgba(255, 255, 255, 0.08);
+    }
+
+    [data-theme="light"] {
+      --bg-primary: #f8f9fa;
+      --bg-secondary: #ffffff;
+      --bg-card: rgba(0, 0, 0, 0.04);
+      --bg-card-hover: rgba(0, 0, 0, 0.08);
+      --text-primary: #1a1a2e;
+      --text-secondary: #4a4a5a;
+      --text-muted: #6b6b7b;
+      --border-color: rgba(0, 0, 0, 0.12);
+      --border-light: rgba(0, 0, 0, 0.08);
+      --accent: #7c3aed;
+      --accent-glow: rgba(124, 58, 237, 0.15);
+      --nav-bg: rgba(255, 255, 255, 0.95);
+      --card-bg: #ffffff;
+      --input-bg: #f0f0f5;
+    }
+
     body {
-      background: #0a0a0f;
+      background: var(--bg-primary);
       min-height: 100vh;
       font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Instrument Sans', sans-serif;
-      color: #fff;
+      color: var(--text-primary);
       -webkit-font-smoothing: antialiased;
+      transition: background 0.3s ease, color 0.3s ease;
     }
 
     .container {
@@ -38,11 +73,11 @@
     .page-title {
       font-size: 18px;
       font-weight: 600;
-      color: #fff;
+      color: var(--text-primary);
     }
 
     .page-title span {
-      color: #a855f7;
+      color: var(--accent);
     }
 
     .online-badge {
@@ -50,7 +85,7 @@
       align-items: center;
       gap: 6px;
       font-size: 11px;
-      color: rgba(255, 255, 255, 0.5);
+      color: var(--text-muted);
     }
 
     .online-dot {
@@ -74,7 +109,7 @@
     /* Post Card */
     .post-card {
       padding: 16px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
     }
 
     .post-card.new-post {
@@ -134,36 +169,36 @@
     .post-username {
       font-size: 14px;
       font-weight: 600;
-      color: #fff;
+      color: var(--text-primary);
     }
 
     .post-handle {
       font-size: 13px;
-      color: rgba(255, 255, 255, 0.4);
+      color: var(--text-muted);
     }
 
     .post-dot {
       width: 3px;
       height: 3px;
-      background: rgba(255, 255, 255, 0.3);
+      background: var(--text-muted);
       border-radius: 50%;
     }
 
     .post-time {
       font-size: 13px;
-      color: rgba(255, 255, 255, 0.4);
+      color: var(--text-muted);
     }
 
     .post-text {
       font-size: 15px;
       line-height: 1.5;
-      color: rgba(255, 255, 255, 0.9);
+      color: var(--text-primary);
       margin-bottom: 12px;
       word-wrap: break-word;
     }
 
     .post-text .ticker {
-      color: #a855f7;
+      color: var(--accent);
       font-weight: 600;
     }
 
@@ -184,7 +219,7 @@
       gap: 6px;
       background: none;
       border: none;
-      color: rgba(255, 255, 255, 0.4);
+      color: var(--text-muted);
       font-size: 13px;
       cursor: pointer;
       padding: 8px 0;
@@ -390,29 +425,34 @@
 
     .compose-modal {
       position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      max-width: 500px;
-      margin: 0 auto;
-      background: #1a1a24;
-      border-radius: 24px 24px 0 0;
-      padding: 20px;
-      padding-bottom: calc(20px + env(safe-area-inset-bottom));
-      transform: translateY(100%);
-      transition: transform 0.3s ease;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.9);
+      width: calc(100% - 32px);
+      max-width: 400px;
+      margin: 0;
+      background: var(--card-bg);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      padding: 0;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.25s ease;
       z-index: 201;
     }
 
     .compose-modal.open {
-      transform: translateY(0);
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+      visibility: visible;
     }
 
     .compose-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 16px;
+      padding: 16px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
     }
 
     .compose-cancel {
@@ -444,6 +484,7 @@
     .compose-body {
       display: flex;
       gap: 12px;
+      padding: 16px 20px;
     }
 
     .compose-avatar {
@@ -465,23 +506,24 @@
       background: transparent;
       border: none;
       font-size: 16px;
-      color: #fff;
+      color: var(--text-primary);
       outline: none;
       resize: none;
-      min-height: 100px;
+      min-height: 80px;
       font-family: inherit;
       line-height: 1.5;
     }
 
     .compose-input::placeholder {
-      color: rgba(255, 255, 255, 0.3);
+      color: var(--text-muted);
     }
 
     .char-count {
       text-align: right;
       font-size: 12px;
-      color: rgba(255, 255, 255, 0.3);
-      margin-top: 12px;
+      color: var(--text-muted);
+      padding: 12px 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
     }
 
     .char-count.warning {
@@ -498,8 +540,8 @@
       bottom: 0;
       left: 0;
       right: 0;
-      background: #0a0a0f;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      background: var(--bg-primary);
+      border-top: 1px solid var(--border-color);
       display: flex;
       justify-content: space-around;
       padding: 12px 0 28px;
@@ -517,14 +559,14 @@
       flex-direction: column;
       align-items: center;
       gap: 4px;
-      color: #666;
+      color: var(--text-muted);
       text-decoration: none;
       font-size: 11px;
       transition: color 0.2s;
     }
 
     .nav-item.active {
-      color: #a855f7;
+      color: var(--accent);
     }
 
     .nav-item svg {
@@ -1129,6 +1171,12 @@
     
     // Periodically update online count
     setInterval(updateOnlineCount, 30000);
+
+    // Load theme
+    (function() {
+      const savedTheme = localStorage.getItem('apehub_theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
   </script>
 </body>
 </html>
