@@ -239,25 +239,10 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'LandingPurple _ DailyEdgeFinance.html'));
 });
 
-// Serve ONLY app files (NOT base44 or other stuff)
-app.use(express.static(__dirname, {
-  index: false, // Don't auto-serve index.html
-  setHeaders: (res, path) => {
-    // Only serve our app files
-    const allowed = [
-      'LandingPurple _ DailyEdgeFinance.html',
-      'dashboard.html',
-      'chat.html',
-      'markets.html',
-      'charts.html',
-      'news.html',
-      'intro-music.mp3'
-    ];
-    const fileName = path.split('/').pop();
-    if (!allowed.includes(fileName) && !fileName.includes('.css') && !fileName.includes('.js') && !fileName.includes('_files')) {
-      res.status(404).end();
-    }
-  }
+// Serve ONLY the Purple Hell app files and assets folder
+app.use('/LandingPurple _ DailyEdgeFinance_files', express.static(path.join(__dirname, 'LandingPurple _ DailyEdgeFinance_files')));
+app.use(express.static(path.join(__dirname), {
+  index: false
 }));
 
 // Serve the landing page at root
@@ -265,8 +250,12 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'LandingPurple _ DailyEdgeFinance.html'));
 });
 
+// Block base44 and other old pages
+app.get('/base44*', (req, res) => res.status(404).send('Not found'));
+app.get('*.supabase*', (req, res) => res.status(404).send('Not found'));
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
-  console.log('Make sure to set STRIPE_SECRET_KEY environment variable!');
+  console.log('Serving Purple Hell app only');
 });
 
