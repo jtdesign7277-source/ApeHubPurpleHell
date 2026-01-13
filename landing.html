@@ -18,6 +18,249 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
+    /* Quant Intro Animation */
+    .quant-intro {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 9999;
+      background: #000;
+      pointer-events: none;
+      animation: intro-fade-out 2s ease-out 4.5s forwards;
+      overflow: hidden;
+    }
+
+    .quant-intro::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(ellipse at 50% 50%, rgba(124, 58, 237, 0.08) 0%, transparent 60%);
+    }
+
+    /* Animated line graph */
+    .line-graph-container {
+      position: absolute;
+      bottom: 20%;
+      left: 0;
+      right: 0;
+      height: 200px;
+      overflow: hidden;
+    }
+
+    .line-graph {
+      position: absolute;
+      bottom: 0;
+      left: -100%;
+      width: 300%;
+      height: 100%;
+      animation: graph-scroll 4s linear forwards;
+    }
+
+    @keyframes graph-scroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(33.33%); }
+    }
+
+    .line-graph svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .graph-line {
+      fill: none;
+      stroke: url(#purpleGradient);
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.8)) drop-shadow(0 0 20px rgba(168, 85, 247, 0.4));
+    }
+
+    .graph-glow {
+      fill: url(#glowGradient);
+      opacity: 0.3;
+    }
+
+    /* Trailing shine effect */
+    .shine-trail {
+      position: absolute;
+      width: 150px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--purple-glow), var(--purple-pink), #fff, var(--purple-pink), var(--purple-glow), transparent);
+      filter: blur(1px);
+      box-shadow: 0 0 20px var(--purple-glow), 0 0 40px var(--purple-core), 0 0 60px rgba(168, 85, 247, 0.5);
+      opacity: 0;
+      animation: shine-move 3s ease-in-out forwards;
+    }
+
+    @keyframes shine-move {
+      0% { left: -150px; opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { left: 110%; opacity: 0; }
+    }
+
+    /* Horizontal scan lines */
+    .scan-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--purple-glow), var(--purple-pink), var(--purple-glow), transparent);
+      box-shadow: 0 0 10px var(--purple-glow), 0 0 20px var(--purple-core);
+      opacity: 0;
+      animation: h-scan 2.5s ease-in-out forwards;
+    }
+
+    @keyframes h-scan {
+      0% { left: -100%; right: 100%; opacity: 0; }
+      20% { opacity: 0.8; }
+      80% { opacity: 0.8; }
+      100% { left: 100%; right: -100%; opacity: 0; }
+    }
+
+    /* Data streams */
+    .data-stream {
+      position: absolute;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--purple-glow);
+      opacity: 0;
+      white-space: nowrap;
+      animation: stream-flow 4s ease-out forwards;
+      text-shadow: 0 0 10px var(--purple-glow);
+    }
+
+    @keyframes stream-flow {
+      0% { opacity: 0; transform: translateY(20px); }
+      15% { opacity: 0.6; }
+      70% { opacity: 0.4; }
+      100% { opacity: 0; transform: translateY(-100vh); }
+    }
+
+    /* Logo */
+    .quant-logo {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 60px;
+      font-weight: 800;
+      letter-spacing: -3px;
+      opacity: 0;
+      animation: logo-explode 3.5s ease-in-out 0.5s forwards;
+      white-space: nowrap;
+    }
+
+    .quant-logo span {
+      background: linear-gradient(135deg, var(--purple-glow), var(--purple-pink), #fff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    @keyframes logo-explode {
+      0% { 
+        opacity: 0; 
+        transform: translate(-50%, -50%) scale(0.5); 
+        filter: blur(15px); 
+      }
+      20% { 
+        opacity: 1; 
+        transform: translate(-50%, -50%) scale(1); 
+        filter: blur(0); 
+      }
+      50% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(2);
+        filter: blur(0);
+      }
+      100% { 
+        opacity: 0; 
+        transform: translate(-50%, -50%) scale(15);
+        filter: blur(8px);
+      }
+    }
+
+    /* Floating particles - small dots */
+    .float-particle {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      background: var(--purple-glow);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--purple-glow), 0 0 20px var(--purple-core);
+      opacity: 0;
+      animation: particle-drift 5s ease-out forwards;
+    }
+
+    @keyframes particle-drift {
+      0% { opacity: 0; transform: translateY(0) scale(0); }
+      20% { opacity: 0.8; transform: translateY(-20px) scale(1); }
+      80% { opacity: 0.4; }
+      100% { opacity: 0; transform: translateY(-200px) scale(0.5); }
+    }
+
+    /* Number rain - subtle */
+    .number-rain {
+      position: absolute;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--purple-soft);
+      opacity: 0;
+      animation: number-fall 4s linear forwards;
+    }
+
+    @keyframes number-fall {
+      0% { opacity: 0; transform: translateY(-20px); }
+      10% { opacity: 0.4; }
+      85% { opacity: 0.2; }
+      100% { opacity: 0; transform: translateY(100vh); }
+    }
+
+    /* Pulse rings from center */
+    .pulse-ring {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 50px;
+      height: 50px;
+      border: 1px solid var(--purple-glow);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0;
+      animation: pulse-expand 3s ease-out forwards;
+    }
+
+    .pulse-ring:nth-child(2) { animation-delay: 0.4s; }
+    .pulse-ring:nth-child(3) { animation-delay: 0.8s; }
+
+    @keyframes pulse-expand {
+      0% { width: 50px; height: 50px; opacity: 0.6; }
+      100% { width: 800px; height: 800px; opacity: 0; }
+    }
+
+    @keyframes intro-fade-out {
+      0% { opacity: 1; }
+      100% { opacity: 0; visibility: hidden; }
+    }
+
+    /* Hide main content initially, then fade in SLOWLY */
+    .page-content {
+      opacity: 0;
+      animation: content-fade-in 2.5s ease-out 4s forwards;
+    }
+
+    @keyframes content-fade-in {
+      0% { opacity: 0; transform: scale(0.97); filter: blur(5px); }
+      50% { filter: blur(0); }
+      100% { opacity: 1; transform: scale(1); filter: blur(0); }
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -76,10 +319,10 @@
 
     .btn-login {
       padding: 10px 20px;
-      background: var(--white-10);
+      background: transparent;
       border: 1px solid var(--white-10);
       border-radius: 8px;
-      color: var(--white);
+      color: var(--white-60);
       font-family: inherit;
       font-size: 14px;
       font-weight: 500;
@@ -88,8 +331,8 @@
     }
 
     .btn-login:hover {
-      background: var(--purple-core);
-      border-color: var(--purple-core);
+      border-color: var(--white-40);
+      color: var(--white);
     }
 
     /* Hero */
@@ -421,38 +664,39 @@
 
     .cta-row {
       display: flex;
-      gap: 12px;
+      gap: 10px;
       justify-content: center;
       animation: fade-in 0.8s ease 0.2s backwards;
     }
 
     .btn-primary {
-      padding: 14px 28px;
-      background: var(--purple-core);
-      border: none;
+      padding: 12px 22px;
+      background: rgba(168, 85, 247, 0.15);
+      border: 2px solid var(--purple-glow);
       border-radius: 8px;
-      color: var(--white);
+      color: var(--purple-glow);
       font-family: inherit;
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
+      box-shadow: 0 0 12px rgba(168, 85, 247, 0.4), inset 0 0 8px rgba(168, 85, 247, 0.1);
     }
 
     .btn-primary:hover {
-      background: #8b5cf6;
+      background: rgba(168, 85, 247, 0.25);
       transform: translateY(-2px);
-      box-shadow: 0 10px 40px rgba(124, 58, 237, 0.4);
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.6), inset 0 0 12px rgba(168, 85, 247, 0.2);
     }
 
     .btn-ghost {
-      padding: 14px 28px;
+      padding: 12px 22px;
       background: transparent;
       border: 1px solid var(--white-10);
       border-radius: 8px;
       color: var(--white-60);
       font-family: inherit;
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 500;
       cursor: pointer;
       transition: all 0.2s;
@@ -748,15 +992,14 @@
       }
 
       .cta-row {
-        flex-direction: column;
-        width: 100%;
-        max-width: 280px;
+        flex-direction: row;
+        width: auto;
       }
 
       .btn-primary,
       .btn-ghost {
-        width: 100%;
-        padding: 16px 24px;
+        padding: 12px 18px;
+        font-size: 13px;
       }
 
       .globe-wrapper {
@@ -927,10 +1170,60 @@
 </head>
 <body>
 
+  <!-- Quant Intro Animation -->
+  <div class="quant-intro" id="quant-intro">
+    <!-- Animated line graph at bottom -->
+    <div class="line-graph-container">
+      <div class="line-graph">
+        <svg viewBox="0 0 1200 200" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="purpleGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:0.3" />
+              <stop offset="30%" style="stop-color:#a855f7;stop-opacity:1" />
+              <stop offset="50%" style="stop-color:#e879f9;stop-opacity:1" />
+              <stop offset="70%" style="stop-color:#a855f7;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:0.3" />
+            </linearGradient>
+            <linearGradient id="glowGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color:#a855f7;stop-opacity:0.4" />
+              <stop offset="100%" style="stop-color:#a855f7;stop-opacity:0" />
+            </linearGradient>
+          </defs>
+          <!-- Glow fill under line -->
+          <path class="graph-glow" d="M0,150 Q50,120 100,130 T200,100 T300,120 T400,80 T500,110 T600,70 T700,90 T800,60 T900,85 T1000,50 T1100,75 T1200,40 L1200,200 L0,200 Z" />
+          <!-- Main line -->
+          <path class="graph-line" d="M0,150 Q50,120 100,130 T200,100 T300,120 T400,80 T500,110 T600,70 T700,90 T800,60 T900,85 T1000,50 T1100,75 T1200,40" />
+        </svg>
+      </div>
+    </div>
+    
+    <!-- Horizontal shine trails -->
+    <div class="shine-trail" style="top: 30%; animation-delay: 0.2s;"></div>
+    <div class="shine-trail" style="top: 50%; animation-delay: 0.8s;"></div>
+    <div class="shine-trail" style="top: 70%; animation-delay: 1.4s;"></div>
+    
+    <!-- Scan lines -->
+    <div class="scan-line" style="top: 25%; animation-delay: 0.3s;"></div>
+    <div class="scan-line" style="top: 75%; animation-delay: 0.9s;"></div>
+    
+    <!-- Pulse rings -->
+    <div class="pulse-ring"></div>
+    <div class="pulse-ring"></div>
+    <div class="pulse-ring"></div>
+    
+    <!-- Logo reveal -->
+    <div class="quant-logo">Ape<span>Hub</span></div>
+    
+    <!-- Particles added via JS -->
+  </div>
+
+  <!-- Page Content Wrapper -->
+  <div class="page-content">
+
   <!-- Nav -->
   <nav>
     <div class="logo">Ape<span>Hub</span></div>
-    <button class="btn-login" onclick="openLoginModal()">Log In</button>
+    <a href="dashboard.html" class="btn-login" style="text-decoration: none;">Log In</a>
   </nav>
 
   <!-- Hero -->
@@ -1002,7 +1295,6 @@
       <div class="cta-row">
         <button class="btn-primary" onclick="openWaitlistModal()">Get Early Access</button>
         <button class="btn-ghost" onclick="openPricingModal()">See Pricing</button>
-        <button class="btn-ghost" onclick="enterApp()">Enter</button>
       </div>
     </div>
 
@@ -1031,6 +1323,8 @@
       </div>
     </footer>
   </section>
+
+  </div> <!-- End page-content wrapper -->
 
   <!-- Waitlist Modal -->
   <div class="modal-overlay" id="waitlist-modal">
@@ -1112,7 +1406,60 @@
     </div>
   </div>
 
+  </div> <!-- End page-content wrapper -->
+
   <script>
+    // ==================== QUANT INTRO ANIMATION ====================
+    const quantIntro = document.getElementById('quant-intro');
+    
+    // Generate data streams - fewer and more subtle
+    const dataStrings = [
+      'SYNC...',
+      'LOADING',
+      '$97,420',
+      '$3,842',
+      '+2.45%',
+      'READY',
+      'α 0.84',
+      'β 1.23',
+    ];
+    
+    // Create data streams - fewer
+    for (let i = 0; i < 10; i++) {
+      const stream = document.createElement('div');
+      stream.className = 'data-stream';
+      stream.textContent = dataStrings[Math.floor(Math.random() * dataStrings.length)];
+      stream.style.left = Math.random() * 100 + '%';
+      stream.style.top = (60 + Math.random() * 40) + '%';
+      stream.style.animationDelay = Math.random() * 2.5 + 's';
+      stream.style.fontSize = (9 + Math.random() * 3) + 'px';
+      quantIntro.appendChild(stream);
+    }
+    
+    // Create floating particles - small glowing dots
+    for (let i = 0; i < 25; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'float-particle';
+      particle.style.left = Math.random() * 100 + '%';
+      particle.style.top = (30 + Math.random() * 60) + '%';
+      particle.style.animationDelay = Math.random() * 3 + 's';
+      particle.style.animationDuration = (3 + Math.random() * 3) + 's';
+      quantIntro.appendChild(particle);
+    }
+    
+    // Create subtle number rain - very few
+    const numbers = '0123456789.%';
+    for (let i = 0; i < 20; i++) {
+      const num = document.createElement('div');
+      num.className = 'number-rain';
+      num.textContent = numbers[Math.floor(Math.random() * numbers.length)];
+      num.style.left = Math.random() * 100 + '%';
+      num.style.animationDelay = Math.random() * 3 + 's';
+      num.style.animationDuration = (3 + Math.random() * 2) + 's';
+      num.style.fontSize = (10 + Math.random() * 4) + 'px';
+      quantIntro.appendChild(num);
+    }
+
     // ==================== PARTICLES ====================
     // Ambient background particles
     for (let i = 0; i < 30; i++) {
@@ -1220,12 +1567,6 @@
       closePricingModal();
     }
 
-    // Handle Enter button
-    function enterApp() {
-      alert('Welcome to ApeHub!\n\nRedirecting to the platform...');
-      // Replace with actual redirect: window.location.href = '/app';
-    }
-
     // Login Modal functions
     function openLoginModal() {
       document.getElementById('login-modal').classList.add('show');
@@ -1252,6 +1593,21 @@
       closeLoginModal();
       // Replace with actual login logic
     }
+
+    // ==================== STRANGER THINGS INTRO AUDIO ====================
+    const introAudio = new Audio('intro-music.mp3');
+    introAudio.volume = 0.5;
+    
+    // Try to play audio on page load (may require user interaction on some browsers)
+    document.addEventListener('DOMContentLoaded', () => {
+      // Play audio when intro animation starts
+      introAudio.play().catch(() => {
+        // If autoplay blocked, play on first click
+        document.addEventListener('click', () => {
+          introAudio.play();
+        }, { once: true });
+      });
+    });
   </script>
 
 </body>

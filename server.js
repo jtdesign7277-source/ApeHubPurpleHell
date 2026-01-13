@@ -237,10 +237,10 @@ app.get('/api/subscription-status/:customerId', async (req, res) => {
   }
 });
 
-// Serve the main dashboard app FIRST (before static files)
+// Serve the landing page at root FIRST
 app.get('/', (req, res) => {
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
-  res.sendFile(path.join(__dirname, 'dashboard.html'));
+  res.sendFile(path.join(__dirname, 'landing.html'));
 });
 
 // Serve static files (but not HTML files at root)

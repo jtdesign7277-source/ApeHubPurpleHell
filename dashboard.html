@@ -190,6 +190,8 @@
       display: flex;
       align-items: center;
       gap: 4px;
+      background: transparent;
+      border: 2px solid transparent;
     }
 
     .welcome-arrow {
@@ -203,7 +205,10 @@
     }
 
     .welcome:hover {
-      background: var(--accent-glow);
+      color: var(--accent);
+      background: rgba(168, 85, 247, 0.1);
+      border-color: var(--accent);
+      box-shadow: 0 0 12px rgba(168, 85, 247, 0.4), inset 0 0 8px rgba(168, 85, 247, 0.1);
     }
 
     .welcome:active {
@@ -794,15 +799,33 @@
       order: 1;
     }
 
+    .wl-changes-container {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      order: 2;
+    }
+
+    .wl-change-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
     .wl-total-change {
       font-size: 14px;
       font-weight: 600;
       color: #00d775;
-      order: 2;
     }
 
     .wl-total-change.down {
       color: #ff4757;
+    }
+
+    .wl-change-label {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--text-muted);
     }
 
     /* Gunmetal shiny stars for hidden values */
@@ -1780,7 +1803,7 @@
           </div>
         </div>
 
-        <button class="profile-logout" onclick="handleLogout()">Sign Out</button>
+        <a href="landing.html" class="profile-logout" style="display: block; text-decoration: none; text-align: center;">Sign Out</a>
       </div>
     </div>
 
@@ -1829,7 +1852,16 @@
           <div class="wl-list-name">Portfolio</div>
           <div class="wl-total-value" onclick="toggleValueDisplay()">
             <span class="wl-total-amount" id="watchlist-total-value">$0.00</span>
-            <span class="wl-total-change" id="watchlist-change">+$0.00 (0.00%)</span>
+            <div class="wl-changes-container">
+              <div class="wl-change-row">
+                <span class="wl-total-change today" id="watchlist-change-today">+$3,914.96 (+1.59%)</span>
+                <span class="wl-change-label">Today</span>
+              </div>
+              <div class="wl-change-row">
+                <span class="wl-total-change alltime" id="watchlist-change-alltime">+$74,959.77 (+42.89%)</span>
+                <span class="wl-change-label">All time</span>
+              </div>
+            </div>
           </div>
         </div>
         <div class="wl-header-actions">
@@ -3268,8 +3300,8 @@
 
     function handleLogout() {
       if (confirm('Are you sure you want to sign out?')) {
-        showToast('Signed out successfully', 'success');
         closeProfile();
+        window.location.href = 'landing.html';
       }
     }
 
