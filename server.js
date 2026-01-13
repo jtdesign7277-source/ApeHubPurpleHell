@@ -239,8 +239,26 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'LandingPurple _ DailyEdgeFinance.html'));
 });
 
-// Serve static files (after all API routes!)
-app.use(express.static(__dirname));
+// Serve ONLY app files (NOT base44 or other stuff)
+app.use(express.static(__dirname, {
+  index: false, // Don't auto-serve index.html
+  setHeaders: (res, path) => {
+    // Only serve our app files
+    const allowed = [
+      'LandingPurple _ DailyEdgeFinance.html',
+      'dashboard.html',
+      'chat.html',
+      'markets.html',
+      'charts.html',
+      'news.html',
+      'intro-music.mp3'
+    ];
+    const fileName = path.split('/').pop();
+    if (!allowed.includes(fileName) && !fileName.includes('.css') && !fileName.includes('.js') && !fileName.includes('_files')) {
+      res.status(404).end();
+    }
+  }
+}));
 
 // Serve the landing page at root
 app.get('/', (req, res) => {
