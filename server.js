@@ -171,9 +171,15 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
 // 2. Then JSON parser for regular API routes
 app.use(express.json({ limit: '10mb' }));
 
-// 3. Logging middleware
+// Logging middleware with cache-busting headers
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} ${req.method} ${req.path}`);
+  // Disable caching for HTML files
+  if (req.path.endsWith('.html') || req.path === '/') {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+  }
   next();
 });
 
