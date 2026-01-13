@@ -244,24 +244,49 @@ app.use(express.static(__dirname));
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'LandingPurple _ DailyEdgeFinance.html'));
 });
-
-// Serve ONLY the Purple Hell app files and assets folder
-app.use('/LandingPurple _ DailyEdgeFinance_files', express.static(path.join(__dirname, 'LandingPurple _ DailyEdgeFinance_files')));
-app.use(express.static(path.join(__dirname), {
-  index: false
-}));
-
-// Serve the landing page at root
+// Serve ONLY specific allowed files
 app.get('/', (req, res) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
   res.sendFile(path.join(__dirname, 'LandingPurple _ DailyEdgeFinance.html'));
 });
 
-// Block base44 and other old pages
-app.get('/base44*', (req, res) => res.status(404).send('Not found'));
-app.get('*.supabase*', (req, res) => res.status(404).send('Not found'));
+app.get('/dashboard.html', (req, res) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+  res.sendFile(path.join(__dirname, 'dashboard.html'));
+});
+
+app.get('/chat.html', (req, res) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+  res.sendFile(path.join(__dirname, 'chat.html'));
+});
+
+app.get('/markets.html', (req, res) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+  res.sendFile(path.join(__dirname, 'markets.html'));
+});
+
+app.get('/charts.html', (req, res) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+  res.sendFile(path.join(__dirname, 'charts.html'));
+});
+
+app.get('/news.html', (req, res) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+  res.sendFile(path.join(__dirname, 'news.html'));
+});
+
+// Serve assets directory
+app.use('/LandingPurple _ DailyEdgeFinance_files', express.static(path.join(__dirname, 'LandingPurple _ DailyEdgeFinance_files')));
+app.use('/intro-music.mp3', express.static(path.join(__dirname, 'intro-music.mp3')));
+
+// Block EVERYTHING ELSE
+app.use((req, res) => {
+  console.log('BLOCKED REQUEST:', req.method, req.path);
+  res.status(404).send('Not found');
+});
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
-  console.log('Serving Purple Hell app only');
+  console.log('Serving ONLY Purple Hell app');
 });
 
