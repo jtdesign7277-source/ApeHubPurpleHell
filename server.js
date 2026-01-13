@@ -292,4 +292,5 @@ app.listen(PORT, () => {
   console.log(`✓ Serving ONLY Purple Hell app`);
   console.log(`✓ Build timestamp: ${Date.now()}`);
   console.log(`=====================================\n`);
+});
 
