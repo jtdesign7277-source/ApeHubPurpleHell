@@ -78,44 +78,7 @@ const getSubscription = (customerId) => {
 // Middleware - order matters!
 app.use(express.json({ limit: '10mb' }));
 
-// Logging middleware
-app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} ${req.method} ${req.path}`);
-  next();
-});
-
-// API Routes (before static files!)
-// Create Checkout Session endpoint
-app.post('/api/create-checkout-session', async (req, res) => {
-  console.log('Checkout session request received:', req.body);
-  try {
-    const { priceId, successUrl, cancelUrl, email } = req.body;
-    console.log('Creating session with priceId:', priceId, 'email:', email);
-    
-    const session = await stripe.checkout.sessions.create({
-      mode: 'subscription',
-      payment_method_types: ['card'],
-      customer_email: email || undefined,
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
-      success_url: successUrl || `${req.headers.origin}/dashboard.html?payment=success`,
-      cancel_url: cancelUrl || `${req.headers.origin}/LandingPurple%20_%20DailyEdgeFinance.html?payment=cancelled`,
-    });
-
-    console.log('Session created successfully:', session.id);
-    res.json({ id: session.id, url: session.url });
-  } catch (error) {
-    console.error('Stripe error:', error.message);
-    console.error('Full error:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Webhook endpoint for Stripe events (PRODUCTION-READY)
+// Webhook endpoint MUST come before logging to use raw body
 app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   const sig = req.headers['stripe-signature'];
 
@@ -203,6 +166,43 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
     res.json({ received: true });
   } catch (error) {
     console.error('Error processing webhook:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Logging middleware
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} ${req.method} ${req.path}`);
+  next();
+});
+
+// API Routes (before static files!)
+// Create Checkout Session endpoint
+app.post('/api/create-checkout-session', async (req, res) => {
+  console.log('Checkout session request received:', req.body);
+  try {
+    const { priceId, successUrl, cancelUrl, email } = req.body;
+    console.log('Creating session with priceId:', priceId, 'email:', email);
+    
+    const session = await stripe.checkout.sessions.create({
+      mode: 'subscription',
+      payment_method_types: ['card'],
+      customer_email: email || undefined,
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
+      success_url: successUrl || `${req.headers.origin}/dashboard.html?payment=success`,
+      cancel_url: cancelUrl || `${req.headers.origin}/LandingPurple%20_%20DailyEdgeFinance.html?payment=cancelled`,
+    });
+
+    console.log('Session created successfully:', session.id);
+    res.json({ id: session.id, url: session.url });
+  } catch (error) {
+    console.error('Stripe error:', error.message);
+    console.error('Full error:', error);
     res.status(500).json({ error: error.message });
   }
 });
