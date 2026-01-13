@@ -75,10 +75,8 @@ const getSubscription = (customerId) => {
   });
 };
 
-// Middleware - order matters!
-app.use(express.json({ limit: '10mb' }));
-
-// Webhook endpoint MUST come before logging to use raw body
+// Middleware - CRITICAL ORDER!
+// 1. Webhook FIRST (uses raw body)
 app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   const sig = req.headers['stripe-signature'];
 
@@ -170,13 +168,16 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
   }
 });
 
-// Logging middleware
+// 2. Then JSON parser for regular API routes
+app.use(express.json({ limit: '10mb' }));
+
+// 3. Logging middleware
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} ${req.method} ${req.path}`);
   next();
 });
 
-// API Routes (before static files!)
+// 4. API Routes
 // Create Checkout Session endpoint
 app.post('/api/create-checkout-session', async (req, res) => {
   console.log('Checkout session request received:', req.body);
@@ -238,7 +239,16 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'LandingPurple _ DailyEdgeFinance.html'));
 });
 
+// Serve static files (after all API routes!)
+app.use(express.static(__dirname));
+
+// Serve the landing page at root
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'LandingPurple _ DailyEdgeFinance.html'));
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
   console.log('Make sure to set STRIPE_SECRET_KEY environment variable!');
 });
+
