@@ -240,7 +240,7 @@ app.get('/api/subscription-status/:customerId', async (req, res) => {
 // Serve static files (after all API routes!)
 app.use(express.static(__dirname));
 
-// Serve the dashboard as the main project
+// Serve the main dashboard app
 app.get('/', (req, res) => {
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
   res.sendFile(path.join(__dirname, 'dashboard.html'));
