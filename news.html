@@ -1046,7 +1046,7 @@
       left: 0;
       right: 0;
       background: var(--bg-primary);
-      border-top: 1px solid var(--border-color);
+      border-top: 1px solid rgba(255, 255, 255, 0.6);
       display: flex;
       justify-content: space-around;
       padding: 12px 0;
@@ -2358,10 +2358,10 @@
     updateTime();
     setInterval(updateTime, 60000);
 
-    // Load theme - always start dark
+    // Load saved theme from localStorage
     (function() {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      localStorage.setItem('apehub_theme', 'dark');
+      const savedTheme = localStorage.getItem('apehub_theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', savedTheme);
     })();
   </script>
 </body>

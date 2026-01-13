@@ -99,7 +99,7 @@
     }
 
     .current-time {
-      font-size: 28px;
+      font-size: 24px;
       font-weight: 600;
       font-variant-numeric: tabular-nums;
       letter-spacing: -1px;
@@ -639,8 +639,9 @@
        INDICES STRIP
        ============================================ */
     .indices-section {
-      padding: 0 0 32px;
-      border-bottom: 1px solid var(--border-color);
+      padding: 16px 0 32px;
+      border-top: 1px solid rgba(255, 255, 255, 0.6);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.6);
     }
 
     .indices-header {
@@ -1507,7 +1508,7 @@
       left: 0;
       right: 0;
       background: var(--bg-primary);
-      border-top: 1px solid var(--border-color);
+      border-top: 1px solid rgba(255, 255, 255, 0.6);
       display: flex;
       justify-content: space-around;
       padding: 12px 0 28px;
@@ -2481,7 +2482,7 @@
       const hours12 = hours % 12 || 12;
       const period = hours < 12 ? 'AM' : 'PM';
       
-      const timeString = `${hours12.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      const timeString = `${hours12}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
       
       document.getElementById('currentTime').textContent = timeString;
       document.getElementById('timePeriod').textContent = period;
@@ -3016,10 +3017,10 @@
       document.getElementById('themeLabel').textContent = newTheme === 'light' ? 'Light mode' : 'Dark mode';
     }
 
-    // Load theme immediately to prevent flash - always start dark
+    // Load saved theme from localStorage
     (function() {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      localStorage.setItem('apehub_theme', 'dark');
+      const savedTheme = localStorage.getItem('apehub_theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', savedTheme);
     })();
 
     // ============================================
