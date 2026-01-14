@@ -3679,8 +3679,8 @@
     let avatarShuffleSeed = Date.now();
     
     function generateAvatarUrl(seed) {
-      // Use DiceBear Adventurer style - reliable and fast
-      return `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(seed)}`;
+      // Use DiceBear Adventurer style with PNG format and background
+      return `https://api.dicebear.com/7.x/adventurer/png?seed=${encodeURIComponent(seed)}&size=128&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`;
     }
     
     function generateVariations(count = 12) {
