@@ -1385,6 +1385,9 @@
         </div>
       </div>
       
+      <!-- Email Input -->
+      <input type="email" class="form-input" id="checkout-email" placeholder="Enter your email" required style="margin-bottom: 16px;">
+      
       <!-- Signup Button -->
       <button class="btn-modal" onclick="handlePricing()">Start Now</button>
     </div>
@@ -1598,9 +1601,20 @@
     async function handlePricing() {
       const priceId = isYearly ? STRIPE_PRICES.yearly : STRIPE_PRICES.monthly;
       const btn = document.querySelector('#pricing-modal .btn-modal');
+      const emailInput = document.getElementById('checkout-email');
+      const email = emailInput.value.trim();
+      
+      if (!email) {
+        alert('Please enter your email address');
+        emailInput.focus();
+        return;
+      }
       
       btn.textContent = 'Redirecting...';
       btn.disabled = true;
+      
+      // Store email for dashboard
+      localStorage.setItem('userEmail', email);
       
       try {
         const response = await fetch('/api/create-checkout-session', {
@@ -1608,6 +1622,7 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             priceId: priceId,
+            email: email,
             successUrl: window.location.origin + '/dashboard.html?payment=success',
             cancelUrl: window.location.origin + '/landing.html?payment=cancelled'
           })
@@ -1663,9 +1678,11 @@
       .then(res => res.json())
       .then(data => {
         if (data.success) {
+          // Store email for dashboard
+          localStorage.setItem('userEmail', email);
           alert('✓ Welcome back!\n\nRedirecting to dashboard...');
           closeLoginModal();
-          window.location.href = 'dashboard.html';
+          window.location.href = 'dashboard.html?payment=success';
         } else {
           alert('⚠️ Access Denied\n\n' + data.message + '\n\nClick "Get Early Access" to subscribe!');
         }
