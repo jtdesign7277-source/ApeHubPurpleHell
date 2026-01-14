@@ -1752,7 +1752,6 @@
           <div class="profile-avatar" id="profileAvatar">U</div>
           <div class="profile-user-info">
             <div class="profile-name" id="profileName">User</div>
-            <div class="profile-handle">@user</div>
           </div>
           <button class="profile-close" onclick="closeProfile()">×</button>
         </div>
@@ -3262,6 +3261,13 @@
         lastName = localStorage.getItem('userLastName');
       }
       
+      // Get or set the member since date (only set once on first signup)
+      let memberSinceDate = localStorage.getItem('userMemberSince');
+      if (!memberSinceDate) {
+        memberSinceDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        localStorage.setItem('userMemberSince', memberSinceDate);
+      }
+      
       console.log('EMAIL VALUE IS:', email);
       console.log('NAME:', firstName, lastName);
       
@@ -3269,7 +3275,7 @@
       if (firstName && lastName) {
         userProfile.name = firstName + ' ' + lastName;
         userProfile.email = email || 'user@example.com';
-        userProfile.joinDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        userProfile.joinDate = memberSinceDate;
         console.log('Updated profile with full name:', userProfile.name);
         
         // Force update immediately
@@ -3290,7 +3296,7 @@
           .split(' ')
           .map(word => word.charAt(0).toUpperCase() + word.slice(1))
           .join(' ');
-        userProfile.joinDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        userProfile.joinDate = memberSinceDate;
         console.log('Updated profile from email - Name:', userProfile.name);
         
         // Force update immediately
@@ -3313,61 +3319,6 @@
       // For now, we'll mark user as subscribed if they just paid
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('payment') === 'success') {
-        const subscriptionBanner = document.createElement('div');
-        subscriptionBanner.style.cssText = `
-          position: fixed;
-          top: 20px;
-          left: 50%;
-          transform: translateX(-50%);
-          background: rgba(16, 185, 129, 0.12);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          border: 1px solid rgba(16, 185, 129, 0.4);
-          border-radius: 16px;
-          color: #10b981;
-          padding: 16px 32px;
-          text-align: center;
-          font-weight: 600;
-          font-size: 15px;
-          z-index: 9999;
-          box-shadow: 0 0 30px rgba(16, 185, 129, 0.3), 0 0 60px rgba(16, 185, 129, 0.15), inset 0 0 20px rgba(16, 185, 129, 0.05);
-          animation: bannerAppear 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-        `;
-        subscriptionBanner.innerHTML = '<span style="display: inline-flex; align-items: center; gap: 10px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Subscription Activated</span>';
-        document.body.insertBefore(subscriptionBanner, document.body.firstChild);
-        
-        // Add animation
-        const style = document.createElement('style');
-        style.textContent = `
-          @keyframes bannerAppear {
-            from {
-              transform: translateX(-50%) translateY(-30px) scale(0.9);
-              opacity: 0;
-            }
-            to {
-              transform: translateX(-50%) translateY(0) scale(1);
-              opacity: 1;
-            }
-          }
-          @keyframes bannerDisappear {
-            from {
-              transform: translateX(-50%) translateY(0) scale(1);
-              opacity: 1;
-            }
-            to {
-              transform: translateX(-50%) translateY(-30px) scale(0.9);
-              opacity: 0;
-            }
-          }
-        `;
-        document.head.appendChild(style);
-        
-        // Remove banner after 5 seconds
-        setTimeout(() => {
-          subscriptionBanner.style.animation = 'bannerDisappear 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards';
-          setTimeout(() => subscriptionBanner.remove(), 400);
-        }, 5000);
-        
         // Add subscription badge to profile
         userProfile.subscribed = true;
         localStorage.setItem('apehub_user_profile', JSON.stringify(userProfile));
