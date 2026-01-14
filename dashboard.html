@@ -263,10 +263,10 @@
     }
 
     .profile-header {
-      padding: 50px 20px 16px;
+      padding: 20px 20px 16px;
       border-bottom: 1px solid var(--border-color);
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-end;
       align-items: center;
     }
 
@@ -312,18 +312,19 @@
     }
 
     .profile-avatar {
-      width: 44px;
-      height: 44px;
+      width: 56px;
+      height: 56px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #00d775, #00a65a);
+      background: rgba(168, 85, 247, 0.15);
+      border: 2px solid #a855f7;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 18px;
+      font-size: 22px;
       font-weight: 600;
-      color: #fff;
+      color: #a855f7;
       flex-shrink: 0;
-      box-shadow: 0 0 12px rgba(0, 215, 117, 0.4);
+      box-shadow: 0 0 16px rgba(168, 85, 247, 0.5), inset 0 0 8px rgba(168, 85, 247, 0.15);
     }
 
     .profile-user-info {
@@ -1738,7 +1739,7 @@
     <div class="profile-overlay" id="profileOverlay" onclick="closeProfile()"></div>
     <div class="profile-panel" id="profilePanel">
       <div class="profile-header">
-        <span class="profile-title">Profile</span>
+        <span></span>
         <button class="profile-close" onclick="closeProfile()">×</button>
       </div>
       <div class="profile-content">
