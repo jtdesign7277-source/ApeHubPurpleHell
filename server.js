@@ -270,12 +270,11 @@ app.post('/api/add-subscription', (req, res) => {
   }
   
   const now = new Date().toISOString();
-  const endDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(); // 1 year
   
   db.run(
-    `INSERT OR REPLACE INTO subscriptions (email, stripe_customer_id, stripe_subscription_id, status, plan, created_at, current_period_end) 
+    `INSERT OR REPLACE INTO subscriptions (customer_id, email, stripe_subscription_id, price_id, status, created_at, updated_at) 
      VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [email, 'manual_' + Date.now(), 'manual_sub_' + Date.now(), 'active', 'yearly', now, endDate],
+    ['manual_' + Date.now(), email, 'manual_sub_' + Date.now(), 'manual', 'active', now, now],
     function(err) {
       if (err) {
         return res.status(500).json({ error: err.message });
