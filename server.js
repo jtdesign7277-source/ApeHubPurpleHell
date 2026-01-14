@@ -252,6 +252,39 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
 // 2. Then JSON parser for regular API routes
 app.use(express.json({ limit: '10mb' }));
 
+// Admin endpoint to view all subscriptions
+app.get('/api/subscriptions', (req, res) => {
+  db.all('SELECT * FROM subscriptions ORDER BY created_at DESC', [], (err, rows) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    res.json(rows || []);
+  });
+});
+
+// Admin endpoint to manually add a subscription
+app.post('/api/add-subscription', (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ error: 'Email required' });
+  }
+  
+  const now = new Date().toISOString();
+  const endDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(); // 1 year
+  
+  db.run(
+    `INSERT OR REPLACE INTO subscriptions (email, stripe_customer_id, stripe_subscription_id, status, plan, created_at, current_period_end) 
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [email, 'manual_' + Date.now(), 'manual_sub_' + Date.now(), 'active', 'yearly', now, endDate],
+    function(err) {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+      res.json({ success: true, message: `Subscription added for ${email}` });
+    }
+  );
+});
+
 // Logging middleware with cache-busting headers
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} ${req.method} ${req.path}`);
