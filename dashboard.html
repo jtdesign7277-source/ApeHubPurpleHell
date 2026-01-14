@@ -3129,30 +3129,42 @@
     const userProfile = {
       name: 'User',
       email: 'user@example.com',
-      joinDate: 'January 12, 2026'
+      joinDate: 'January 13, 2026'
     };
 
     function loadUserProfile() {
-      const saved = localStorage.getItem('apehub_user_profile');
-      if (saved) {
-        const data = JSON.parse(saved);
-        Object.assign(userProfile, data);
+      // Get email from URL first (most reliable), then localStorage
+      const urlParams = new URLSearchParams(window.location.search);
+      let email = urlParams.get('email');
+      
+      // Decode the email if it came from URL
+      if (email) {
+        email = decodeURIComponent(email);
+        // Save to localStorage for future visits
+        localStorage.setItem('userEmail', email);
+        console.log('Got email from URL:', email);
+      } else {
+        // Try localStorage
+        email = localStorage.getItem('userEmail');
+        console.log('Got email from localStorage:', email);
       }
       
-      // Check for email from URL first, then localStorage
-      const urlParams = new URLSearchParams(window.location.search);
-      let email = urlParams.get('email') || localStorage.getItem('userEmail');
-      console.log('Loading user profile. Email:', email);
-      if (email) {
+      // If we have an email, update the profile
+      if (email && email !== 'user@example.com') {
         userProfile.email = email;
         // Extract name from email - capitalize first letter
         const namePart = email.split('@')[0];
-        userProfile.name = namePart.charAt(0).toUpperCase() + namePart.slice(1);
-        console.log('Set user name to:', userProfile.name);
-        // Save updated profile
-        localStorage.setItem('apehub_user_profile', JSON.stringify(userProfile));
+        // Capitalize first letter of each word if contains dots/underscores
+        userProfile.name = namePart
+          .replace(/[._]/g, ' ')
+          .split(' ')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+        userProfile.joinDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        console.log('Updated profile - Name:', userProfile.name, 'Email:', userProfile.email);
       }
       
+      // Update the display immediately
       updateProfileDisplay();
       checkSubscriptionStatus();
     }
@@ -3212,13 +3224,25 @@
     }
 
     function updateProfileDisplay() {
+      console.log('Updating profile display with:', userProfile);
       const initial = userProfile.name.charAt(0).toUpperCase();
-      document.getElementById('userName').textContent = userProfile.name;
-      document.getElementById('profileAvatar').textContent = initial;
-      document.getElementById('profileName').textContent = userProfile.name;
-      document.getElementById('infoName').textContent = userProfile.name;
-      document.getElementById('infoEmail').textContent = userProfile.email;
-      document.getElementById('infoJoined').textContent = userProfile.joinDate;
+      
+      // Update all profile elements
+      const userNameEl = document.getElementById('userName');
+      const profileAvatarEl = document.getElementById('profileAvatar');
+      const profileNameEl = document.getElementById('profileName');
+      const infoNameEl = document.getElementById('infoName');
+      const infoEmailEl = document.getElementById('infoEmail');
+      const infoJoinedEl = document.getElementById('infoJoined');
+      
+      if (userNameEl) userNameEl.textContent = userProfile.name;
+      if (profileAvatarEl) profileAvatarEl.textContent = initial;
+      if (profileNameEl) profileNameEl.textContent = userProfile.name;
+      if (infoNameEl) infoNameEl.textContent = userProfile.name;
+      if (infoEmailEl) infoEmailEl.textContent = userProfile.email;
+      if (infoJoinedEl) infoJoinedEl.textContent = userProfile.joinDate;
+      
+      console.log('Profile display updated!');
     }
 
     function openProfile() {
