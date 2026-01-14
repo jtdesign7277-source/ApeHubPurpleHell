@@ -3673,23 +3673,25 @@
     }
 
     // ============================================
-    // AVATAR SELECTOR (MULTIAVATAR - CRYPTO STYLE)
+    // AVATAR SELECTOR (DICEBEAR ADVENTURER STYLE)
     // ============================================
     let avatarVariations = [];
     let avatarShuffleSeed = Date.now();
     
-    function generateMultiavatarUrl(seed) {
-      return `https://api.multiavatar.com/${encodeURIComponent(seed)}.png`;
+    function generateAvatarUrl(seed) {
+      // Use DiceBear Adventurer style - reliable and fast
+      return `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(seed)}`;
     }
     
     function generateVariations(count = 12) {
       const variations = [];
       const userId = userProfile.email || 'user';
+      const seeds = ['diamond', 'moon', 'rocket', 'whale', 'bull', 'bear', 'ape', 'degen', 'hodl', 'gains', 'alpha', 'tendies'];
       for (let i = 0; i < count; i++) {
-        const seed = `${userId}-${avatarShuffleSeed}-${i}`;
+        const seed = `${seeds[i]}-${userId}-${avatarShuffleSeed}-${i}`;
         variations.push({
           seed: seed,
-          url: generateMultiavatarUrl(seed)
+          url: generateAvatarUrl(seed)
         });
       }
       return variations;
@@ -3709,7 +3711,7 @@
       grid.innerHTML = avatarVariations.map(v => `
         <div class="avatar-variation ${savedAvatar?.seed === v.seed ? 'selected' : ''}" 
              onclick="selectVariation('${v.seed}', '${v.url}', event)">
-          <img src="${v.url}" alt="Avatar variation">
+          <img src="${v.url}" alt="Avatar" onerror="this.style.display='none'">
         </div>
       `).join('');
     }
@@ -3717,7 +3719,7 @@
     function selectVariation(seed, url, evt) {
       // Save immediately
       const avatarData = { 
-        type: 'multiavatar', 
+        type: 'dicebear', 
         value: url, 
         seed: seed 
       };
