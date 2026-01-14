@@ -3757,7 +3757,7 @@
     }
 
     // ============================================
-    // AVATAR SELECTOR (MULTIAVATAR - CRYPTO STYLE)
+    // AVATAR SELECTOR (DICEBEAR - CRYPTO STYLE)
     // ============================================
     let avatarVariations = [];
     let avatarShuffleSeed = Date.now();
@@ -3768,8 +3768,9 @@
       'tothemoon', 'buythedip', 'lambo', 'wagmi', 'ngmi'
     ];
     
-    function generateMultiavatarUrl(seed) {
-      return `https://api.multiavatar.com/${encodeURIComponent(seed)}.png`;
+    // Using DiceBear bottts (robots) - reliable and cool looking
+    function generateAvatarUrl(seed) {
+      return `https://api.dicebear.com/7.x/bottts-neutral/png?seed=${encodeURIComponent(seed)}&size=80`;
     }
     
     function generateVariations(count = 24) {
@@ -3779,7 +3780,7 @@
         const seed = `${randomBase}-${avatarShuffleSeed}-${i}`;
         variations.push({
           seed: seed,
-          url: generateMultiavatarUrl(seed)
+          url: generateAvatarUrl(seed)
         });
       }
       return variations;
@@ -3809,7 +3810,7 @@
       grid.innerHTML = avatarVariations.map(v => `
         <div class="avatar-variation ${savedAvatar?.seed === v.seed ? 'selected' : ''}" 
              onclick="selectVariation('${v.seed}', '${v.url}', event)">
-          <img src="${v.url}" alt="" loading="lazy" onerror="this.parentElement.style.display='none'">
+          <img src="${v.url}" alt="" loading="lazy">
         </div>
       `).join('');
     }
@@ -3817,7 +3818,7 @@
     function selectVariation(seed, url, evt) {
       // Save immediately
       const avatarData = { 
-        type: 'multiavatar', 
+        type: 'dicebear', 
         value: url, 
         seed: seed 
       };
@@ -3852,7 +3853,7 @@
         const seed = i === 0 ? customSeed : `${customSeed}${i}`;
         avatarVariations.push({
           seed: seed,
-          url: generateMultiavatarUrl(seed)
+          url: generateAvatarUrl(seed)
         });
       }
       renderVariations();
