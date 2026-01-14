@@ -1422,8 +1422,13 @@
 
     // Initialize
     loadCurrentUser();
-    // Load saved theme from localStorage
-    (function() {
+    initializePosts();
+    renderPosts();
+    updateOnlineCount();
+    
+    // Periodically update online count
+    setInterval(updateOnlineCount, 30000);
+
       const savedTheme = localStorage.getItem('apehub_theme') || 'dark';
       document.documentElement.setAttribute('data-theme', savedTheme);
     })();
