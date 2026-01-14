@@ -3139,9 +3139,10 @@
         Object.assign(userProfile, data);
       }
       
-      // Always check for stored email (from login or payment)
-      const email = localStorage.getItem('userEmail');
-      console.log('Loading user profile. Email from localStorage:', email);
+      // Check for email from URL first, then localStorage
+      const urlParams = new URLSearchParams(window.location.search);
+      let email = urlParams.get('email') || localStorage.getItem('userEmail');
+      console.log('Loading user profile. Email:', email);
       if (email) {
         userProfile.email = email;
         // Extract name from email - capitalize first letter

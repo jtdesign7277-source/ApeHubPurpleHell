@@ -1623,7 +1623,7 @@
           body: JSON.stringify({
             priceId: priceId,
             email: email,
-            successUrl: window.location.origin + '/dashboard.html?payment=success',
+            successUrl: window.location.origin + '/dashboard.html?payment=success&email=' + encodeURIComponent(email),
             cancelUrl: window.location.origin + '/landing.html?payment=cancelled'
           })
         });
@@ -1682,7 +1682,7 @@
           localStorage.setItem('userEmail', email);
           alert('✓ Welcome back!\n\nRedirecting to dashboard...');
           closeLoginModal();
-          window.location.href = 'dashboard.html?payment=success';
+          window.location.href = 'dashboard.html?payment=success&email=' + encodeURIComponent(email);
         } else {
           alert('⚠️ Access Denied\n\n' + data.message + '\n\nClick "Get Early Access" to subscribe!');
         }
