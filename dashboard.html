@@ -2117,17 +2117,12 @@
         
         <div class="avatar-divider">
           <div class="avatar-divider-line"></div>
-          <span class="avatar-divider-text">or choose a style</span>
+          <span class="avatar-divider-text">or choose from NFT-style avatars</span>
           <div class="avatar-divider-line"></div>
         </div>
         
-        <div class="avatar-styles-title">Avatar Styles</div>
-        <div class="avatar-styles-scroll" id="avatarStylesScroll">
-          <!-- Populated by JavaScript -->
-        </div>
-        
-        <div class="avatar-variations-header" id="variationsHeader" style="display: none;">
-          <div class="avatar-styles-title" style="margin: 0;">Choose Your Look</div>
+        <div class="avatar-variations-header" id="variationsHeader" style="display: flex;">
+          <div class="avatar-styles-title" style="margin: 0;">Pick Your Avatar</div>
           <button class="avatar-shuffle-btn" onclick="shuffleVariations()">🔄 Shuffle</button>
         </div>
         <div class="avatar-variations-grid" id="avatarVariationsGrid">
@@ -3678,88 +3673,32 @@
     }
 
     // ============================================
-    // AVATAR SELECTOR (TRADING/CRYPTO THEMED)
+    // AVATAR SELECTOR (MULTIAVATAR - CRYPTO STYLE)
     // ============================================
-    const AVATAR_STYLES = [
-      { key: 'traderbots', name: 'Trader Bots', api: 'robohash', set: 'set1' },
-      { key: 'degens', name: 'Degens', api: 'robohash', set: 'set2' },
-      { key: 'nft', name: 'NFT Style', api: 'multiavatar', set: null },
-      { key: 'clean', name: 'Clean/Pro', api: 'boring', set: null },
-    ];
-    
-    const BORING_COLORS = '00d4ff,7b3fe4,ff6b00,ffd700,00ff88';
-    
-    let selectedAvatarStyle = null;
     let avatarVariations = [];
-    let selectedVariation = null;
     let avatarShuffleSeed = Date.now();
     
-    function generateAvatarUrl(style, seed, size = 200) {
-      const styleData = AVATAR_STYLES.find(s => s.key === style);
-      if (!styleData) return '';
-      
-      if (styleData.api === 'robohash') {
-        return `https://robohash.org/${encodeURIComponent(seed)}?set=${styleData.set}&size=${size}x${size}`;
-      } else if (styleData.api === 'multiavatar') {
-        return `https://api.multiavatar.com/${encodeURIComponent(seed)}.png`;
-      } else if (styleData.api === 'boring') {
-        return `https://source.boringavatars.com/beam/${size}/${encodeURIComponent(seed)}?colors=${BORING_COLORS}`;
-      }
-      return '';
+    function generateMultiavatarUrl(seed) {
+      return `https://api.multiavatar.com/${encodeURIComponent(seed)}.png`;
     }
     
-    function generateVariations(style, count = 12) {
+    function generateVariations(count = 12) {
       const variations = [];
-      const baseSeed = `${userProfile.email || 'user'}-${avatarShuffleSeed}`;
-      const seeds = ['diamond', 'moon', 'rocket', 'whale', 'bull', 'bear', 'ape', 'degen', 'hodl', 'gains', 'alpha', 'tendies'];
+      const userId = userProfile.email || 'user';
       for (let i = 0; i < count; i++) {
-        const seed = `${seeds[i]}-${baseSeed}-${i}`;
+        const seed = `${userId}-${avatarShuffleSeed}-${i}`;
         variations.push({
           seed: seed,
-          url: generateAvatarUrl(style, seed)
+          url: generateMultiavatarUrl(seed)
         });
       }
       return variations;
     }
     
     function initAvatarSelector() {
-      const stylesScroll = document.getElementById('avatarStylesScroll');
-      if (!stylesScroll) return;
-      
-      const savedAvatar = JSON.parse(localStorage.getItem('userAvatar') || 'null');
-      const userSeed = userProfile.email || 'user';
-      
-      stylesScroll.innerHTML = AVATAR_STYLES.map(style => `
-        <div class="avatar-style-card ${savedAvatar?.style === style.key ? 'selected' : ''}" 
-             onclick="selectAvatarStyle('${style.key}', event)">
-          <img class="avatar-style-preview" src="${generateAvatarUrl(style.key, userSeed)}" alt="${style.name}">
-          <span class="avatar-style-name">${style.name}</span>
-        </div>
-      `).join('');
-      
-      // If user has a saved trading avatar style, preselect it
-      if (savedAvatar?.type === 'trading' && savedAvatar?.style) {
-        selectAvatarStyle(savedAvatar.style);
-      } else {
-        document.getElementById('variationsHeader').style.display = 'none';
-        document.getElementById('avatarVariationsGrid').innerHTML = '';
-      }
-    }
-    
-    function selectAvatarStyle(styleKey, evt) {
-      selectedAvatarStyle = styleKey;
-      selectedVariation = null;
-      
-      // Update style card selection UI
-      document.querySelectorAll('.avatar-style-card').forEach(card => {
-        card.classList.remove('selected');
-      });
-      if (evt) evt.target.closest('.avatar-style-card')?.classList.add('selected');
-      
-      // Generate and show variations
-      avatarVariations = generateVariations(styleKey);
+      // Generate avatar variations immediately
+      avatarVariations = generateVariations();
       renderVariations();
-      
       document.getElementById('variationsHeader').style.display = 'flex';
     }
     
@@ -3776,13 +3715,10 @@
     }
     
     function selectVariation(seed, url, evt) {
-      selectedVariation = { seed, url };
-      
       // Save immediately
       const avatarData = { 
-        type: 'trading', 
+        type: 'multiavatar', 
         value: url, 
-        style: selectedAvatarStyle, 
         seed: seed 
       };
       localStorage.setItem('userAvatar', JSON.stringify(avatarData));
@@ -3797,9 +3733,8 @@
     }
     
     function shuffleVariations() {
-      if (!selectedAvatarStyle) return;
       avatarShuffleSeed = Date.now();
-      avatarVariations = generateVariations(selectedAvatarStyle);
+      avatarVariations = generateVariations();
       renderVariations();
     }
     
@@ -3880,7 +3815,7 @@
         return;
       }
       
-      if (avatarData.type === 'image' || avatarData.type === 'dicebear' || avatarData.type === 'trading') {
+      if (avatarData.type === 'image' || avatarData.type === 'dicebear' || avatarData.type === 'trading' || avatarData.type === 'multiavatar') {
         profileAvatarEl.innerHTML = `<img src="${avatarData.value}" alt="Avatar">`;
         profileAvatarEl.className = 'profile-avatar has-image';
       }

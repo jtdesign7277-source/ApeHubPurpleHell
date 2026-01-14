@@ -821,7 +821,7 @@
         if (savedAvatar.type === 'emoji') {
           currentUser.avatar = savedAvatar.value;
           currentUser.avatarType = 'emoji';
-        } else if (savedAvatar.type === 'image' || savedAvatar.type === 'dicebear' || savedAvatar.type === 'trading') {
+        } else if (savedAvatar.type === 'image' || savedAvatar.type === 'dicebear' || savedAvatar.type === 'trading' || savedAvatar.type === 'multiavatar') {
           currentUser.avatar = savedAvatar.value;
           currentUser.avatarType = 'image';
         }
@@ -1421,9 +1421,24 @@
     }
 
     // Initialize
+    console.log('ApeChat initializing...');
     loadCurrentUser();
+    
+    // Clear old posts if corrupted
+    try {
+      const savedPosts = localStorage.getItem('apehub_posts_v3');
+      if (savedPosts) {
+        JSON.parse(savedPosts);
+      }
+    } catch(e) {
+      console.log('Clearing corrupted posts data');
+      localStorage.removeItem('apehub_posts_v3');
+    }
+    
     initializePosts();
+    console.log('Posts loaded:', posts.length);
     renderPosts();
+    console.log('Posts rendered');
     updateOnlineCount();
     
     // Periodically update online count
