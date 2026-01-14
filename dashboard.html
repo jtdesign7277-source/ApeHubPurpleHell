@@ -3141,11 +3141,13 @@
       
       // Always check for stored email (from login or payment)
       const email = localStorage.getItem('userEmail');
+      console.log('Loading user profile. Email from localStorage:', email);
       if (email) {
         userProfile.email = email;
         // Extract name from email - capitalize first letter
         const namePart = email.split('@')[0];
         userProfile.name = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+        console.log('Set user name to:', userProfile.name);
         // Save updated profile
         localStorage.setItem('apehub_user_profile', JSON.stringify(userProfile));
       }
