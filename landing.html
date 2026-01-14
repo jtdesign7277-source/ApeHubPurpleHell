@@ -1404,7 +1404,11 @@
       <h2 class="modal-title">Welcome Back</h2>
       
       <form onsubmit="handleLogin(event)">
-        <input type="email" class="form-input" placeholder="Enter your email" required>
+        <div style="display: flex; gap: 12px; margin-bottom: 0;">
+          <input type="text" class="form-input" id="login-firstname" placeholder="First Name" required style="margin-bottom: 12px;">
+          <input type="text" class="form-input" id="login-lastname" placeholder="Last Name" required style="margin-bottom: 12px;">
+        </div>
+        <input type="email" class="form-input" id="login-email" placeholder="Enter your email" required>
         <button type="submit" class="btn-modal">Log In</button>
       </form>
       
@@ -1667,7 +1671,9 @@
     // Handle login
     function handleLogin(e) {
       e.preventDefault();
-      const email = e.target.querySelector('input[type="email"]').value;
+      const firstName = document.getElementById('login-firstname').value.trim();
+      const lastName = document.getElementById('login-lastname').value.trim();
+      const email = document.getElementById('login-email').value.trim();
       const submitBtn = e.target.querySelector('button');
       
       submitBtn.textContent = 'Checking...';
@@ -1681,11 +1687,13 @@
       .then(res => res.json())
       .then(data => {
         if (data.success) {
-          // Store email for dashboard
+          // Store user info for dashboard
           localStorage.setItem('userEmail', email);
-          alert('✓ Welcome back!\n\nRedirecting to dashboard...');
+          localStorage.setItem('userFirstName', firstName);
+          localStorage.setItem('userLastName', lastName);
+          alert('✓ Welcome back, ' + firstName + '!\n\nRedirecting to dashboard...');
           closeLoginModal();
-          window.location.href = 'dashboard.html?payment=success&email=' + encodeURIComponent(email);
+          window.location.href = 'dashboard.html?payment=success&email=' + encodeURIComponent(email) + '&firstName=' + encodeURIComponent(firstName) + '&lastName=' + encodeURIComponent(lastName);
         } else {
           alert('⚠️ Access Denied\n\n' + data.message + '\n\nClick "Get Early Access" to subscribe!');
         }

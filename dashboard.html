@@ -3244,21 +3244,54 @@
         console.log('Got email from localStorage:', email);
       }
       
-      console.log('EMAIL VALUE IS:', email);
+      // Get first and last name from URL or localStorage
+      let firstName = urlParams.get('firstName');
+      let lastName = urlParams.get('lastName');
       
-      // If we have an email, update the profile
-      if (email && email !== 'user@example.com') {
+      if (firstName) {
+        firstName = decodeURIComponent(firstName);
+        localStorage.setItem('userFirstName', firstName);
+      } else {
+        firstName = localStorage.getItem('userFirstName');
+      }
+      
+      if (lastName) {
+        lastName = decodeURIComponent(lastName);
+        localStorage.setItem('userLastName', lastName);
+      } else {
+        lastName = localStorage.getItem('userLastName');
+      }
+      
+      console.log('EMAIL VALUE IS:', email);
+      console.log('NAME:', firstName, lastName);
+      
+      // If we have first and last name, use them
+      if (firstName && lastName) {
+        userProfile.name = firstName + ' ' + lastName;
+        userProfile.email = email || 'user@example.com';
+        userProfile.joinDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        console.log('Updated profile with full name:', userProfile.name);
+        
+        // Force update immediately
+        setTimeout(function() {
+          document.getElementById('userName').textContent = firstName;
+          document.getElementById('profileAvatar').textContent = firstName.charAt(0).toUpperCase();
+          document.getElementById('profileName').textContent = firstName;
+          document.getElementById('infoName').textContent = firstName + ' ' + lastName;
+          if (email) document.getElementById('infoEmail').textContent = email;
+          console.log('FORCED UPDATE COMPLETE');
+        }, 100);
+      } else if (email && email !== 'user@example.com') {
+        // Fallback: extract name from email
         userProfile.email = email;
-        // Extract name from email - capitalize first letter
         const namePart = email.split('@')[0];
-        // Capitalize first letter of each word if contains dots/underscores
         userProfile.name = namePart
           .replace(/[._]/g, ' ')
           .split(' ')
           .map(word => word.charAt(0).toUpperCase() + word.slice(1))
           .join(' ');
         userProfile.joinDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-        console.log('Updated profile - Name:', userProfile.name, 'Email:', userProfile.email);
+        console.log('Updated profile from email - Name:', userProfile.name);
         
         // Force update immediately
         setTimeout(function() {
