@@ -3079,18 +3079,27 @@
     function updatePortfolioTotal() {
       let totalMarketValue = 0;
       let totalCost = 0;
+      let todayChange = 0;
       
       watchlist.forEach(stock => {
         const position = positions[stock.symbol];
         if (position && position.shares > 0) {
-          totalMarketValue += position.shares * stock.price;
+          const currentValue = position.shares * stock.price;
+          totalMarketValue += currentValue;
           totalCost += position.shares * position.avgCost;
+          // Calculate today's change based on the stock's daily change percent
+          // Yesterday's price = current price / (1 + changePercent/100)
+          const yesterdayPrice = stock.price / (1 + stock.changePercent / 100);
+          const yesterdayValue = position.shares * yesterdayPrice;
+          todayChange += currentValue - yesterdayValue;
         }
       });
       
       const totalReturn = totalMarketValue - totalCost;
       const returnPercent = totalCost > 0 ? ((totalReturn / totalCost) * 100) : 0;
       const isGain = totalReturn >= 0;
+      const todayPercent = totalMarketValue > 0 ? ((todayChange / (totalMarketValue - todayChange)) * 100) : 0;
+      const isTodayGain = todayChange >= 0;
       
       const valueEl = document.getElementById('watchlist-total-value');
       const changeElToday = document.getElementById('watchlist-change-today');
@@ -3113,23 +3122,21 @@
       // Display total market value
       valueEl.textContent = '$' + totalMarketValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       
-      // Display change (profit/loss)
+      // Display today's change (based on daily stock movements)
+      if (changeElToday) {
+        const todayText = (isTodayGain ? '+' : '-') + '$' + Math.abs(todayChange).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' (' + (isTodayGain ? '+' : '') + todayPercent.toFixed(2) + '%)';
+        changeElToday.textContent = todayText;
+        changeElToday.className = 'wl-today-change' + (isTodayGain ? '' : ' down');
+      }
+      
+      // Display all-time change (profit/loss from cost basis)
       if (totalCost > 0) {
         const changeText = (isGain ? '+' : '-') + '$' + Math.abs(totalReturn).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' (' + (isGain ? '+' : '') + returnPercent.toFixed(2) + '%)';
-        const todayText = (isGain ? '+' : '-') + '$' + Math.abs(totalReturn).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' (' + (isGain ? '+' : '') + returnPercent.toFixed(2) + '%)';
-        if (changeElToday) {
-          changeElToday.textContent = todayText;
-          changeElToday.className = 'wl-today-change' + (isGain ? '' : ' down');
-        }
         if (changeElAlltime) {
           changeElAlltime.textContent = changeText;
           changeElAlltime.className = 'wl-alltime-change' + (isGain ? '' : ' down');
         }
       } else {
-        if (changeElToday) {
-          changeElToday.textContent = '+$0.00 (0.00%)';
-          changeElToday.className = 'wl-today-change';
-        }
         if (changeElAlltime) {
           changeElAlltime.textContent = '+$0.00 (0.00%)';
           changeElAlltime.className = 'wl-alltime-change';
