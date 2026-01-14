@@ -2,162 +2,158 @@ require('dotenv').config();
 const express = require('express');
 const Stripe = require('stripe');
 const path = require('path');
-const sqlite3 = require('sqlite3').verbose();
+const { Pool } = require('pg');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-// Stripe Configuration - loads from .env file
+// Stripe Configuration
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 
-// ===== DATABASE SETUP =====
-const db = new sqlite3.Database('subscriptions.db', (err) => {
-  if (err) {
-    console.error('Database connection error:', err.message);
-  } else {
-    console.log('Connected to SQLite database');
-    // Create subscriptions table if it doesn't exist
-    db.run(`
+// ===== POSTGRESQL DATABASE SETUP =====
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
+});
+
+// Initialize database tables
+async function initDatabase() {
+  try {
+    // Create subscriptions table
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS subscriptions (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         customer_id TEXT UNIQUE,
         email TEXT,
         stripe_subscription_id TEXT,
         price_id TEXT,
         status TEXT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
-    `, (err) => {
-      if (err) console.error('Table creation error:', err);
-      else console.log('Subscriptions table ready');
-    });
+    `);
+    console.log('✓ Subscriptions table ready');
+
     // Create waitlist table
-    db.run(`
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS waitlist (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         email TEXT UNIQUE,
         source TEXT DEFAULT 'waitlist',
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
-    `, (err) => {
-      if (err) console.error('Waitlist table creation error:', err);
-      else console.log('Waitlist table ready');
-    });  }
-});
+    `);
+    console.log('✓ Waitlist table ready');
+    console.log('✓ Connected to PostgreSQL database');
+  } catch (err) {
+    console.error('Database initialization error:', err);
+  }
+}
+
+initDatabase();
 
 // Helper function to update subscription in database
-const updateSubscription = (customerId, email, subscriptionId, priceId, status) => {
-  return new Promise((resolve, reject) => {
-    db.run(
-      `INSERT INTO subscriptions (customer_id, email, stripe_subscription_id, price_id, status)
-       VALUES (?, ?, ?, ?, ?)
-       ON CONFLICT(customer_id) DO UPDATE SET
-       stripe_subscription_id = excluded.stripe_subscription_id,
-       price_id = excluded.price_id,
-       status = excluded.status,
+const updateSubscription = async (customerId, email, subscriptionId, priceId, status) => {
+  try {
+    await pool.query(
+      `INSERT INTO subscriptions (customer_id, email, stripe_subscription_id, price_id, status, updated_at)
+       VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP)
+       ON CONFLICT (customer_id) DO UPDATE SET
+       stripe_subscription_id = EXCLUDED.stripe_subscription_id,
+       price_id = EXCLUDED.price_id,
+       status = EXCLUDED.status,
        updated_at = CURRENT_TIMESTAMP`,
-      [customerId, email, subscriptionId, priceId, status],
-      function(err) {
-        if (err) {
-          console.error('Database update error:', err);
-          reject(err);
-        } else {
-          console.log('Subscription updated for customer:', customerId);
-          resolve();
-        }
-      }
+      [customerId, email, subscriptionId, priceId, status]
     );
-  });
+    console.log('Subscription updated for customer:', customerId);
+  } catch (err) {
+    console.error('Database update error:', err);
+    throw err;
+  }
 };
 
 // Helper function to get subscription status
-const getSubscription = (customerId) => {
-  return new Promise((resolve, reject) => {
-    db.get(
-      'SELECT * FROM subscriptions WHERE customer_id = ?',
-      [customerId],
-      (err, row) => {
-        if (err) reject(err);
-        else resolve(row);
-      }
+const getSubscription = async (customerId) => {
+  try {
+    const result = await pool.query(
+      'SELECT * FROM subscriptions WHERE customer_id = $1',
+      [customerId]
     );
-  });
+    return result.rows[0];
+  } catch (err) {
+    console.error('Database query error:', err);
+    throw err;
+  }
 };
 
 // ===== WAITLIST API =====
-app.use(express.json());
-
-app.post('/api/waitlist', (req, res) => {
+app.post('/api/waitlist', express.json(), async (req, res) => {
   const { email, source } = req.body;
   
   if (!email) {
     return res.status(400).json({ error: 'Email is required' });
   }
   
-  db.run(
-    `INSERT OR IGNORE INTO waitlist (email, source) VALUES (?, ?)`,
-    [email, source || 'waitlist'],
-    function(err) {
-      if (err) {
-        console.error('Waitlist error:', err);
-        return res.status(500).json({ error: 'Failed to add to waitlist' });
-      }
-      console.log('✓ New waitlist signup:', email);
-      res.json({ success: true, message: 'Added to waitlist!' });
-    }
-  );
+  try {
+    await pool.query(
+      `INSERT INTO waitlist (email, source) VALUES ($1, $2) ON CONFLICT (email) DO NOTHING`,
+      [email, source || 'waitlist']
+    );
+    console.log('✓ New waitlist signup:', email);
+    res.json({ success: true, message: 'Added to waitlist!' });
+  } catch (err) {
+    console.error('Waitlist error:', err);
+    res.status(500).json({ error: 'Failed to add to waitlist' });
+  }
 });
 
 // Get all waitlist emails (admin endpoint)
-app.get('/api/waitlist', (req, res) => {
-  db.all('SELECT * FROM waitlist ORDER BY created_at DESC', [], (err, rows) => {
-    if (err) {
-      return res.status(500).json({ error: 'Failed to fetch waitlist' });
-    }
-    res.json(rows);
-  });
+app.get('/api/waitlist', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM waitlist ORDER BY created_at DESC');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch waitlist' });
+  }
 });
 
 // ===== LOGIN API =====
-// Check if user has active subscription
-app.post('/api/login', (req, res) => {
+app.post('/api/login', express.json(), async (req, res) => {
   const { email } = req.body;
   
   if (!email) {
     return res.status(400).json({ error: 'Email is required' });
   }
   
-  db.get(
-    'SELECT * FROM subscriptions WHERE email = ? AND status = ?',
-    [email, 'active'],
-    (err, row) => {
-      if (err) {
-        console.error('Login error:', err);
-        return res.status(500).json({ error: 'Login failed' });
-      }
-      
-      if (row) {
-        console.log('✓ Paid user logged in:', email);
-        res.json({ 
-          success: true, 
-          message: 'Login successful!',
-          user: { email: row.email, status: row.status }
-        });
-      } else {
-        console.log('✗ Login denied (no active subscription):', email);
-        res.json({ 
-          success: false, 
-          message: 'No active subscription found. Please subscribe to access the dashboard.'
-        });
-      }
+  try {
+    const result = await pool.query(
+      'SELECT * FROM subscriptions WHERE email = $1 AND status = $2',
+      [email, 'active']
+    );
+    
+    if (result.rows.length > 0) {
+      const row = result.rows[0];
+      console.log('✓ Paid user logged in:', email);
+      res.json({ 
+        success: true, 
+        message: 'Login successful!',
+        user: { email: row.email, status: row.status }
+      });
+    } else {
+      console.log('✗ Login denied (no active subscription):', email);
+      res.json({ 
+        success: false, 
+        message: 'No active subscription found. Please subscribe to access the dashboard.'
+      });
     }
-  );
+  } catch (err) {
+    console.error('Login error:', err);
+    res.status(500).json({ error: 'Login failed' });
+  }
 });
 
-// Middleware - CRITICAL ORDER!
-// 1. Webhook FIRST (uses raw body)
+// ===== STRIPE WEBHOOK =====
 app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   const sig = req.headers['stripe-signature'];
 
@@ -176,7 +172,6 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  // Handle the event
   try {
     switch (event.type) {
       case 'checkout.session.completed': {
@@ -184,7 +179,6 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
         console.log('📦 Checkout session completed:', session.id);
         console.log('  Customer:', session.customer_email);
         
-        // Retrieve full subscription details
         const subscription = await stripe.subscriptions.retrieve(session.subscription);
         const customerId = session.customer || subscription.customer;
         
@@ -211,8 +205,6 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
           subscription.items.data[0].price.id,
           subscription.status
         );
-        
-        console.log('✓ Subscription status updated');
         break;
       }
 
@@ -227,14 +219,6 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
           subscription.items.data[0].price.id,
           'cancelled'
         );
-        
-        console.log('✓ Subscription marked as cancelled');
-        break;
-      }
-
-      case 'payment_intent.succeeded': {
-        const paymentIntent = event.data.object;
-        console.log('💰 Payment intent succeeded:', paymentIntent.id);
         break;
       }
 
@@ -249,45 +233,45 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
   }
 });
 
-// 2. Then JSON parser for regular API routes
+// 2. JSON parser for regular API routes
 app.use(express.json({ limit: '10mb' }));
 
 // Admin endpoint to view all subscriptions
-app.get('/api/subscriptions', (req, res) => {
-  db.all('SELECT * FROM subscriptions ORDER BY created_at DESC', [], (err, rows) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    res.json(rows || []);
-  });
+app.get('/api/subscriptions', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM subscriptions ORDER BY created_at DESC');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // Admin endpoint to manually add a subscription
-app.post('/api/add-subscription', (req, res) => {
+app.post('/api/add-subscription', async (req, res) => {
   const { email } = req.body;
   if (!email) {
     return res.status(400).json({ error: 'Email required' });
   }
   
-  const now = new Date().toISOString();
-  
-  db.run(
-    `INSERT OR REPLACE INTO subscriptions (customer_id, email, stripe_subscription_id, price_id, status, created_at, updated_at) 
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    ['manual_' + Date.now(), email, 'manual_sub_' + Date.now(), 'manual', 'active', now, now],
-    function(err) {
-      if (err) {
-        return res.status(500).json({ error: err.message });
-      }
-      res.json({ success: true, message: `Subscription added for ${email}` });
-    }
-  );
+  try {
+    await pool.query(
+      `INSERT INTO subscriptions (customer_id, email, stripe_subscription_id, price_id, status)
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT (customer_id) DO UPDATE SET
+       email = EXCLUDED.email,
+       status = EXCLUDED.status,
+       updated_at = CURRENT_TIMESTAMP`,
+      ['manual_' + Date.now(), email, 'manual_sub_' + Date.now(), 'manual', 'active']
+    );
+    res.json({ success: true, message: `Subscription added for ${email}` });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-// Logging middleware with cache-busting headers
+// Logging middleware
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} ${req.method} ${req.path}`);
-  // Disable caching for HTML files
   if (req.path.endsWith('.html') || req.path === '/') {
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
     res.set('Pragma', 'no-cache');
@@ -296,7 +280,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// 4. API Routes
 // Create Checkout Session endpoint
 app.post('/api/create-checkout-session', async (req, res) => {
   console.log('Checkout session request received:', req.body);
@@ -308,21 +291,15 @@ app.post('/api/create-checkout-session', async (req, res) => {
       mode: 'subscription',
       payment_method_types: ['card'],
       customer_email: email || undefined,
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
+      line_items: [{ price: priceId, quantity: 1 }],
       success_url: successUrl || `${req.headers.origin}/dashboard.html?payment=success`,
-      cancel_url: cancelUrl || `${req.headers.origin}/LandingPurple%20_%20DailyEdgeFinance.html?payment=cancelled`,
+      cancel_url: cancelUrl || `${req.headers.origin}/landing.html?payment=cancelled`,
     });
 
     console.log('Session created successfully:', session.id);
     res.json({ id: session.id, url: session.url });
   } catch (error) {
     console.error('Stripe error:', error.message);
-    console.error('Full error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -345,21 +322,20 @@ app.get('/api/subscription-status/:customerId', async (req, res) => {
       res.json({ subscribed: false, status: 'none' });
     }
   } catch (error) {
-    console.error('Error fetching subscription:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Serve the landing page at root FIRST
+// Serve landing page at root
 app.get('/', (req, res) => {
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
   res.sendFile(path.join(__dirname, 'landing.html'));
 });
 
-// Serve static files (but not HTML files at root)
+// Serve static files
 app.use(express.static(__dirname, {
-  setHeaders: (res, path) => {
-    if (path.endsWith('.html')) {
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.html')) {
       res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
     }
   }
@@ -395,11 +371,11 @@ app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'LandingPurple _ DailyEdgeFinance.html'));
 });
 
-// Serve assets directory
+// Serve assets
 app.use('/LandingPurpleFiles', express.static(path.join(__dirname, 'LandingPurpleFiles')));
 app.use('/intro-music.mp3', express.static(path.join(__dirname, 'intro-music.mp3')));
 
-// Block EVERYTHING ELSE
+// 404 handler
 app.use((req, res) => {
   console.log('BLOCKED REQUEST:', req.method, req.path);
   res.status(404).send('Not found');
@@ -409,8 +385,7 @@ app.listen(PORT, () => {
   console.log(`\n=====================================`);
   console.log(`✓ Server running on http://localhost:${PORT}`);
   console.log(`✓ Started at: ${new Date().toISOString()}`);
-  console.log(`✓ Serving ONLY Purple Hell app`);
-  console.log(`✓ Build timestamp: ${Date.now()}`);
+  console.log(`✓ Using PostgreSQL database`);
   console.log(`=====================================\n`);
 });
 
