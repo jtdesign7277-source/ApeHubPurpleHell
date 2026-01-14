@@ -1223,7 +1223,7 @@
   <!-- Nav -->
   <nav>
     <div class="logo">Ape<span>Hub</span></div>
-    <a href="dashboard.html" class="btn-login" style="text-decoration: none;">Log In</a>
+    <button class="btn-login" onclick="openLoginModal()">Log In</button>
   </nav>
 
   <!-- Hero -->
@@ -1617,9 +1617,34 @@
     function handleLogin(e) {
       e.preventDefault();
       const email = e.target.querySelector('input[type="email"]').value;
-      alert(`Welcome back!\n\nLogging in as ${email}...`);
-      closeLoginModal();
-      // Replace with actual login logic
+      const submitBtn = e.target.querySelector('button');
+      
+      submitBtn.textContent = 'Checking...';
+      submitBtn.disabled = true;
+      
+      fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          alert('✓ Welcome back!\n\nRedirecting to dashboard...');
+          closeLoginModal();
+          window.location.href = 'dashboard.html';
+        } else {
+          alert('⚠️ Access Denied\n\n' + data.message + '\n\nClick "Get Early Access" to subscribe!');
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert('Something went wrong. Please try again.');
+      })
+      .finally(() => {
+        submitBtn.textContent = 'Log In';
+        submitBtn.disabled = false;
+      });
     }
 
     // ==================== STRANGER THINGS INTRO AUDIO ====================

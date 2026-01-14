@@ -120,6 +120,42 @@ app.get('/api/waitlist', (req, res) => {
   });
 });
 
+// ===== LOGIN API =====
+// Check if user has active subscription
+app.post('/api/login', (req, res) => {
+  const { email } = req.body;
+  
+  if (!email) {
+    return res.status(400).json({ error: 'Email is required' });
+  }
+  
+  db.get(
+    'SELECT * FROM subscriptions WHERE email = ? AND status = ?',
+    [email, 'active'],
+    (err, row) => {
+      if (err) {
+        console.error('Login error:', err);
+        return res.status(500).json({ error: 'Login failed' });
+      }
+      
+      if (row) {
+        console.log('✓ Paid user logged in:', email);
+        res.json({ 
+          success: true, 
+          message: 'Login successful!',
+          user: { email: row.email, status: row.status }
+        });
+      } else {
+        console.log('✗ Login denied (no active subscription):', email);
+        res.json({ 
+          success: false, 
+          message: 'No active subscription found. Please subscribe to access the dashboard.'
+        });
+      }
+    }
+  );
+});
+
 // Middleware - CRITICAL ORDER!
 // 1. Webhook FIRST (uses raw body)
 app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
