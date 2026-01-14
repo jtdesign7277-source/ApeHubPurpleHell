@@ -2954,6 +2954,12 @@
     function renderWatchlist() {
       const container = document.getElementById('watchlist-content');
       
+      // Guard against missing element
+      if (!container) {
+        console.log('Watchlist container not found, skipping render');
+        return;
+      }
+      
       if (watchlist.length === 0) {
         container.innerHTML = `
           <div class="wl-empty">
@@ -3019,6 +3025,12 @@
       
       const valueEl = document.getElementById('watchlist-total-value');
       const changeEl = document.getElementById('watchlist-change');
+      
+      // Guard against missing elements
+      if (!valueEl || !changeEl) {
+        console.log('Watchlist elements not found, skipping update');
+        return;
+      }
       
       // If hidden, show stars with gunmetal shine
       if (valuesHidden) {
