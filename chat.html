@@ -821,7 +821,7 @@
         if (savedAvatar.type === 'emoji') {
           currentUser.avatar = savedAvatar.value;
           currentUser.avatarType = 'emoji';
-        } else if (savedAvatar.type === 'image') {
+        } else if (savedAvatar.type === 'image' || savedAvatar.type === 'dicebear') {
           currentUser.avatar = savedAvatar.value;
           currentUser.avatarType = 'image';
         }
@@ -839,6 +839,8 @@
       if (composeAvatar) {
         if (currentUser.avatarType === 'image') {
           composeAvatar.innerHTML = `<img src="${currentUser.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+        } else if (currentUser.avatarType === 'emoji') {
+          composeAvatar.textContent = currentUser.avatar;
         } else {
           composeAvatar.textContent = currentUser.avatar;
         }

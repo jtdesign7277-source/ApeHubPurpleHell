@@ -1757,9 +1757,10 @@
       object-fit: cover;
     }
 
-    .profile-avatar.has-emoji {
-      font-size: 32px;
-      background: rgba(34, 197, 94, 0.15);
+    .profile-avatar.has-dicebear img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
     .avatar-modal-overlay {
@@ -1859,35 +1860,124 @@
       font-size: 13px;
     }
 
-    .avatar-presets-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 12px;
-      margin-bottom: 20px;
+    .avatar-styles-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 12px;
     }
 
-    .avatar-preset {
-      aspect-ratio: 1;
+    .avatar-styles-scroll {
       display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .avatar-styles-scroll::-webkit-scrollbar {
+      height: 4px;
+    }
+
+    .avatar-styles-scroll::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 2px;
+    }
+
+    .avatar-style-card {
+      flex-shrink: 0;
+      width: 80px;
+      display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      font-size: 28px;
+      padding: 10px;
       background: var(--bg-card);
       border: 2px solid transparent;
-      border-radius: 50%;
+      border-radius: 12px;
       cursor: pointer;
       transition: all 0.2s;
     }
 
-    .avatar-preset:hover {
+    .avatar-style-card:hover {
       background: var(--bg-card-hover);
-      transform: scale(1.1);
     }
 
-    .avatar-preset.selected {
+    .avatar-style-card.selected {
       border-color: #22c55e;
-      background: rgba(34, 197, 94, 0.15);
+      background: rgba(34, 197, 94, 0.1);
+    }
+
+    .avatar-style-preview {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      margin-bottom: 6px;
+      background: var(--bg-primary);
+    }
+
+    .avatar-style-name {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .avatar-variations-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .avatar-shuffle-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      color: var(--text-primary);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .avatar-shuffle-btn:hover {
+      background: var(--bg-card-hover);
+      border-color: #22c55e;
+    }
+
+    .avatar-variations-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .avatar-variation {
+      aspect-ratio: 1;
+      border-radius: 12px;
+      border: 2px solid transparent;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--bg-card);
+    }
+
+    .avatar-variation:hover {
+      transform: scale(1.05);
+    }
+
+    .avatar-variation.selected {
+      border-color: #22c55e;
       box-shadow: 0 0 12px rgba(34, 197, 94, 0.4);
+    }
+
+    .avatar-variation img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
     .avatar-cancel-btn {
@@ -2033,11 +2123,20 @@
         
         <div class="avatar-divider">
           <div class="avatar-divider-line"></div>
-          <span class="avatar-divider-text">or choose below</span>
+          <span class="avatar-divider-text">or choose a style</span>
           <div class="avatar-divider-line"></div>
         </div>
         
-        <div class="avatar-presets-grid" id="avatarPresetsGrid">
+        <div class="avatar-styles-title">Avatar Styles</div>
+        <div class="avatar-styles-scroll" id="avatarStylesScroll">
+          <!-- Populated by JavaScript -->
+        </div>
+        
+        <div class="avatar-variations-header" id="variationsHeader" style="display: none;">
+          <div class="avatar-styles-title" style="margin: 0;">Choose Your Look</div>
+          <button class="avatar-shuffle-btn" onclick="shuffleVariations()">🔄 Shuffle</button>
+        </div>
+        <div class="avatar-variations-grid" id="avatarVariationsGrid">
           <!-- Populated by JavaScript -->
         </div>
         
@@ -3585,22 +3684,124 @@
     }
 
     // ============================================
-    // AVATAR SELECTOR
+    // AVATAR SELECTOR (DICEBEAR)
     // ============================================
-    const presetAvatars = ['😀', '😎', '🚀', '💰', '📈', '🐂', '🐻', '💎', '🔥', '⚡', '🦍', '🎯', '👑', '🌙', '⭐'];
+    const AVATAR_STYLES = [
+      { key: 'adventurer', name: 'Adventurer' },
+      { key: 'avataaars', name: 'Cartoon' },
+      { key: 'lorelei', name: 'Anime' },
+      { key: 'micah', name: 'Modern' },
+      { key: 'notionists', name: 'Minimal' },
+      { key: 'open-peeps', name: 'Hand Drawn' },
+      { key: 'bottts', name: 'Robots' },
+      { key: 'pixel-art', name: 'Pixel Art' },
+      { key: 'fun-emoji', name: 'Emoji' },
+      { key: 'thumbs', name: 'Thumbs' },
+      { key: 'big-smile', name: 'Happy' },
+      { key: 'personas', name: 'Personas' },
+    ];
+    
+    let selectedAvatarStyle = null;
+    let avatarVariations = [];
+    let selectedVariation = null;
+    let avatarShuffleSeed = Date.now();
+    
+    function generateDiceBearUrl(style, seed, size = 200) {
+      return `https://api.dicebear.com/7.x/${style}/png?seed=${encodeURIComponent(seed)}&size=${size}`;
+    }
+    
+    function generateVariations(style, count = 12) {
+      const variations = [];
+      const baseSeed = `${userProfile.email || 'user'}-${avatarShuffleSeed}`;
+      for (let i = 0; i < count; i++) {
+        const seed = `${baseSeed}-${i}`;
+        variations.push({
+          seed: seed,
+          url: generateDiceBearUrl(style, seed)
+        });
+      }
+      return variations;
+    }
     
     function initAvatarSelector() {
-      const grid = document.getElementById('avatarPresetsGrid');
-      if (!grid) return;
+      const stylesScroll = document.getElementById('avatarStylesScroll');
+      if (!stylesScroll) return;
       
       const savedAvatar = JSON.parse(localStorage.getItem('userAvatar') || 'null');
+      const userSeed = userProfile.email || 'user';
       
-      grid.innerHTML = presetAvatars.map(emoji => `
-        <div class="avatar-preset ${savedAvatar?.type === 'emoji' && savedAvatar?.value === emoji ? 'selected' : ''}" 
-             onclick="selectPresetAvatar('${emoji}')">
-          ${emoji}
+      stylesScroll.innerHTML = AVATAR_STYLES.map(style => `
+        <div class="avatar-style-card ${savedAvatar?.style === style.key ? 'selected' : ''}" 
+             onclick="selectAvatarStyle('${style.key}')">
+          <img class="avatar-style-preview" src="${generateDiceBearUrl(style.key, userSeed)}" alt="${style.name}">
+          <span class="avatar-style-name">${style.name}</span>
         </div>
       `).join('');
+      
+      // If user has a saved dicebear style, preselect it
+      if (savedAvatar?.type === 'dicebear' && savedAvatar?.style) {
+        selectAvatarStyle(savedAvatar.style);
+      } else {
+        document.getElementById('variationsHeader').style.display = 'none';
+        document.getElementById('avatarVariationsGrid').innerHTML = '';
+      }
+    }
+    
+    function selectAvatarStyle(styleKey) {
+      selectedAvatarStyle = styleKey;
+      selectedVariation = null;
+      
+      // Update style card selection UI
+      document.querySelectorAll('.avatar-style-card').forEach(card => {
+        card.classList.remove('selected');
+      });
+      event.target.closest('.avatar-style-card')?.classList.add('selected');
+      
+      // Generate and show variations
+      avatarVariations = generateVariations(styleKey);
+      renderVariations();
+      
+      document.getElementById('variationsHeader').style.display = 'flex';
+    }
+    
+    function renderVariations() {
+      const grid = document.getElementById('avatarVariationsGrid');
+      const savedAvatar = JSON.parse(localStorage.getItem('userAvatar') || 'null');
+      
+      grid.innerHTML = avatarVariations.map(v => `
+        <div class="avatar-variation ${savedAvatar?.seed === v.seed ? 'selected' : ''}" 
+             onclick="selectVariation('${v.seed}', '${v.url}')">
+          <img src="${v.url}" alt="Avatar variation">
+        </div>
+      `).join('');
+    }
+    
+    function selectVariation(seed, url) {
+      selectedVariation = { seed, url };
+      
+      // Save immediately
+      const avatarData = { 
+        type: 'dicebear', 
+        value: url, 
+        style: selectedAvatarStyle, 
+        seed: seed 
+      };
+      localStorage.setItem('userAvatar', JSON.stringify(avatarData));
+      updateAvatarDisplay(avatarData);
+      
+      // Update selection UI
+      document.querySelectorAll('.avatar-variation').forEach(v => v.classList.remove('selected'));
+      event.target.closest('.avatar-variation')?.classList.add('selected');
+      
+      closeAvatarSelector();
+      showToast('Avatar updated!', 'success');
+    }
+    
+    function shuffleVariations() {
+      if (!selectedAvatarStyle) return;
+      avatarShuffleSeed = Date.now();
+      avatarVariations = generateVariations(selectedAvatarStyle);
+      renderVariations();
     }
     
     function openAvatarSelector() {
@@ -3611,14 +3812,6 @@
     function closeAvatarSelector(event) {
       if (event && event.target !== event.currentTarget) return;
       document.getElementById('avatarModalOverlay').classList.remove('active');
-    }
-    
-    function selectPresetAvatar(emoji) {
-      const avatarData = { type: 'emoji', value: emoji };
-      localStorage.setItem('userAvatar', JSON.stringify(avatarData));
-      updateAvatarDisplay(avatarData);
-      closeAvatarSelector();
-      showToast('Avatar updated!', 'success');
     }
     
     function handleAvatarUpload(event) {
@@ -3688,12 +3881,9 @@
         return;
       }
       
-      if (avatarData.type === 'image') {
+      if (avatarData.type === 'image' || avatarData.type === 'dicebear') {
         profileAvatarEl.innerHTML = `<img src="${avatarData.value}" alt="Avatar">`;
         profileAvatarEl.className = 'profile-avatar has-image';
-      } else if (avatarData.type === 'emoji') {
-        profileAvatarEl.innerHTML = avatarData.value;
-        profileAvatarEl.className = 'profile-avatar has-emoji';
       }
     }
     
