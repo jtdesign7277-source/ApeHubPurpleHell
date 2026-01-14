@@ -45,6 +45,19 @@ async function initDatabase() {
       )
     `);
     console.log('✓ Waitlist table ready');
+
+    // Create user_data table for watchlists and portfolios
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS user_data (
+        id SERIAL PRIMARY KEY,
+        email TEXT UNIQUE,
+        watchlist JSONB DEFAULT '[]',
+        positions JSONB DEFAULT '{}',
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    console.log('✓ User data table ready');
+
     console.log('✓ Connected to PostgreSQL database');
   } catch (err) {
     console.error('Database initialization error:', err);
@@ -115,6 +128,64 @@ app.get('/api/waitlist', async (req, res) => {
     res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch waitlist' });
+  }
+});
+
+// ===== USER DATA API =====
+// Get user's watchlist and positions
+app.get('/api/user-data/:email', async (req, res) => {
+  const { email } = req.params;
+  
+  try {
+    const result = await pool.query(
+      'SELECT watchlist, positions FROM user_data WHERE email = $1',
+      [email]
+    );
+    
+    if (result.rows.length > 0) {
+      res.json({
+        success: true,
+        watchlist: result.rows[0].watchlist || [],
+        positions: result.rows[0].positions || {}
+      });
+    } else {
+      // Return empty defaults for new user
+      res.json({
+        success: true,
+        watchlist: [],
+        positions: {}
+      });
+    }
+  } catch (err) {
+    console.error('Error fetching user data:', err);
+    res.status(500).json({ error: 'Failed to fetch user data' });
+  }
+});
+
+// Save user's watchlist and positions
+app.post('/api/user-data', express.json(), async (req, res) => {
+  const { email, watchlist, positions } = req.body;
+  
+  if (!email) {
+    return res.status(400).json({ error: 'Email is required' });
+  }
+  
+  try {
+    await pool.query(
+      `INSERT INTO user_data (email, watchlist, positions, updated_at)
+       VALUES ($1, $2, $3, CURRENT_TIMESTAMP)
+       ON CONFLICT (email) DO UPDATE SET
+       watchlist = EXCLUDED.watchlist,
+       positions = EXCLUDED.positions,
+       updated_at = CURRENT_TIMESTAMP`,
+      [email, JSON.stringify(watchlist || []), JSON.stringify(positions || {})]
+    );
+    
+    console.log('✓ Saved user data for:', email);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error saving user data:', err);
+    res.status(500).json({ error: 'Failed to save user data' });
   }
 });
 

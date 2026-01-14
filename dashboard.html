@@ -2335,17 +2335,82 @@
       { symbol: 'RGTI', name: 'Rigetti Computing', price: 18.92, changePercent: 8.45, trend: 'up' },
     ];
 
-    let watchlist = JSON.parse(localStorage.getItem('watchlist')) || [];
-    let positions = JSON.parse(localStorage.getItem('positions')) || {};
+    let watchlist = [];
+    let positions = {};
     let currentEditSymbol = null;
     let priceCache = {};
     let lastPriceUpdate = 0;
     const PRICE_CACHE_DURATION = 60000; // 1 minute cache
+    let currentUserEmail = null;
     
-    // Mark prices as needing update (set to 0 so API updates them)
-    watchlist.forEach(stock => {
-      stock.needsUpdate = true;
-    });
+    // Load user data from server
+    async function loadUserData() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const email = urlParams.get('email') || localStorage.getItem('userEmail');
+      
+      if (!email) {
+        console.log('No email found, using localStorage');
+        watchlist = JSON.parse(localStorage.getItem('watchlist')) || [];
+        positions = JSON.parse(localStorage.getItem('positions')) || {};
+        return;
+      }
+      
+      currentUserEmail = email;
+      console.log('Loading user data for:', email);
+      
+      try {
+        const response = await fetch('/api/user-data/' + encodeURIComponent(email));
+        const data = await response.json();
+        
+        if (data.success) {
+          watchlist = data.watchlist || [];
+          positions = data.positions || {};
+          console.log('Loaded from server - Watchlist:', watchlist.length, 'Positions:', Object.keys(positions).length);
+        }
+      } catch (err) {
+        console.error('Failed to load user data:', err);
+        // Fallback to localStorage
+        watchlist = JSON.parse(localStorage.getItem('watchlist')) || [];
+        positions = JSON.parse(localStorage.getItem('positions')) || {};
+      }
+      
+      // Mark prices as needing update
+      watchlist.forEach(stock => {
+        stock.needsUpdate = true;
+      });
+      
+      // Re-render with loaded data
+      renderWatchlist();
+    }
+    
+    // Save user data to server
+    async function saveUserData() {
+      if (!currentUserEmail) {
+        // No logged in user, just save to localStorage
+        localStorage.setItem('watchlist', JSON.stringify(watchlist));
+        localStorage.setItem('positions', JSON.stringify(positions));
+        return;
+      }
+      
+      try {
+        await fetch('/api/user-data', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: currentUserEmail,
+            watchlist: watchlist,
+            positions: positions
+          })
+        });
+        console.log('User data saved to server');
+      } catch (err) {
+        console.error('Failed to save user data:', err);
+      }
+      
+      // Also save to localStorage as backup
+      localStorage.setItem('watchlist', JSON.stringify(watchlist));
+      localStorage.setItem('positions', JSON.stringify(positions));
+    }
 
     // ============================================
     // FINNHUB API SERVICE
@@ -2493,7 +2558,7 @@
         });
         
         lastPriceUpdate = now;
-        localStorage.setItem('watchlist', JSON.stringify(watchlist));
+        saveUserData();
         renderWatchlist();
         console.log('Watchlist updated with live prices');
       } catch (error) {
@@ -2604,7 +2669,7 @@
         delete positions[currentEditSymbol];
       }
       
-      localStorage.setItem('positions', JSON.stringify(positions));
+      saveUserData();
       closeModal();
       renderWatchlist();
       showToast('Position saved', 'success');
@@ -2664,7 +2729,7 @@
       
       positions[currentEditSymbol] = { shares: totalShares, avgCost: avgCost };
       
-      localStorage.setItem('positions', JSON.stringify(positions));
+      saveUserData();
       
       // Update the display and clear input for adding more
       document.getElementById('modal-total-shares').textContent = totalShares;
@@ -2940,13 +3005,13 @@
         }
       }
       
-      localStorage.setItem('watchlist', JSON.stringify(watchlist));
+      saveUserData();
       renderWatchlist();
     }
 
     function removeFromWatchlist(symbol) {
       watchlist = watchlist.filter(s => s.symbol !== symbol);
-      localStorage.setItem('watchlist', JSON.stringify(watchlist));
+      saveUserData();
       renderWatchlist();
       showToast(`${symbol} removed`, 'removed');
     }
@@ -3398,10 +3463,14 @@
     // ============================================
     // INITIALIZE
     // ============================================
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', async function() {
       updateClock();
       setInterval(updateClock, 1000);
       renderMarketSparklines();
+      
+      // Load user data from server first
+      await loadUserData();
+      
       renderWatchlist();
       applyHiddenState();
       loadUserProfile();
