@@ -806,34 +806,42 @@
       cursor: pointer;
     }
 
+    .wl-value-row {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+    }
+
     .wl-total-amount {
       font-size: 32px;
       font-weight: 600;
       color: var(--text-primary);
       letter-spacing: -1px;
-      order: 1;
     }
 
-    .wl-changes-container {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      order: 2;
-    }
-
-    .wl-change-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .wl-total-change {
+    .wl-today-change {
       font-size: 14px;
       font-weight: 600;
       color: #00d775;
     }
 
-    .wl-total-change.down {
+    .wl-today-change.down {
+      color: #ff4757;
+    }
+
+    .wl-alltime-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .wl-alltime-change {
+      font-size: 14px;
+      font-weight: 600;
+      color: #00d775;
+    }
+
+    .wl-alltime-change.down {
       color: #ff4757;
     }
 
@@ -1863,16 +1871,13 @@
         <div class="wl-title-section">
           <div class="wl-list-name">Portfolio</div>
           <div class="wl-total-value" onclick="toggleValueDisplay()">
-            <span class="wl-total-amount" id="watchlist-total-value">$0.00</span>
-            <div class="wl-changes-container">
-              <div class="wl-change-row">
-                <span class="wl-total-change today" id="watchlist-change-today">+$3,914.96 (+1.59%)</span>
-                <span class="wl-change-label">Today</span>
-              </div>
-              <div class="wl-change-row">
-                <span class="wl-total-change alltime" id="watchlist-change-alltime">+$74,959.77 (+42.89%)</span>
-                <span class="wl-change-label">All time</span>
-              </div>
+            <div class="wl-value-row">
+              <span class="wl-total-amount" id="watchlist-total-value">$0.00</span>
+              <span class="wl-today-change" id="watchlist-change-today">+1.59%</span>
+            </div>
+            <div class="wl-alltime-row">
+              <span class="wl-alltime-change" id="watchlist-change-alltime">+$74,959.77 (+42.89%)</span>
+              <span class="wl-change-label">All time</span>
             </div>
           </div>
         </div>
@@ -3111,14 +3116,23 @@
       // Display change (profit/loss)
       if (totalCost > 0) {
         const changeText = (isGain ? '+' : '-') + '$' + Math.abs(totalReturn).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' (' + (isGain ? '+' : '') + returnPercent.toFixed(2) + '%)';
+        const todayPercent = (isGain ? '+' : '') + returnPercent.toFixed(2) + '%';
+        if (changeElToday) {
+          changeElToday.textContent = todayPercent;
+          changeElToday.className = 'wl-today-change' + (isGain ? '' : ' down');
+        }
         if (changeElAlltime) {
           changeElAlltime.textContent = changeText;
-          changeElAlltime.className = 'wl-total-change alltime' + (isGain ? '' : ' down');
+          changeElAlltime.className = 'wl-alltime-change' + (isGain ? '' : ' down');
         }
       } else {
+        if (changeElToday) {
+          changeElToday.textContent = '+0.00%';
+          changeElToday.className = 'wl-today-change';
+        }
         if (changeElAlltime) {
           changeElAlltime.textContent = '+$0.00 (0.00%)';
-          changeElAlltime.className = 'wl-total-change alltime';
+          changeElAlltime.className = 'wl-alltime-change';
         }
       }
     }
