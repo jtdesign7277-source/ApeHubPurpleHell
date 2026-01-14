@@ -13,6 +13,7 @@
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary_large_image">
   <title>ApeHub - The signal in the noise</title>
+  <script src="https://js.stripe.com/v3/"></script>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦍</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1587,11 +1588,44 @@
       }, 500);
     }
 
-    // Handle pricing signup
-    function handlePricing() {
-      const plan = isYearly ? 'yearly ($33.50/year)' : 'monthly ($3.99/month)';
-      alert(`Thanks for choosing the ${plan} plan!\n\nWe'll redirect you to checkout.`);
-      closePricingModal();
+    // Stripe Price IDs
+    const STRIPE_PRICES = {
+      monthly: 'price_1SiydORdPxQfs9UesVrVb3X8',
+      yearly: 'price_1SiydORdPxQfs9UesVrVb3X8' // Update this when you have yearly price
+    };
+
+    // Handle pricing signup - Real Stripe Checkout
+    async function handlePricing() {
+      const priceId = isYearly ? STRIPE_PRICES.yearly : STRIPE_PRICES.monthly;
+      const btn = document.querySelector('#pricing-modal .btn-modal');
+      
+      btn.textContent = 'Redirecting...';
+      btn.disabled = true;
+      
+      try {
+        const response = await fetch('/api/create-checkout-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            priceId: priceId,
+            successUrl: window.location.origin + '/dashboard.html?payment=success',
+            cancelUrl: window.location.origin + '/landing.html?payment=cancelled'
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (data.url) {
+          window.location.href = data.url;
+        } else {
+          throw new Error(data.error || 'Failed to create checkout session');
+        }
+      } catch (error) {
+        console.error('Checkout error:', error);
+        alert('Something went wrong. Please try again.');
+        btn.textContent = 'Start Now';
+        btn.disabled = false;
+      }
     }
 
     // Login Modal functions
