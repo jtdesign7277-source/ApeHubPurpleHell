@@ -1555,9 +1555,37 @@
     function handleWaitlist(e) {
       e.preventDefault();
       const email = e.target.querySelector('input').value;
-      alert(`You're on the list!\n\nWe'll notify ${email} when we launch.`);
-      closeWaitlistModal();
-      e.target.reset();
+      const submitBtn = e.target.querySelector('button');
+      
+      submitBtn.textContent = 'Joining...';
+      submitBtn.disabled = true;
+      
+      // Send to both: Local database AND Google Sheets
+      const payload = { email: email, source: 'landing-page' };
+      
+      // 1. Send to local database
+      fetch('/api/waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      
+      // 2. Send to Google Sheets (backup)
+      fetch('https://script.google.com/macros/s/AKfycbxqGKfa-7XAJdoqcYtjgrK4LScnwWJ_2Sgptf3F_0MKGQMbJRIF0XS9mc39TAu9Ffo/exec', {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      
+      // Show success
+      setTimeout(() => {
+        alert(`🎉 You're on the list!\n\nWe'll notify ${email} when we launch.`);
+        closeWaitlistModal();
+        e.target.reset();
+        submitBtn.textContent = 'Enter';
+        submitBtn.disabled = false;
+      }, 500);
     }
 
     // Handle pricing signup

@@ -33,7 +33,18 @@ const db = new sqlite3.Database('subscriptions.db', (err) => {
       if (err) console.error('Table creation error:', err);
       else console.log('Subscriptions table ready');
     });
-  }
+    // Create waitlist table
+    db.run(`
+      CREATE TABLE IF NOT EXISTS waitlist (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT UNIQUE,
+        source TEXT DEFAULT 'waitlist',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `, (err) => {
+      if (err) console.error('Waitlist table creation error:', err);
+      else console.log('Waitlist table ready');
+    });  }
 });
 
 // Helper function to update subscription in database
@@ -74,6 +85,40 @@ const getSubscription = (customerId) => {
     );
   });
 };
+
+// ===== WAITLIST API =====
+app.use(express.json());
+
+app.post('/api/waitlist', (req, res) => {
+  const { email, source } = req.body;
+  
+  if (!email) {
+    return res.status(400).json({ error: 'Email is required' });
+  }
+  
+  db.run(
+    `INSERT OR IGNORE INTO waitlist (email, source) VALUES (?, ?)`,
+    [email, source || 'waitlist'],
+    function(err) {
+      if (err) {
+        console.error('Waitlist error:', err);
+        return res.status(500).json({ error: 'Failed to add to waitlist' });
+      }
+      console.log('✓ New waitlist signup:', email);
+      res.json({ success: true, message: 'Added to waitlist!' });
+    }
+  );
+});
+
+// Get all waitlist emails (admin endpoint)
+app.get('/api/waitlist', (req, res) => {
+  db.all('SELECT * FROM waitlist ORDER BY created_at DESC', [], (err, rows) => {
+    if (err) {
+      return res.status(500).json({ error: 'Failed to fetch waitlist' });
+    }
+    res.json(rows);
+  });
+});
 
 // Middleware - CRITICAL ORDER!
 // 1. Webhook FIRST (uses raw body)
