@@ -799,13 +799,58 @@
     // Max 222 AI community members
     const MAX_COMMUNITY_SIZE = 222;
 
-    // Current user (real user)
+    // Current user (real user) - will be updated from localStorage
     const currentUser = {
-      name: 'JT',
-      handle: '@jtdesign72',
-      avatar: 'J',
+      name: 'User',
+      handle: '@user',
+      avatar: 'U',
+      avatarType: 'initial',
       type: 'normal'
     };
+
+    // Load user info from localStorage
+    function loadCurrentUser() {
+      const firstName = localStorage.getItem('userFirstName') || 'User';
+      const lastName = localStorage.getItem('userLastName') || '';
+      const savedAvatar = JSON.parse(localStorage.getItem('userAvatar') || 'null');
+      
+      currentUser.name = firstName + (lastName ? ' ' + lastName : '');
+      currentUser.handle = '@' + firstName.toLowerCase();
+      
+      if (savedAvatar) {
+        if (savedAvatar.type === 'emoji') {
+          currentUser.avatar = savedAvatar.value;
+          currentUser.avatarType = 'emoji';
+        } else if (savedAvatar.type === 'image') {
+          currentUser.avatar = savedAvatar.value;
+          currentUser.avatarType = 'image';
+        }
+      } else {
+        currentUser.avatar = firstName.charAt(0).toUpperCase();
+        currentUser.avatarType = 'initial';
+      }
+      
+      // Update compose avatar
+      updateComposeAvatar();
+    }
+    
+    function updateComposeAvatar() {
+      const composeAvatar = document.querySelector('.compose-avatar');
+      if (composeAvatar) {
+        if (currentUser.avatarType === 'image') {
+          composeAvatar.innerHTML = `<img src="${currentUser.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+        } else {
+          composeAvatar.textContent = currentUser.avatar;
+        }
+      }
+    }
+    
+    function getUserAvatarHTML() {
+      if (currentUser.avatarType === 'image') {
+        return `<img src="${currentUser.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+      }
+      return currentUser.avatar;
+    }
 
     // Persona types with percentages
     // 60% normal, 5% asshole, 10% gambler, 5% woman, 10% cocky winner, 10% retail ape
@@ -1011,10 +1056,18 @@
     // Render single post HTML
     function renderPostHTML(post) {
       const avatarClass = post.user.type && post.user.type !== 'normal' ? post.user.type : '';
+      const isCurrentUser = post.user.handle === currentUser.handle;
+      let avatarContent = post.user.avatar;
+      
+      // For current user's posts, use their saved avatar (which might be an image)
+      if (isCurrentUser && post.user.avatarType === 'image') {
+        avatarContent = `<img src="${post.user.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+      }
+      
       return `
         <div class="post-card" id="post-${post.id}">
           <div class="post-header">
-            <div class="post-avatar ${avatarClass}">${post.user.avatar}</div>
+            <div class="post-avatar ${avatarClass}">${avatarContent}</div>
             <div class="post-content">
               <div class="post-meta">
                 <span class="post-username">${post.user.name}</span>
@@ -1058,9 +1111,15 @@
               </div>
               
               <div class="replies-container" id="replies-${post.id}">
-                ${post.replies.map(reply => `
+                ${post.replies.map(reply => {
+                  const isCurrentUserReply = reply.user.handle === currentUser.handle;
+                  let replyAvatarContent = reply.user.avatar;
+                  if (isCurrentUserReply && reply.user.avatarType === 'image') {
+                    replyAvatarContent = `<img src="${reply.user.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+                  }
+                  return `
                   <div class="reply-card">
-                    <div class="reply-avatar">${reply.user.avatar}</div>
+                    <div class="reply-avatar">${replyAvatarContent}</div>
                     <div class="reply-content">
                       <div class="reply-meta">
                         <span class="reply-username">${reply.user.name}</span>
@@ -1069,7 +1128,7 @@
                       <div class="reply-text">${reply.text}</div>
                     </div>
                   </div>
-                `).join('')}
+                `}).join('')}
               </div>
             </div>
           </div>
@@ -1174,7 +1233,13 @@
       
       const newPost = {
         id: nextPostId++,
-        user: currentUser,
+        user: {
+          name: currentUser.name,
+          handle: currentUser.handle,
+          avatar: currentUser.avatar,
+          avatarType: currentUser.avatarType,
+          type: currentUser.type
+        },
         text: text,
         image: attachedImage,
         time: 'now',
@@ -1298,7 +1363,13 @@
       if (!post) return;
       
       const newReply = {
-        user: currentUser,
+        user: {
+          name: currentUser.name,
+          handle: currentUser.handle,
+          avatar: currentUser.avatar,
+          avatarType: currentUser.avatarType,
+          type: currentUser.type
+        },
         text: text,
         time: 'now'
       };
@@ -1307,9 +1378,13 @@
       
       // Update replies container
       const repliesContainer = document.getElementById(`replies-${postId}`);
+      let replyAvatarContent = newReply.user.avatar;
+      if (newReply.user.avatarType === 'image') {
+        replyAvatarContent = `<img src="${newReply.user.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+      }
       repliesContainer.innerHTML += `
         <div class="reply-card">
-          <div class="reply-avatar">${newReply.user.avatar}</div>
+          <div class="reply-avatar">${replyAvatarContent}</div>
           <div class="reply-content">
             <div class="reply-meta">
               <span class="reply-username">${newReply.user.name}</span>
@@ -1344,13 +1419,7 @@
     }
 
     // Initialize
-    initializePosts();
-    renderPosts();
-    updateOnlineCount();
-    
-    // Periodically update online count
-    setInterval(updateOnlineCount, 30000);
-
+    loadCurrentUser();
     // Load saved theme from localStorage
     (function() {
       const savedTheme = localStorage.getItem('apehub_theme') || 'dark';
