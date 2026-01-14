@@ -3139,19 +3139,15 @@
         Object.assign(userProfile, data);
       }
       
-      // Check if user just came from payment
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('payment') === 'success') {
-        const email = localStorage.getItem('userEmail');
-        if (email) {
-          userProfile.email = email;
-          // Extract name from email
-          userProfile.name = email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1);
-          // Save updated profile
-          localStorage.setItem('apehub_user_profile', JSON.stringify(userProfile));
-          // Remove payment param from URL
-          window.history.replaceState({}, document.title, window.location.pathname);
-        }
+      // Always check for stored email (from login or payment)
+      const email = localStorage.getItem('userEmail');
+      if (email) {
+        userProfile.email = email;
+        // Extract name from email - capitalize first letter
+        const namePart = email.split('@')[0];
+        userProfile.name = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+        // Save updated profile
+        localStorage.setItem('apehub_user_profile', JSON.stringify(userProfile));
       }
       
       updateProfileDisplay();
