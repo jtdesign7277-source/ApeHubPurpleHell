@@ -1873,7 +1873,7 @@
           <div class="wl-total-value" onclick="toggleValueDisplay()">
             <div class="wl-value-row">
               <span class="wl-total-amount" id="watchlist-total-value">$0.00</span>
-              <span class="wl-today-change" id="watchlist-change-today">+1.59%</span>
+              <span class="wl-today-change" id="watchlist-change-today">+$3,914.96 (+1.59%)</span>
             </div>
             <div class="wl-alltime-row">
               <span class="wl-alltime-change" id="watchlist-change-alltime">+$74,959.77 (+42.89%)</span>
@@ -3116,9 +3116,9 @@
       // Display change (profit/loss)
       if (totalCost > 0) {
         const changeText = (isGain ? '+' : '-') + '$' + Math.abs(totalReturn).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' (' + (isGain ? '+' : '') + returnPercent.toFixed(2) + '%)';
-        const todayPercent = (isGain ? '+' : '') + returnPercent.toFixed(2) + '%';
+        const todayText = (isGain ? '+' : '-') + '$' + Math.abs(totalReturn).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' (' + (isGain ? '+' : '') + returnPercent.toFixed(2) + '%)';
         if (changeElToday) {
-          changeElToday.textContent = todayPercent;
+          changeElToday.textContent = todayText;
           changeElToday.className = 'wl-today-change' + (isGain ? '' : ' down');
         }
         if (changeElAlltime) {
@@ -3127,7 +3127,7 @@
         }
       } else {
         if (changeElToday) {
-          changeElToday.textContent = '+0.00%';
+          changeElToday.textContent = '+$0.00 (0.00%)';
           changeElToday.className = 'wl-today-change';
         }
         if (changeElAlltime) {
