@@ -3089,40 +3089,38 @@
       const isGain = totalReturn >= 0;
       
       const valueEl = document.getElementById('watchlist-total-value');
-      const changeEl = document.getElementById('watchlist-change');
+      const changeElToday = document.getElementById('watchlist-change-today');
+      const changeElAlltime = document.getElementById('watchlist-change-alltime');
       
       // Guard against missing elements
-      if (!valueEl || !changeEl) {
-        console.log('Watchlist elements not found, skipping update');
+      if (!valueEl) {
+        console.log('Portfolio value element not found, skipping update');
         return;
       }
       
       // If hidden, show stars with gunmetal shine
       if (valuesHidden) {
         valueEl.innerHTML = '<span class="hidden-stars">★★★★★</span>';
-        changeEl.innerHTML = '<span class="hidden-stars">★★★★</span>';
-        changeEl.className = 'wl-total-change';
+        if (changeElToday) changeElToday.innerHTML = '<span class="hidden-stars">★★★★</span>';
+        if (changeElAlltime) changeElAlltime.innerHTML = '<span class="hidden-stars">★★★★</span>';
         return;
       }
       
-      // Display total value or percentage based on toggle
-      if (showPercentage && totalCost > 0) {
-        valueEl.textContent = (isGain ? '+' : '') + returnPercent.toFixed(2) + '%';
-      } else {
-        valueEl.textContent = '$' + totalMarketValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      }
+      // Display total market value
+      valueEl.textContent = '$' + totalMarketValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       
-      // Display change with both $ and %
+      // Display change (profit/loss)
       if (totalCost > 0) {
-        if (showPercentage) {
-          changeEl.textContent = (isGain ? '+' : '') + '$' + Math.abs(totalReturn).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        } else {
-          changeEl.textContent = (isGain ? '+' : '') + '$' + totalReturn.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' (' + (isGain ? '+' : '') + returnPercent.toFixed(2) + '%)';
+        const changeText = (isGain ? '+' : '-') + '$' + Math.abs(totalReturn).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' (' + (isGain ? '+' : '') + returnPercent.toFixed(2) + '%)';
+        if (changeElAlltime) {
+          changeElAlltime.textContent = changeText;
+          changeElAlltime.className = 'wl-total-change alltime' + (isGain ? '' : ' down');
         }
-        changeEl.className = 'wl-total-change ' + (isGain ? '' : 'down');
       } else {
-        changeEl.textContent = '+$0.00 (0.00%)';
-        changeEl.className = 'wl-total-change';
+        if (changeElAlltime) {
+          changeElAlltime.textContent = '+$0.00 (0.00%)';
+          changeElAlltime.className = 'wl-total-change alltime';
+        }
       }
     }
 
