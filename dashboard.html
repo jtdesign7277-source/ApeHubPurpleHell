@@ -3732,7 +3732,7 @@
       
       stylesScroll.innerHTML = AVATAR_STYLES.map(style => `
         <div class="avatar-style-card ${savedAvatar?.style === style.key ? 'selected' : ''}" 
-             onclick="selectAvatarStyle('${style.key}')">
+             onclick="selectAvatarStyle('${style.key}', event)">
           <img class="avatar-style-preview" src="${generateDiceBearUrl(style.key, userSeed)}" alt="${style.name}">
           <span class="avatar-style-name">${style.name}</span>
         </div>
@@ -3747,7 +3747,7 @@
       }
     }
     
-    function selectAvatarStyle(styleKey) {
+    function selectAvatarStyle(styleKey, evt) {
       selectedAvatarStyle = styleKey;
       selectedVariation = null;
       
@@ -3755,7 +3755,7 @@
       document.querySelectorAll('.avatar-style-card').forEach(card => {
         card.classList.remove('selected');
       });
-      event.target.closest('.avatar-style-card')?.classList.add('selected');
+      if (evt) evt.target.closest('.avatar-style-card')?.classList.add('selected');
       
       // Generate and show variations
       avatarVariations = generateVariations(styleKey);
@@ -3770,13 +3770,13 @@
       
       grid.innerHTML = avatarVariations.map(v => `
         <div class="avatar-variation ${savedAvatar?.seed === v.seed ? 'selected' : ''}" 
-             onclick="selectVariation('${v.seed}', '${v.url}')">
+             onclick="selectVariation('${v.seed}', '${v.url}', event)">
           <img src="${v.url}" alt="Avatar variation">
         </div>
       `).join('');
     }
     
-    function selectVariation(seed, url) {
+    function selectVariation(seed, url, evt) {
       selectedVariation = { seed, url };
       
       // Save immediately
@@ -3791,7 +3791,7 @@
       
       // Update selection UI
       document.querySelectorAll('.avatar-variation').forEach(v => v.classList.remove('selected'));
-      event.target.closest('.avatar-variation')?.classList.add('selected');
+      if (evt) evt.target.closest('.avatar-variation')?.classList.add('selected');
       
       closeAvatarSelector();
       showToast('Avatar updated!', 'success');
