@@ -1950,22 +1950,19 @@
 
     .avatar-variations-grid {
       display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 8px;
-      margin-bottom: 16px;
-      max-height: 280px;
-      overflow-y: auto;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
     }
 
     .avatar-variation {
       aspect-ratio: 1;
-      border-radius: 10px;
+      border-radius: 12px;
       border: 2px solid transparent;
       overflow: hidden;
       cursor: pointer;
       transition: all 0.2s;
       background: var(--bg-card);
-      position: relative;
     }
 
     .avatar-variation:hover {
@@ -2191,17 +2188,8 @@
         
         <div class="avatar-divider">
           <div class="avatar-divider-line"></div>
-          <span class="avatar-divider-text">or create your unique avatar</span>
+          <span class="avatar-divider-text">or pick from these</span>
           <div class="avatar-divider-line"></div>
-        </div>
-        
-        <div class="avatar-custom-input">
-          <input type="text" id="customAvatarInput" placeholder="Type any word (e.g. diamondhands)" maxlength="30">
-          <button class="avatar-custom-btn" onclick="generateCustomAvatar()">Generate</button>
-        </div>
-        
-        <div class="avatar-presets" id="avatarPresets">
-          <!-- Preset tags populated by JS -->
         </div>
         
         <div class="avatar-variations-header" id="variationsHeader" style="display: flex;">
@@ -3758,27 +3746,20 @@
     }
 
     // ============================================
-    // AVATAR SELECTOR (DICEBEAR - CRYPTO STYLE)
+    // AVATAR SELECTOR (DICEBEAR SHAPES - SIMPLE)
     // ============================================
     let avatarVariations = [];
     let avatarShuffleSeed = Date.now();
     
-    const PRESET_SEEDS = [
-      'diamondhands', 'paperhands', 'moonshot', 'whale', 'degen', 'hodler',
-      'bullrun', 'bearmarket', 'rocketman', 'tendies', 'stonks', 'apestogether',
-      'tothemoon', 'buythedip', 'lambo', 'wagmi', 'ngmi'
-    ];
-    
-    // Using DiceBear bottts (robots) - reliable and cool looking
     function generateAvatarUrl(seed) {
-      return `https://api.dicebear.com/7.x/bottts-neutral/png?seed=${encodeURIComponent(seed)}&size=80`;
+      return `https://api.dicebear.com/7.x/shapes/png?seed=${encodeURIComponent(seed)}&size=200`;
     }
     
-    function generateVariations(count = 24) {
+    function generateVariations(count = 12) {
       const variations = [];
-      const randomBase = Math.random().toString(36).substring(2, 8);
+      const userId = userProfile.email || 'user';
       for (let i = 0; i < count; i++) {
-        const seed = `${randomBase}-${avatarShuffleSeed}-${i}`;
+        const seed = `${userId}-${avatarShuffleSeed}-${i}`;
         variations.push({
           seed: seed,
           url: generateAvatarUrl(seed)
@@ -3788,20 +3769,8 @@
     }
     
     function initAvatarSelector() {
-      // Render preset tags
-      const presetsContainer = document.getElementById('avatarPresets');
-      presetsContainer.innerHTML = PRESET_SEEDS.slice(0, 8).map(seed => 
-        `<span class="avatar-preset-tag" onclick="generateFromPreset('${seed}')">${seed}</span>`
-      ).join('');
-      
-      // Generate avatar variations immediately
       avatarVariations = generateVariations();
       renderVariations();
-      document.getElementById('variationsHeader').style.display = 'flex';
-      
-      // Clear custom input
-      const input = document.getElementById('customAvatarInput');
-      if (input) input.value = '';
     }
     
     function renderVariations() {
@@ -3811,13 +3780,12 @@
       grid.innerHTML = avatarVariations.map(v => `
         <div class="avatar-variation ${savedAvatar?.seed === v.seed ? 'selected' : ''}" 
              onclick="selectVariation('${v.seed}', '${v.url}', event)">
-          <img src="${v.url}" alt="" loading="lazy">
+          <img src="${v.url}" alt="">
         </div>
       `).join('');
     }
     
     function selectVariation(seed, url, evt) {
-      // Save immediately
       const avatarData = { 
         type: 'dicebear', 
         value: url, 
@@ -3826,7 +3794,6 @@
       localStorage.setItem('userAvatar', JSON.stringify(avatarData));
       updateAvatarDisplay(avatarData);
       
-      // Update selection UI
       document.querySelectorAll('.avatar-variation').forEach(v => v.classList.remove('selected'));
       if (evt) evt.target.closest('.avatar-variation')?.classList.add('selected');
       
@@ -3838,31 +3805,6 @@
       avatarShuffleSeed = Date.now();
       avatarVariations = generateVariations();
       renderVariations();
-    }
-    
-    function generateCustomAvatar() {
-      const input = document.getElementById('customAvatarInput');
-      const customSeed = input.value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
-      if (!customSeed) {
-        showToast('Enter a word to generate avatar', 'error');
-        return;
-      }
-      
-      // Generate 24 variations based on custom seed
-      avatarVariations = [];
-      for (let i = 0; i < 24; i++) {
-        const seed = i === 0 ? customSeed : `${customSeed}${i}`;
-        avatarVariations.push({
-          seed: seed,
-          url: generateAvatarUrl(seed)
-        });
-      }
-      renderVariations();
-    }
-    
-    function generateFromPreset(presetSeed) {
-      document.getElementById('customAvatarInput').value = presetSeed;
-      generateCustomAvatar();
     }
     
     function openAvatarSelector() {
