@@ -3149,6 +3149,8 @@
         console.log('Got email from localStorage:', email);
       }
       
+      console.log('EMAIL VALUE IS:', email);
+      
       // If we have an email, update the profile
       if (email && email !== 'user@example.com') {
         userProfile.email = email;
@@ -3162,6 +3164,16 @@
           .join(' ');
         userProfile.joinDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
         console.log('Updated profile - Name:', userProfile.name, 'Email:', userProfile.email);
+        
+        // Force update immediately
+        setTimeout(function() {
+          document.getElementById('userName').textContent = userProfile.name;
+          document.getElementById('profileAvatar').textContent = userProfile.name.charAt(0).toUpperCase();
+          document.getElementById('profileName').textContent = userProfile.name;
+          document.getElementById('infoName').textContent = userProfile.name;
+          document.getElementById('infoEmail').textContent = userProfile.email;
+          console.log('FORCED UPDATE COMPLETE');
+        }, 100);
       }
       
       // Update the display immediately
