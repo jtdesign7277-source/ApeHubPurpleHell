@@ -2140,7 +2140,8 @@
       }
       
       // Fallback - Current Fed Funds target rate (Jan 2026)
-      if (fedRateEl) fedRateEl.textContent = '4.25-4.50%';
+      // After 175bps in cuts since Sept 2024
+      if (fedRateEl) fedRateEl.textContent = '3.50-3.75%';
       if (fedChangeEl) {
         fedChangeEl.textContent = 'Target Range';
         fedChangeEl.className = 'fed-rate-change neutral';
@@ -2248,8 +2249,8 @@
       const cpiEl = document.getElementById('cpi-value');
       
       if (fedRateEl) {
-        fedRateEl.textContent = '4.50%';
-        fedRateEl.nextElementSibling.textContent = 'Unchanged';
+        fedRateEl.textContent = '3.50-3.75%';
+        fedRateEl.nextElementSibling.textContent = 'Target Range';
         fedRateEl.nextElementSibling.className = 'fed-rate-change neutral';
       }
       if (yieldEl) {
