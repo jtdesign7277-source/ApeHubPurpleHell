@@ -466,6 +466,32 @@ app.get('/api/futures/:symbol', async (req, res) => {
   }
 });
 
+// ===== INTERNATIONAL INDICES PROXY =====
+app.get('/api/index/:symbol', async (req, res) => {
+  try {
+    const symbol = req.params.symbol;
+    // Valid international index symbols
+    const validSymbols = [
+      // Europe
+      '^GDAXI', '^FTSE', '^FCHI', '^STOXX',
+      // Asia
+      '^N225', '^HSI', '000001.SS', '^KS11'
+    ];
+    
+    if (!validSymbols.includes(symbol)) {
+      return res.status(400).json({ error: 'Invalid symbol' });
+    }
+    
+    const response = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=5m&range=1d`);
+    const data = await response.json();
+    
+    res.json(data);
+  } catch (error) {
+    console.error('Index API error:', error);
+    res.status(500).json({ error: 'Failed to fetch index data' });
+  }
+});
+
 // 404 handler
 app.use((req, res) => {
   console.log('BLOCKED REQUEST:', req.method, req.path);

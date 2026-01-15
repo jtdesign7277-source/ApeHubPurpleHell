@@ -1076,12 +1076,38 @@
     // ============================================
     // UPDATE MARKET DATA WITH REAL PRICES
     // ============================================
+    
+    // Fetch international index data from Yahoo Finance via server proxy
+    async function fetchIndexQuote(symbol) {
+      try {
+        const response = await fetch(`/api/index/${encodeURIComponent(symbol)}`);
+        if (!response.ok) return null;
+        const data = await response.json();
+        
+        const result = data.chart?.result?.[0];
+        if (!result) return null;
+        
+        const meta = result.meta;
+        const price = meta.regularMarketPrice || 0;
+        const previousClose = meta.chartPreviousClose || meta.previousClose || price;
+        const change = price - previousClose;
+        const changePercent = previousClose ? (change / previousClose) * 100 : 0;
+        
+        return { price, change, changePercent };
+      } catch (error) {
+        console.error(`Error fetching ${symbol}:`, error);
+        return null;
+      }
+    }
+    
     async function updateRealTimeMarketData(region) {
       const marketOverview = document.getElementById('market-overview');
       
-      // Use ETFs for US (Finnhub supported), simulated data for international
+      // Symbol mappings for each region
       const regionSymbols = {
-        us: ['SPY', 'QQQ', 'DIA', 'IWM']
+        us: ['SPY', 'QQQ', 'DIA', 'IWM'],
+        europe: ['^GDAXI', '^FTSE', '^FCHI', '^STOXX'],
+        asia: ['^N225', '^HSI', '000001.SS', '^KS11']
       };
       
       const regionNames = {
@@ -1090,40 +1116,39 @@
         asia: ['NIKKEI 225', 'HANG SENG', 'SHANGHAI', 'KOSPI']
       };
       
-      // Simulated international data (Finnhub free tier only supports US)
-      const simulatedData = {
-        europe: [
-          { price: 18245.32, change: 87.45, changePercent: 0.48 },
-          { price: 8156.78, change: -23.12, changePercent: -0.28 },
-          { price: 7589.45, change: 45.67, changePercent: 0.61 },
-          { price: 512.34, change: 3.21, changePercent: 0.63 }
-        ],
-        asia: [
-          { price: 38456.78, change: -156.34, changePercent: -0.41 },
-          { price: 19234.56, change: 234.56, changePercent: 1.23 },
-          { price: 3156.78, change: 12.34, changePercent: 0.39 },
-          { price: 2567.89, change: -34.56, changePercent: -1.33 }
-        ]
-      };
-      
       const names = regionNames[region] || regionNames.us;
+      const symbols = regionSymbols[region] || regionSymbols.us;
       
       try {
         let quotes = [];
         
         if (region === 'us') {
-          // Fetch real data for US markets
-          const symbols = regionSymbols.us;
+          // Fetch real data for US markets via Finnhub
           quotes = await StockAPI.getMultipleQuotes(symbols);
         } else {
-          // Use simulated data for international markets
-          quotes = simulatedData[region].map((data, i) => ({
-            symbol: names[i],
-            name: names[i],
-            price: data.price,
-            change: data.change,
-            changePercent: data.changePercent
-          }));
+          // Fetch real data for international markets via Yahoo Finance proxy
+          const promises = symbols.map(symbol => fetchIndexQuote(symbol));
+          const results = await Promise.all(promises);
+          
+          quotes = results.map((data, i) => {
+            if (data) {
+              return {
+                symbol: names[i],
+                name: names[i],
+                price: data.price,
+                change: data.change,
+                changePercent: data.changePercent
+              };
+            }
+            // Fallback if API fails
+            return {
+              symbol: names[i],
+              name: names[i],
+              price: 0,
+              change: 0,
+              changePercent: 0
+            };
+          }).filter(q => q.price > 0);
         }
         
         if (quotes.length > 0) {
@@ -1143,6 +1168,8 @@
               </div>
             `;
           }).join('');
+        } else {
+          marketOverview.innerHTML = '<div class="market-card"><div class="market-name">Market data unavailable</div></div>';
         }
       } catch (error) {
         console.error('Error updating market data:', error);
