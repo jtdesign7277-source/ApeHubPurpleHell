@@ -297,7 +297,8 @@
       try {
         const resp = await fetch(`https://finnhub.io/api/v1/calendar/earnings?from=${from}&to=${to}&token=${FINNHUB_API_KEY}`);
         const data = await resp.json();
-        earnings = (data.earningsCalendar || []).filter(e => e.symbol && e.company);
+        // Only keep US companies
+        earnings = (data.earningsCalendar || []).filter(e => e.symbol && e.company && (e.country === 'US' || e.country === undefined));
       } catch (e) {
         container.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">Error loading earnings</div>';
         return;
