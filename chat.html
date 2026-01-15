@@ -814,20 +814,29 @@
       const lastName = localStorage.getItem('userLastName') || '';
       const savedAvatar = JSON.parse(localStorage.getItem('userAvatar') || 'null');
       
+      console.log('Loading user avatar:', savedAvatar);
+      
       currentUser.name = firstName + (lastName ? ' ' + lastName : '');
       currentUser.handle = '@' + firstName.toLowerCase();
       
-      if (savedAvatar) {
+      if (savedAvatar && savedAvatar.value) {
         if (savedAvatar.type === 'emoji') {
           currentUser.avatar = savedAvatar.value;
           currentUser.avatarType = 'emoji';
         } else if (savedAvatar.type === 'image' || savedAvatar.type === 'boring' || savedAvatar.type === 'dicebear' || savedAvatar.type === 'trading' || savedAvatar.type === 'multiavatar') {
           currentUser.avatar = savedAvatar.value;
           currentUser.avatarType = 'image';
+          console.log('Avatar set to image:', currentUser.avatar);
+        } else {
+          // Unknown type but has value - treat as image
+          currentUser.avatar = savedAvatar.value;
+          currentUser.avatarType = 'image';
+          console.log('Avatar unknown type, treating as image:', savedAvatar.type);
         }
       } else {
         currentUser.avatar = firstName.charAt(0).toUpperCase();
         currentUser.avatarType = 'initial';
+        console.log('No avatar found, using initial:', currentUser.avatar);
       }
       
       // Update compose avatar
