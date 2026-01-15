@@ -2131,8 +2131,6 @@
           <span class="time-period" id="timePeriod">AM</span>
         </div>
         <div class="market-row">
-          <div class="status-dot" id="statusDot"></div>
-          <span class="status-text" id="statusText">Closed</span>
           <span class="countdown" id="countdown">00:00:00</span>
           <span class="countdown-label" id="countdownLabel">until open</span>
         </div>
@@ -3263,18 +3261,14 @@
       const marketOpen = 9 * 60 + 30;
       const marketClose = 16 * 60;
       
-      const statusDot = document.getElementById('statusDot');
-      const statusText = document.getElementById('statusText');
       const countdown = document.getElementById('countdown');
       const countdownLabel = document.getElementById('countdownLabel');
       const marketDot = document.getElementById('marketDot');
       const marketStatusText = document.getElementById('marketStatusText');
       
       if (day === 0 || day === 6) {
-        statusDot.className = 'status-dot closed';
-        statusText.textContent = 'Weekend';
         if (marketDot) marketDot.style.background = '#ff4757';
-        marketStatusText.textContent = 'Closed';
+        if (marketStatusText) marketStatusText.textContent = 'Closed';
         
         const daysUntilMonday = day === 0 ? 1 : 2;
         const targetTime = new Date(now);
@@ -3288,10 +3282,8 @@
       }
       
       if (currentMinutes >= marketOpen && currentMinutes < marketClose) {
-        statusDot.className = 'status-dot open';
-        statusText.textContent = 'Open';
         if (marketDot) marketDot.style.background = '#00d775';
-        marketStatusText.textContent = 'Open';
+        if (marketStatusText) marketStatusText.textContent = 'Open';
         
         const closeTime = new Date(now);
         closeTime.setHours(16, 0, 0, 0);
@@ -3307,10 +3299,8 @@
           countdown.className = 'countdown';
         }
       } else {
-        statusDot.className = 'status-dot closed';
-        statusText.textContent = 'Closed';
         if (marketDot) marketDot.style.background = '#ff4757';
-        marketStatusText.textContent = 'Closed';
+        if (marketStatusText) marketStatusText.textContent = 'Closed';
         
         const openTime = new Date(now);
         if (currentMinutes >= marketClose) {
