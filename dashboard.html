@@ -2403,22 +2403,22 @@
       </div>
       <div class="indices-scroll">
         <div class="index-item">
-          <div class="index-name">S&P 500</div>
+          <div class="index-name">SPY</div>
           <div class="index-value">5,918.25</div>
           <div class="index-change up">+0.87%</div>
         </div>
         <div class="index-item">
-          <div class="index-name">DOW</div>
+          <div class="index-name">DIA</div>
           <div class="index-value">42,840.26</div>
           <div class="index-change up">+1.24%</div>
         </div>
         <div class="index-item">
-          <div class="index-name">NASDAQ</div>
+          <div class="index-name">QQQ</div>
           <div class="index-value">19,572.60</div>
           <div class="index-change down">-0.32%</div>
         </div>
         <div class="index-item">
-          <div class="index-name">RUSSELL</div>
+          <div class="index-name">IWM</div>
           <div class="index-value">2,279.45</div>
           <div class="index-change up">+1.52%</div>
         </div>
@@ -3084,7 +3084,7 @@
     async function updateIndices() {
       // Use ETFs instead of index symbols (Finnhub doesn't support ^GSPC etc)
       const indexSymbols = ['SPY', 'DIA', 'QQQ', 'IWM', 'UVXY'];
-      const indexNames = ['S&P 500', 'DOW', 'NASDAQ', 'RUSSELL', 'VIX'];
+      const indexNames = ['SPY', 'DIA', 'QQQ', 'IWM', 'VIX'];
       
       try {
         const quotes = await StockAPI.getMultipleQuotes(indexSymbols);
