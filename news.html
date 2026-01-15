@@ -304,12 +304,12 @@
         return;
       }
 
-      // List of trending/biggest US companies (FAANG, Tesla, Nvidia, Microsoft, etc.)
-      const trendingSymbols = [
-        'AAPL', 'MSFT', 'GOOGL', 'GOOG', 'AMZN', 'META', 'TSLA', 'NVDA', 'NFLX', 'AMD', 'INTC', 'JPM', 'BAC', 'WFC', 'V', 'MA', 'PYPL', 'DIS', 'CRM', 'COST', 'PEP', 'KO', 'MCD', 'SBUX', 'QCOM', 'AVGO', 'ADBE', 'ORCL', 'CSCO', 'T', 'VZ', 'XOM', 'CVX', 'UNH', 'PFE', 'JNJ', 'LLY', 'MRK', 'ABT', 'TMO', 'HD', 'LOW', 'WMT', 'TGT', 'UPS', 'FDX', 'BA', 'LMT', 'NKE', 'GM', 'F', 'UBER', 'LYFT', 'PLTR', 'SNOW', 'SHOP', 'SQ', 'ROKU', 'ZM', 'DOCU', 'SPOT', 'TWLO', 'NET', 'DDOG', 'MDB', 'ZS', 'CRWD', 'PANW', 'OKTA', 'TEAM', 'NOW', 'WORK', 'BIDU', 'BABA', 'JD', 'PDD', 'TSM', 'ASML', 'SAP', 'SONY', 'TM', 'HMC', 'NSANY', 'VWAGY', 'DMLRY', 'RACE', 'STLA', 'FCAU', 'GM', 'F', 'RIVN', 'LCID', 'NKLA', 'FSR', 'QS', 'BLNK', 'CHPT', 'PLUG', 'BE', 'ENPH', 'SEDG', 'RUN', 'SPWR', 'FSLR', 'CSIQ', 'JKS', 'DQ', 'MAXN', 'SUNE', 'VSLR', 'TSLA', 'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'NVDA', 'NFLX', 'TSLA'
+      // Curated list of most anticipated US earnings (most watched, high-impact)
+      const anticipatedSymbols = [
+        'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA', 'NVDA', 'NFLX', 'AMD', 'JPM', 'BAC', 'WFC', 'V', 'MA', 'PYPL', 'DIS', 'CRM', 'COST', 'PEP', 'KO', 'MCD', 'SBUX', 'QCOM', 'AVGO', 'ADBE', 'ORCL', 'CSCO', 'XOM', 'CVX', 'UNH', 'PFE', 'JNJ', 'LLY', 'MRK', 'HD', 'WMT', 'TGT', 'NKE', 'GM', 'F', 'PLTR', 'SNOW', 'SHOP', 'SQ', 'ROKU', 'ZM', 'ABNB', 'UBER', 'LYFT', 'BABA', 'BIDU', 'TSM', 'ASML', 'PANW', 'CRWD', 'ZS', 'DDOG', 'NET', 'MDB', 'OKTA', 'TEAM', 'NOW', 'DOCU', 'SPOT', 'TWLO', 'ROKU', 'RIVN', 'LCID', 'FSLR', 'ENPH', 'SEDG', 'SPWR', 'F', 'GM', 'BA', 'LMT', 'UPS', 'FDX', 'TMO', 'ABT', 'MRNA', 'REGN', 'VRTX', 'GILD', 'BIIB', 'ISRG', 'ILMN', 'ZTS', 'CVS', 'CI', 'ANTM', 'HUM', 'CNC', 'MOH', 'UNH', 'AET', 'HCA', 'UHS', 'DGX', 'LH', 'DHR', 'MTD', 'PKI', 'WAT', 'A', 'BIO', 'BRKR', 'IDXX', 'IQV', 'SYNH', 'PPD', 'CRL', 'PRAH', 'MEDP', 'ICON', 'CTLT', 'ALGN', 'STE', 'RMD', 'EW', 'BSX', 'SYK', 'ZBH', 'TFX', 'A', 'DHR', 'TMO', 'WAT', 'PKI', 'MTD', 'BIO', 'BRKR', 'IDXX', 'IQV', 'SYNH', 'PPD', 'CRL', 'PRAH', 'MEDP', 'ICON', 'CTLT', 'ALGN', 'STE', 'RMD', 'EW', 'BSX', 'SYK', 'ZBH', 'TFX'
       ];
-      // Filter for trending/biggest companies only
-      let topEarnings = earnings.filter(e => trendingSymbols.includes(e.symbol));
+      // Filter for most anticipated companies only
+      let topEarnings = earnings.filter(e => anticipatedSymbols.includes(e.symbol));
       // If not enough, fill with top by market cap
       if (topEarnings.length < 12) {
         const byCap = earnings
