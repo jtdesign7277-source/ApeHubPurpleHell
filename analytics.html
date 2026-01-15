@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Analytics | ApeHub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #111118;
+      --bg-card: rgba(255, 255, 255, 0.03);
+      --bg-card-hover: rgba(255, 255, 255, 0.06);
+      --text-primary: #fff;
+      --text-secondary: rgba(255, 255, 255, 0.6);
+      --text-muted: rgba(255, 255, 255, 0.4);
+      --border-color: rgba(255, 255, 255, 0.15);
+      --border-light: rgba(255, 255, 255, 0.1);
+      --accent: #a855f7;
+      --accent-glow: rgba(168, 85, 247, 0.3);
+      --nav-bg: rgba(10, 10, 15, 0.95);
+      --card-bg: #16161d;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--bg-primary);
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Instrument Sans', sans-serif;
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      padding-bottom: 100px;
+    }
+
+    /* Header */
+    .analytics-header {
+      display: flex;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-light);
+      position: sticky;
+      top: 0;
+      background: var(--bg-primary);
+      z-index: 100;
+    }
+
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: none;
+      border: none;
+      color: var(--accent);
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      padding: 8px 0;
+      text-decoration: none;
+    }
+
+    .back-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .header-title {
+      flex: 1;
+      text-align: center;
+      font-size: 17px;
+      font-weight: 600;
+      margin-right: 60px;
+    }
+
+    /* Chart Type Tabs */
+    .chart-tabs {
+      display: flex;
+      gap: 8px;
+      padding: 20px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .chart-tab {
+      flex-shrink: 0;
+      padding: 10px 20px;
+      border: 1px solid var(--border-color);
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 20px;
+      transition: all 0.2s;
+    }
+
+    .chart-tab:hover {
+      border-color: var(--accent);
+      color: var(--text-primary);
+    }
+
+    .chart-tab.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    /* Portfolio Summary Card */
+    .portfolio-summary {
+      margin: 0 20px 20px;
+      padding: 20px;
+      background: var(--card-bg);
+      border-radius: 16px;
+      border: 1px solid var(--border-light);
+    }
+
+    .summary-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .summary-value {
+      font-size: 32px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .summary-change {
+      font-size: 15px;
+      font-weight: 500;
+      color: #00d775;
+    }
+
+    .summary-change.down {
+      color: #ff4757;
+    }
+
+    /* Chart Container */
+    .chart-container {
+      margin: 0 20px 24px;
+      padding: 20px;
+      background: var(--card-bg);
+      border-radius: 16px;
+      border: 1px solid var(--border-light);
+    }
+
+    .chart-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: var(--text-primary);
+    }
+
+    .chart-wrapper {
+      position: relative;
+      height: 280px;
+    }
+
+    /* Holdings Breakdown */
+    .holdings-section {
+      padding: 0 20px;
+    }
+
+    .holdings-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+
+    .holding-item {
+      display: flex;
+      align-items: center;
+      padding: 16px;
+      background: var(--card-bg);
+      border-radius: 12px;
+      margin-bottom: 8px;
+      border: 1px solid var(--border-light);
+    }
+
+    .holding-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      margin-right: 12px;
+    }
+
+    .holding-info {
+      flex: 1;
+    }
+
+    .holding-symbol {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .holding-name {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .holding-value {
+      text-align: right;
+    }
+
+    .holding-amount {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .holding-percent {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    /* Table View */
+    .table-container {
+      margin: 0 20px;
+      overflow-x: auto;
+    }
+
+    .holdings-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    .holdings-table th {
+      text-align: left;
+      padding: 12px 8px;
+      color: var(--text-muted);
+      font-weight: 500;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .holdings-table td {
+      padding: 14px 8px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .holdings-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .table-symbol {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .table-value {
+      text-align: right;
+      font-weight: 500;
+    }
+
+    .table-change {
+      text-align: right;
+    }
+
+    .table-change.up {
+      color: #00d775;
+    }
+
+    .table-change.down {
+      color: #ff4757;
+    }
+
+    /* Bottom Nav */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 12px 0;
+      padding-bottom: calc(12px + env(safe-area-inset-bottom));
+      background: var(--nav-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border-light);
+      z-index: 1000;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 10px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-item:hover {
+      color: var(--text-secondary);
+    }
+
+    .nav-item.active {
+      color: var(--accent);
+    }
+
+    .nav-item svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* Hidden views */
+    .chart-view {
+      display: none;
+    }
+
+    .chart-view.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="analytics-header">
+      <a href="dashboard.html" class="back-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        Back
+      </a>
+      <div class="header-title">Portfolio Analytics</div>
+    </div>
+
+    <!-- Chart Type Tabs -->
+    <div class="chart-tabs">
+      <button class="chart-tab active" data-view="pie">Pie</button>
+      <button class="chart-tab" data-view="bar">Bar</button>
+      <button class="chart-tab" data-view="line">Line</button>
+      <button class="chart-tab" data-view="table">Table</button>
+    </div>
+
+    <!-- Portfolio Summary -->
+    <div class="portfolio-summary">
+      <div class="summary-label">Portfolio Value</div>
+      <div class="summary-value" id="total-value">$0.00</div>
+      <div class="summary-change" id="total-change">+$0.00 (+0.00%)</div>
+    </div>
+
+    <!-- Pie Chart View -->
+    <div class="chart-view active" id="pie-view">
+      <div class="chart-container">
+        <div class="chart-title">Portfolio Allocation</div>
+        <div class="chart-wrapper">
+          <canvas id="pieChart"></canvas>
+        </div>
+      </div>
+      <div class="holdings-section" id="holdings-list"></div>
+    </div>
+
+    <!-- Bar Chart View -->
+    <div class="chart-view" id="bar-view">
+      <div class="chart-container">
+        <div class="chart-title">Holdings by Value</div>
+        <div class="chart-wrapper">
+          <canvas id="barChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Line Chart View -->
+    <div class="chart-view" id="line-view">
+      <div class="chart-container">
+        <div class="chart-title">Portfolio Value Over Time</div>
+        <div class="chart-wrapper">
+          <canvas id="lineChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table View -->
+    <div class="chart-view" id="table-view">
+      <div class="table-container">
+        <table class="holdings-table">
+          <thead>
+            <tr>
+              <th>Symbol</th>
+              <th>Shares</th>
+              <th>Value</th>
+              <th>Change</th>
+            </tr>
+          </thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/>
+      </svg>
+      <span>Home</span>
+    </a>
+    <a href="news.html" class="nav-item">
+      <svg viewBox="0 0 16 16" fill="currentColor">
+        <path d="M8 0C8 4.418 4.418 8 0 8C4.418 8 8 11.582 8 16C8 11.582 11.582 8 16 8C11.582 8 8 4.418 8 0Z"/>
+      </svg>
+      <span>News</span>
+    </a>
+    <a href="charts.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M6 4v4M6 14v6M6 8h0M6 14h0"/>
+        <rect x="4" y="8" width="4" height="6" rx="1" fill="currentColor"/>
+        <path d="M12 2v6M12 12v10M12 8h0M12 12h0"/>
+        <rect x="10" y="8" width="4" height="4" rx="1"/>
+        <path d="M18 6v4M18 16v4M18 10h0M18 16h0"/>
+        <rect x="16" y="10" width="4" height="6" rx="1" fill="currentColor"/>
+      </svg>
+      <span>Charts</span>
+    </a>
+    <a href="markets.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="12" cy="12" r="5"/>
+        <ellipse cx="12" cy="12" rx="10" ry="3" transform="rotate(-20 12 12)"/>
+      </svg>
+      <span>Markets</span>
+    </a>
+    <a href="chat.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.36 5.08L2 22l4.92-1.36C8.42 21.5 10.15 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2z"/>
+      </svg>
+      <span>Chat</span>
+    </a>
+  </nav>
+
+  <script>
+    // Chart colors
+    const COLORS = [
+      '#a855f7', // Purple
+      '#3b82f6', // Blue
+      '#10b981', // Green
+      '#f59e0b', // Amber
+      '#ef4444', // Red
+      '#8b5cf6', // Violet
+      '#06b6d4', // Cyan
+      '#f97316', // Orange
+      '#ec4899', // Pink
+      '#14b8a6', // Teal
+    ];
+
+    // Load watchlist from localStorage
+    function loadWatchlist() {
+      const saved = localStorage.getItem('apehub_watchlist');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          return [];
+        }
+      }
+      return [];
+    }
+
+    const watchlist = loadWatchlist();
+    
+    // Calculate portfolio data
+    let totalValue = 0;
+    let totalCost = 0;
+    const holdingsData = watchlist.map((stock, i) => {
+      const shares = stock.shares || 0;
+      const avgCost = stock.avgCost || stock.price;
+      const currentPrice = stock.price;
+      const value = shares * currentPrice;
+      const cost = shares * avgCost;
+      const change = value - cost;
+      const changePercent = cost > 0 ? ((change / cost) * 100) : 0;
+      
+      totalValue += value;
+      totalCost += cost;
+      
+      return {
+        symbol: stock.symbol,
+        name: stock.name || stock.symbol,
+        shares: shares,
+        avgCost: avgCost,
+        currentPrice: currentPrice,
+        value: value,
+        change: change,
+        changePercent: changePercent,
+        color: COLORS[i % COLORS.length]
+      };
+    }).filter(h => h.value > 0).sort((a, b) => b.value - a.value);
+
+    const totalChange = totalValue - totalCost;
+    const totalChangePercent = totalCost > 0 ? ((totalChange / totalCost) * 100) : 0;
+
+    // Update summary
+    document.getElementById('total-value').textContent = '$' + totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const changeEl = document.getElementById('total-change');
+    const sign = totalChange >= 0 ? '+' : '';
+    changeEl.textContent = `${sign}$${Math.abs(totalChange).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${sign}${totalChangePercent.toFixed(2)}%)`;
+    if (totalChange < 0) {
+      changeEl.classList.add('down');
+    }
+
+    // Render holdings list
+    function renderHoldingsList() {
+      const container = document.getElementById('holdings-list');
+      container.innerHTML = '<div class="holdings-title">Holdings Breakdown</div>' + 
+        holdingsData.map(h => `
+          <div class="holding-item">
+            <div class="holding-color" style="background: ${h.color}"></div>
+            <div class="holding-info">
+              <div class="holding-symbol">${h.symbol}</div>
+              <div class="holding-name">${h.shares} shares</div>
+            </div>
+            <div class="holding-value">
+              <div class="holding-amount">$${h.value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+              <div class="holding-percent">${totalValue > 0 ? ((h.value / totalValue) * 100).toFixed(1) : 0}%</div>
+            </div>
+          </div>
+        `).join('');
+    }
+    renderHoldingsList();
+
+    // Render table
+    function renderTable() {
+      const tbody = document.getElementById('table-body');
+      tbody.innerHTML = holdingsData.map(h => `
+        <tr>
+          <td class="table-symbol">${h.symbol}</td>
+          <td>${h.shares}</td>
+          <td class="table-value">$${h.value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+          <td class="table-change ${h.change >= 0 ? 'up' : 'down'}">${h.change >= 0 ? '+' : ''}${h.changePercent.toFixed(2)}%</td>
+        </tr>
+      `).join('');
+    }
+    renderTable();
+
+    // Chart.js defaults
+    Chart.defaults.color = 'rgba(255, 255, 255, 0.6)';
+    Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+
+    // Pie Chart
+    const pieCtx = document.getElementById('pieChart').getContext('2d');
+    const pieChart = new Chart(pieCtx, {
+      type: 'doughnut',
+      data: {
+        labels: holdingsData.map(h => h.symbol),
+        datasets: [{
+          data: holdingsData.map(h => h.value),
+          backgroundColor: holdingsData.map(h => h.color),
+          borderWidth: 0,
+          hoverOffset: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '60%',
+        plugins: {
+          legend: {
+            display: true,
+            position: 'bottom',
+            labels: {
+              padding: 16,
+              usePointStyle: true,
+              pointStyle: 'circle'
+            }
+          }
+        }
+      }
+    });
+
+    // Bar Chart
+    const barCtx = document.getElementById('barChart').getContext('2d');
+    const barChart = new Chart(barCtx, {
+      type: 'bar',
+      data: {
+        labels: holdingsData.map(h => h.symbol),
+        datasets: [{
+          data: holdingsData.map(h => h.value),
+          backgroundColor: holdingsData.map(h => h.color),
+          borderRadius: 6,
+          borderSkipped: false
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: 'rgba(255, 255, 255, 0.05)'
+            },
+            ticks: {
+              callback: function(value) {
+                return '$' + value.toLocaleString();
+              }
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            }
+          }
+        }
+      }
+    });
+
+    // Line Chart (simulated historical data)
+    function generateHistoricalData() {
+      const days = 30;
+      const data = [];
+      let value = totalValue * 0.85; // Start 15% lower
+      
+      for (let i = days; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        
+        // Add some randomness
+        const change = (Math.random() - 0.45) * (value * 0.02);
+        value = Math.max(value + change, totalValue * 0.7);
+        
+        if (i === 0) value = totalValue; // End at current value
+        
+        data.push({
+          date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          value: value
+        });
+      }
+      return data;
+    }
+
+    const historicalData = generateHistoricalData();
+    const lineCtx = document.getElementById('lineChart').getContext('2d');
+    const lineChart = new Chart(lineCtx, {
+      type: 'line',
+      data: {
+        labels: historicalData.map(d => d.date),
+        datasets: [{
+          data: historicalData.map(d => d.value),
+          borderColor: '#a855f7',
+          backgroundColor: 'rgba(168, 85, 247, 0.1)',
+          fill: true,
+          tension: 0.4,
+          pointRadius: 0,
+          pointHoverRadius: 6,
+          pointHoverBackgroundColor: '#a855f7',
+          pointHoverBorderColor: '#fff',
+          pointHoverBorderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          y: {
+            grid: {
+              color: 'rgba(255, 255, 255, 0.05)'
+            },
+            ticks: {
+              callback: function(value) {
+                return '$' + (value / 1000).toFixed(0) + 'K';
+              }
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            },
+            ticks: {
+              maxTicksLimit: 6
+            }
+          }
+        },
+        interaction: {
+          intersect: false,
+          mode: 'index'
+        }
+      }
+    });
+
+    // Tab switching
+    document.querySelectorAll('.chart-tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        const view = this.dataset.view;
+        
+        // Update active tab
+        document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        
+        // Show corresponding view
+        document.querySelectorAll('.chart-view').forEach(v => v.classList.remove('active'));
+        document.getElementById(view + '-view').classList.add('active');
+      });
+    });
+
+    // Apply saved theme
+    const savedTheme = localStorage.getItem('apehub_theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+  </script>
+</body>
+</html>

@@ -857,6 +857,47 @@
       margin-top: 12px;
     }
 
+    /* Portfolio View Tabs */
+    .portfolio-tabs {
+      display: flex;
+      gap: 0;
+      margin-top: 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      padding: 4px;
+    }
+
+    .portfolio-tab {
+      flex: 1;
+      padding: 10px 16px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .portfolio-tab:hover {
+      color: var(--text-primary);
+    }
+
+    .portfolio-tab.active {
+      background: var(--accent);
+      color: white;
+    }
+
+    .portfolio-tab svg {
+      width: 14px;
+      height: 14px;
+    }
+
     /* Gunmetal shiny stars for hidden values */
     .hidden-stars {
       background: linear-gradient(135deg, #2a2d33 0%, #4a4f5a 25%, #6b7280 50%, #4a4f5a 75%, #2a2d33 100%);
@@ -2269,6 +2310,26 @@
               <span class="wl-change-label">All time</span>
             </div>
             <div class="wl-divider"></div>
+          </div>
+          
+          <!-- Portfolio View Tabs -->
+          <div class="portfolio-tabs">
+            <button class="portfolio-tab active">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7"/>
+                <rect x="14" y="3" width="7" height="7"/>
+                <rect x="14" y="14" width="7" height="7"/>
+                <rect x="3" y="14" width="7" height="7"/>
+              </svg>
+              Overview
+            </button>
+            <a href="analytics.html" class="portfolio-tab" style="text-decoration: none;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 21H4.6c-.56 0-.84 0-1.054-.109a1 1 0 0 1-.437-.437C3 20.24 3 19.96 3 19.4V3"/>
+                <path d="m7 14 4-4 4 4 6-6"/>
+              </svg>
+              Analytics
+            </a>
           </div>
         </div>
         <div class="wl-header-actions">
