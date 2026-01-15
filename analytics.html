@@ -690,6 +690,40 @@
       if (barChart) barChart.destroy();
       if (lineChart) lineChart.destroy();
 
+      // Center text plugin for doughnut chart (M1 style)
+      const centerTextPlugin = {
+        id: 'centerText',
+        beforeDraw: function(chart) {
+          if (chart.config.type !== 'doughnut') return;
+          
+          const { ctx, width, height } = chart;
+          ctx.save();
+          
+          // Calculate center position
+          const centerX = width / 2;
+          const centerY = (height - 40) / 2; // Account for legend at bottom
+          
+          // Draw total value
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillStyle = '#fff';
+          ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, sans-serif';
+          ctx.fillText('$' + totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), centerX, centerY - 12);
+          
+          // Draw change percentage
+          const totalChange = totalValue - totalCost;
+          const changePercent = totalCost > 0 ? ((totalChange / totalCost) * 100) : 0;
+          const sign = totalChange >= 0 ? '+' : '';
+          const changeColor = totalChange >= 0 ? '#00d775' : '#ff4757';
+          
+          ctx.font = '500 14px -apple-system, BlinkMacSystemFont, sans-serif';
+          ctx.fillStyle = changeColor;
+          ctx.fillText(`${sign}$${Math.abs(totalChange).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${totalChange >= 0 ? '▲' : '▼'}${Math.abs(changePercent).toFixed(1)}%`, centerX, centerY + 14);
+          
+          ctx.restore();
+        }
+      };
+
       // Pie Chart
       const pieCtx = document.getElementById('pieChart').getContext('2d');
       pieChart = new Chart(pieCtx, {
@@ -700,13 +734,15 @@
             data: holdingsData.map(h => h.value),
             backgroundColor: holdingsData.map(h => h.color),
             borderWidth: 0,
-            hoverOffset: 8
+            hoverOffset: 8,
+            spacing: 2
           }]
         },
+        plugins: [centerTextPlugin],
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          cutout: '60%',
+          cutout: '65%',
           plugins: {
             legend: {
               display: true,
