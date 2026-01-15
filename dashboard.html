@@ -945,7 +945,16 @@
       position: relative;
       margin-bottom: 24px;
       padding-top: 24px;
-      border-top: 1px solid var(--border-light);
+    }
+    
+    .wl-search-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -24px;
+      right: -24px;
+      height: 1px;
+      background: var(--border-light);
     }
 
     .wl-search-input {
