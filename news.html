@@ -272,6 +272,9 @@
     .earnings-section {
       display: none;
       padding: 0 24px;
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
     }
 
     .earnings-section.active {
@@ -462,6 +465,7 @@
     .earnings-timeline {
       position: relative;
       padding-left: 0;
+      overflow: hidden;
     }
 
     .earnings-timeline-item {
@@ -1689,6 +1693,7 @@
       padding-bottom: calc(12px + env(safe-area-inset-bottom));
       max-width: 500px;
       margin: 0 auto;
+      z-index: 1000;
     }
 
     .nav-item {
