@@ -1160,21 +1160,35 @@
     
     // Calculate next post interval based on time of day
     function getNextPostInterval() {
-      const hour = new Date().getHours();
+      const now = new Date();
+      const hour = now.getHours();
+      const dayOfWeek = now.getDay(); // 0 = Sunday, 6 = Saturday
       let baseMin, baseMax;
       
-      if (hour >= 9 && hour < 16) {
-        // Market hours - faster
-        baseMin = 5 * 60 * 1000;  // 5 min
-        baseMax = 8 * 60 * 1000;  // 8 min
-      } else if (hour >= 0 && hour < 6) {
-        // Night - slower
-        baseMin = 15 * 60 * 1000; // 15 min
-        baseMax = 20 * 60 * 1000; // 20 min
-      } else {
-        // Normal hours
+      // Weekend - very slow
+      if (dayOfWeek === 0 || dayOfWeek === 6) {
+        baseMin = 20 * 60 * 1000; // 20 min
+        baseMax = 40 * 60 * 1000; // 40 min
+      }
+      // Market hours 9:30 AM - 4 PM - fast posting
+      else if (hour >= 9 && hour < 16) {
+        baseMin = 3 * 60 * 1000;  // 3 min
+        baseMax = 7 * 60 * 1000;  // 7 min
+      }
+      // Extended hours 4 PM - 8 PM - moderate
+      else if (hour >= 16 && hour < 20) {
+        baseMin = 10 * 60 * 1000; // 10 min
+        baseMax = 18 * 60 * 1000; // 18 min
+      }
+      // Early morning 6 AM - 9 AM - warming up
+      else if (hour >= 6 && hour < 9) {
         baseMin = 8 * 60 * 1000;  // 8 min
-        baseMax = 12 * 60 * 1000; // 12 min
+        baseMax = 15 * 60 * 1000; // 15 min
+      }
+      // Night time 8 PM - 6 AM - very slow (barely any posts)
+      else {
+        baseMin = 25 * 60 * 1000; // 25 min
+        baseMax = 45 * 60 * 1000; // 45 min
       }
       
       // Add randomness (+/- 2 min)
@@ -1685,9 +1699,52 @@
       localStorage.setItem('apehub_posts_v4', JSON.stringify(posts));
     }
 
-    // Update online count (randomize between 150-222)
+    // Update online count based on time of day (market hours = more active)
     function updateOnlineCount() {
-      const count = Math.floor(Math.random() * (MAX_COMMUNITY_SIZE - 150)) + 150;
+      const now = new Date();
+      const hour = now.getHours();
+      const dayOfWeek = now.getDay(); // 0 = Sunday, 6 = Saturday
+      
+      let minCount, maxCount;
+      
+      // Weekend - low activity
+      if (dayOfWeek === 0 || dayOfWeek === 6) {
+        minCount = 15;
+        maxCount = 35;
+      }
+      // Market hours: 9:30 AM - 4:00 PM ET (peak activity)
+      else if (hour >= 9 && hour < 16) {
+        if (hour === 9) {
+          // Pre-market/early - ramping up
+          minCount = 80;
+          maxCount = 120;
+        } else if (hour >= 10 && hour <= 15) {
+          // Peak market hours
+          minCount = 150;
+          maxCount = 220;
+        } else {
+          // After 3pm - winding down
+          minCount = 100;
+          maxCount = 160;
+        }
+      }
+      // Extended hours: 4 PM - 8 PM (after market, still some activity)
+      else if (hour >= 16 && hour < 20) {
+        minCount = 40;
+        maxCount = 70;
+      }
+      // Pre-market: 6 AM - 9 AM (early birds)
+      else if (hour >= 6 && hour < 9) {
+        minCount = 30;
+        maxCount = 60;
+      }
+      // Night time: 8 PM - 6 AM (low activity)
+      else {
+        minCount = 18;
+        maxCount = 30;
+      }
+      
+      const count = Math.floor(Math.random() * (maxCount - minCount + 1)) + minCount;
       document.getElementById('online-count').textContent = `${count} online`;
     }
 
