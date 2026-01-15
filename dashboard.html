@@ -3662,7 +3662,11 @@
         // Force update immediately
         setTimeout(function() {
           document.getElementById('userName').textContent = firstName;
-          document.getElementById('profileAvatar').textContent = firstName.charAt(0).toUpperCase();
+          // Only set initial avatar if no saved avatar exists
+          const savedAvatar = JSON.parse(localStorage.getItem('userAvatar') || 'null');
+          if (!savedAvatar) {
+            document.getElementById('profileAvatar').textContent = firstName.charAt(0).toUpperCase();
+          }
           document.getElementById('profileName').textContent = firstName;
           document.getElementById('infoName').textContent = firstName + ' ' + lastName;
           if (email) document.getElementById('infoEmail').textContent = email;
@@ -3683,7 +3687,11 @@
         // Force update immediately
         setTimeout(function() {
           document.getElementById('userName').textContent = userProfile.name;
-          document.getElementById('profileAvatar').textContent = userProfile.name.charAt(0).toUpperCase();
+          // Only set initial avatar if no saved avatar exists
+          const savedAvatar = JSON.parse(localStorage.getItem('userAvatar') || 'null');
+          if (!savedAvatar) {
+            document.getElementById('profileAvatar').textContent = userProfile.name.charAt(0).toUpperCase();
+          }
           document.getElementById('profileName').textContent = userProfile.name;
           document.getElementById('infoName').textContent = userProfile.name;
           document.getElementById('infoEmail').textContent = userProfile.email;
@@ -3724,7 +3732,9 @@
       const infoJoinedEl = document.getElementById('infoJoined');
       
       if (userNameEl) userNameEl.textContent = userProfile.name;
-      if (profileAvatarEl) profileAvatarEl.textContent = initial;
+      // Only set initial avatar if no saved avatar exists
+      const savedAvatar = JSON.parse(localStorage.getItem('userAvatar') || 'null');
+      if (profileAvatarEl && !savedAvatar) profileAvatarEl.textContent = initial;
       if (profileNameEl) profileNameEl.textContent = userProfile.name;
       if (infoNameEl) infoNameEl.textContent = userProfile.name;
       if (infoEmailEl) infoEmailEl.textContent = userProfile.email;
