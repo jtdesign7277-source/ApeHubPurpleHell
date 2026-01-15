@@ -707,8 +707,8 @@
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           ctx.fillStyle = '#fff';
-          ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, sans-serif';
-          ctx.fillText('$' + totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), centerX, centerY - 12);
+          ctx.font = 'bold 15px -apple-system, BlinkMacSystemFont, sans-serif';
+          ctx.fillText('$' + totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), centerX, centerY - 8);
           
           // Draw change percentage
           const totalChange = totalValue - totalCost;
@@ -716,9 +716,9 @@
           const sign = totalChange >= 0 ? '+' : '';
           const changeColor = totalChange >= 0 ? '#00d775' : '#ff4757';
           
-          ctx.font = '500 14px -apple-system, BlinkMacSystemFont, sans-serif';
+          ctx.font = '500 11px -apple-system, BlinkMacSystemFont, sans-serif';
           ctx.fillStyle = changeColor;
-          ctx.fillText(`${sign}$${Math.abs(totalChange).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${totalChange >= 0 ? '▲' : '▼'}${Math.abs(changePercent).toFixed(1)}%`, centerX, centerY + 14);
+          ctx.fillText(`${sign}$${Math.abs(totalChange).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${totalChange >= 0 ? '▲' : '▼'}${Math.abs(changePercent).toFixed(1)}%`, centerX, centerY + 10);
           
           ctx.restore();
         }
