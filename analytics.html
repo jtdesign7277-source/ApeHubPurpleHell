@@ -9,21 +9,37 @@
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    :root {
-      --bg-primary: #0a0a0f;
-      --bg-secondary: #111118;
-      --bg-card: rgba(255, 255, 255, 0.03);
-      --bg-card-hover: rgba(255, 255, 255, 0.06);
-      --text-primary: #fff;
-      --text-secondary: rgba(255, 255, 255, 0.6);
-      --text-muted: rgba(255, 255, 255, 0.4);
-      --border-color: rgba(255, 255, 255, 0.15);
-      --border-light: rgba(255, 255, 255, 0.1);
-      --accent: #a855f7;
-      --accent-glow: rgba(168, 85, 247, 0.3);
-      --nav-bg: rgba(10, 10, 15, 0.95);
-      --card-bg: #16161d;
-    }
+      :root {
+        --bg-primary: #0a0a0f;
+        --bg-secondary: #111118;
+        --bg-card: rgba(255, 255, 255, 0.03);
+        --bg-card-hover: rgba(255, 255, 255, 0.06);
+        --text-primary: #fff;
+        --text-secondary: rgba(255, 255, 255, 0.6);
+        --text-muted: rgba(255, 255, 255, 0.4);
+        --border-color: rgba(255, 255, 255, 0.15);
+        --border-light: rgba(255, 255, 255, 0.1);
+        --accent: #a855f7;
+        --accent-glow: rgba(168, 85, 247, 0.3);
+        --nav-bg: rgba(10, 10, 15, 0.95);
+        --card-bg: #16161d;
+      }
+
+      [data-theme="light"] {
+        --bg-primary: #f8f8fa;
+        --bg-secondary: #fff;
+        --bg-card: rgba(0, 0, 0, 0.03);
+        --bg-card-hover: rgba(0, 0, 0, 0.06);
+        --text-primary: #18181b;
+        --text-secondary: rgba(24, 24, 27, 0.6);
+        --text-muted: rgba(24, 24, 27, 0.4);
+        --border-color: rgba(24, 24, 27, 0.12);
+        --border-light: rgba(24, 24, 27, 0.08);
+        --accent: #a855f7;
+        --accent-glow: rgba(168, 85, 247, 0.13);
+        --nav-bg: rgba(255, 255, 255, 0.95);
+        --card-bg: #fff;
+      }
 
     * {
       margin: 0;
