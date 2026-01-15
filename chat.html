@@ -294,8 +294,8 @@
     }
 
     .reply-send-btn {
-      background: #a855f7;
-      border: none;
+      background: rgba(168, 85, 247, 0.15);
+      border: 2px solid #a855f7;
       border-radius: 50%;
       width: 36px;
       height: 36px;
@@ -304,12 +304,17 @@
       justify-content: center;
       cursor: pointer;
       flex-shrink: 0;
+      transition: all 0.2s;
+    }
+
+    .reply-send-btn:hover {
+      background: rgba(168, 85, 247, 0.25);
     }
 
     .reply-send-btn svg {
       width: 16px;
       height: 16px;
-      color: #fff;
+      color: #a855f7;
     }
 
     /* Replies */
@@ -373,20 +378,21 @@
       right: 24px;
       width: 56px;
       height: 56px;
-      background: linear-gradient(135deg, #a855f7 0%, #8b5cf6 100%);
-      border: none;
+      background: rgba(168, 85, 247, 0.15);
+      border: 2px solid #a855f7;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      box-shadow: 0 4px 20px rgba(168, 85, 247, 0.4);
+      box-shadow: 0 4px 20px rgba(168, 85, 247, 0.3);
       transition: all 0.3s;
       z-index: 100;
       -webkit-tap-highlight-color: transparent;
     }
 
     .fab:hover {
+      background: rgba(168, 85, 247, 0.25);
       transform: scale(1.05);
     }
 
@@ -397,7 +403,7 @@
     .fab svg {
       width: 24px;
       height: 24px;
-      color: #fff;
+      color: #a855f7;
       transition: transform 0.3s;
     }
 
