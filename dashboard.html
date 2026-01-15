@@ -2143,25 +2143,25 @@
     <!-- Futures Cards -->
     <div class="futures-container" id="futuresContainer">
       <div class="futures-card">
-        <div class="futures-name">S&P Futures</div>
+        <div class="futures-name" id="name-es">S&P Futures</div>
         <div class="futures-chart" id="chart-es"></div>
         <div class="futures-price" id="price-es">5,996.50</div>
         <div class="futures-change up" id="change-es">+0.32%</div>
       </div>
       <div class="futures-card">
-        <div class="futures-name">Dow Futures</div>
+        <div class="futures-name" id="name-ym">Dow Futures</div>
         <div class="futures-chart" id="chart-ym"></div>
         <div class="futures-price" id="price-ym">43,520.00</div>
         <div class="futures-change up" id="change-ym">+0.18%</div>
       </div>
       <div class="futures-card">
-        <div class="futures-name">Nasdaq Futures</div>
+        <div class="futures-name" id="name-nq">Nasdaq Futures</div>
         <div class="futures-chart" id="chart-nq"></div>
         <div class="futures-price" id="price-nq">21,285.75</div>
         <div class="futures-change up" id="change-nq">+0.45%</div>
       </div>
       <div class="futures-card">
-        <div class="futures-name">Russell 2000</div>
+        <div class="futures-name" id="name-rty">Russell 2000</div>
         <div class="futures-chart" id="chart-rty"></div>
         <div class="futures-price" id="price-rty">2,025.60</div>
         <div class="futures-change up" id="change-rty">+0.22%</div>
@@ -3305,16 +3305,63 @@
       'nq': 'NQ=F',   // Nasdaq Futures
       'rty': 'RTY=F'  // Russell 2000 Futures
     };
+    
+    const etfSymbols = {
+      'es': 'SPY',    // S&P 500 ETF
+      'ym': 'DIA',    // Dow ETF
+      'nq': 'QQQ',    // Nasdaq ETF
+      'rty': 'IWM'    // Russell 2000 ETF
+    };
+    
+    const futuresNames = {
+      'es': 'S&P Futures',
+      'ym': 'Dow Futures',
+      'nq': 'Nasdaq Futures',
+      'rty': 'Russell 2000'
+    };
+    
+    const etfNames = {
+      'es': 'SPY',
+      'ym': 'DIA',
+      'nq': 'QQQ',
+      'rty': 'IWM'
+    };
+    
+    function isMarketOpen() {
+      const now = new Date();
+      const day = now.getDay();
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+      const currentMinutes = hours * 60 + minutes;
+      
+      const marketOpen = 9 * 60 + 30;  // 9:30 AM
+      const marketClose = 16 * 60;      // 4:00 PM
+      
+      // Weekends
+      if (day === 0 || day === 6) return false;
+      
+      // Check if within market hours
+      return currentMinutes >= marketOpen && currentMinutes < marketClose;
+    }
 
     let futuresData = {};
 
     async function fetchFuturesData() {
-      const symbols = Object.values(futuresSymbols);
+      const marketOpen = isMarketOpen();
+      const symbols = marketOpen ? etfSymbols : futuresSymbols;
+      const names = marketOpen ? etfNames : futuresNames;
       
-      for (const [key, symbol] of Object.entries(futuresSymbols)) {
+      // Update the card names
+      for (const key of Object.keys(names)) {
+        const nameEl = document.getElementById(`name-${key}`);
+        if (nameEl) nameEl.textContent = names[key];
+      }
+      
+      for (const [key, symbol] of Object.entries(symbols)) {
         try {
-          // Use our server proxy to avoid CORS issues
-          const response = await fetch(`/api/futures/${encodeURIComponent(symbol)}`);
+          // Use our server proxy for both futures and ETFs
+          const endpoint = marketOpen ? `/api/index/${encodeURIComponent(symbol)}` : `/api/futures/${encodeURIComponent(symbol)}`;
+          const response = await fetch(endpoint);
           const data = await response.json();
           
           if (data.chart && data.chart.result && data.chart.result[0]) {

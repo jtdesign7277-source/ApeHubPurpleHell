@@ -470,8 +470,10 @@ app.get('/api/futures/:symbol', async (req, res) => {
 app.get('/api/index/:symbol', async (req, res) => {
   try {
     const symbol = req.params.symbol;
-    // Valid international index symbols
+    // Valid index and ETF symbols
     const validSymbols = [
+      // US ETFs (for market hours)
+      'SPY', 'DIA', 'QQQ', 'IWM',
       // Europe
       '^GDAXI', '^FTSE', '^FCHI', '^STOXX',
       // Asia
