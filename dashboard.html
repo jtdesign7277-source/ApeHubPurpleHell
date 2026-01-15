@@ -258,7 +258,8 @@
       font-weight: 600;
       color: #7c3aed;
       font-variant-numeric: tabular-nums;
-      transition: color 0.3s ease;
+      transition: all 0.5s ease;
+      text-shadow: none;
     }
 
     .countdown.closing {
@@ -267,6 +268,32 @@
 
     .countdown.opening {
       color: #00d775;
+    }
+
+    /* Brightness intensity levels - 60 mins before open/close */
+    .countdown.intensity-1 {
+      color: #8b4fef;
+      text-shadow: 0 0 4px rgba(124, 58, 237, 0.3);
+    }
+    .countdown.intensity-2 {
+      color: #9a5ff5;
+      text-shadow: 0 0 8px rgba(124, 58, 237, 0.4);
+    }
+    .countdown.intensity-3 {
+      color: #a86ff8;
+      text-shadow: 0 0 12px rgba(124, 58, 237, 0.5);
+    }
+    .countdown.intensity-4 {
+      color: #b580ff;
+      text-shadow: 0 0 16px rgba(124, 58, 237, 0.6);
+    }
+    .countdown.intensity-5 {
+      color: #c294ff;
+      text-shadow: 0 0 20px rgba(124, 58, 237, 0.7);
+    }
+    .countdown.intensity-6 {
+      color: #d0a8ff;
+      text-shadow: 0 0 25px rgba(124, 58, 237, 0.8), 0 0 35px rgba(124, 58, 237, 0.4);
     }
 
     .countdown-label {
@@ -3633,13 +3660,23 @@
       const minutes = now.getMinutes();
       const currentMinutes = hours * 60 + minutes;
       
-      const marketOpen = 9 * 60 + 30;
-      const marketClose = 16 * 60;
+      const marketOpen = 9 * 60 + 30;  // 9:30 AM
+      const marketClose = 16 * 60;      // 4:00 PM
+      const preOpenBrightness = 8 * 60 + 30;  // 8:30 AM - 60 mins before open
+      const lastHourStart = 15 * 60;   // 3:00 PM - last 60 mins of trading
       
       const countdown = document.getElementById('countdown');
       const countdownLabel = document.getElementById('countdownLabel');
       const marketDot = document.getElementById('marketDot');
       const marketStatusText = document.getElementById('marketStatusText');
+      
+      // Helper to get intensity class (1-6 based on 10-min intervals)
+      function getIntensityClass(minutesRemaining) {
+        if (minutesRemaining > 60 || minutesRemaining <= 0) return '';
+        // 60-50 mins = intensity-1, 50-40 = intensity-2, etc.
+        const level = Math.ceil((60 - minutesRemaining) / 10) + 1;
+        return `intensity-${Math.min(level, 6)}`;
+      }
       
       if (day === 0 || day === 6) {
         if (marketDot) marketDot.style.background = '#ff4757';
@@ -3653,10 +3690,12 @@
         const diff = targetTime - now;
         countdown.textContent = formatCountdown(diff);
         countdownLabel.textContent = 'until Monday';
+        countdown.className = 'countdown';
         return;
       }
       
       if (currentMinutes >= marketOpen && currentMinutes < marketClose) {
+        // Market is OPEN
         if (marketDot) marketDot.style.background = '#00d775';
         if (marketStatusText) marketStatusText.textContent = 'Open';
         
@@ -3666,14 +3705,18 @@
         countdown.textContent = formatCountdown(diff);
         countdownLabel.textContent = 'until close';
         
-        // Red for last 10 minutes before close (3:50pm - 4:00pm)
-        const minutesUntilClose = (marketClose - currentMinutes);
-        if (minutesUntilClose <= 10) {
-          countdown.className = 'countdown closing';
+        const minutesUntilClose = marketClose - currentMinutes;
+        
+        // Last 60 minutes (3:00 PM - 4:00 PM) - increase brightness
+        if (currentMinutes >= lastHourStart) {
+          const minutesIntoLastHour = currentMinutes - lastHourStart;
+          const intensity = getIntensityClass(60 - minutesIntoLastHour);
+          countdown.className = `countdown ${intensity}`;
         } else {
           countdown.className = 'countdown';
         }
       } else {
+        // Market is CLOSED
         if (marketDot) marketDot.style.background = '#ff4757';
         if (marketStatusText) marketStatusText.textContent = 'Closed';
         
@@ -3691,10 +3734,12 @@
         countdown.textContent = formatCountdown(diff);
         countdownLabel.textContent = 'until open';
         
-        // Green for last 10 minutes before open (9:20am - 9:30am)
-        const minutesUntilOpen = diff / 1000 / 60;
-        if (minutesUntilOpen <= 10 && minutesUntilOpen > 0) {
-          countdown.className = 'countdown opening';
+        // 60 minutes before open (8:30 AM - 9:30 AM) - increase brightness
+        const minutesUntilOpen = Math.floor(diff / 1000 / 60);
+        if (currentMinutes >= preOpenBrightness && currentMinutes < marketOpen) {
+          const minutesIntoPreOpen = currentMinutes - preOpenBrightness;
+          const intensity = getIntensityClass(60 - minutesIntoPreOpen);
+          countdown.className = `countdown ${intensity}`;
         } else {
           countdown.className = 'countdown';
         }
