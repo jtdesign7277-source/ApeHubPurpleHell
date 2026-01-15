@@ -936,10 +936,8 @@
     
     // Generate 200 bot profiles
     const BOTS = BOT_USERNAMES.map((username, i) => {
-      const useBoringAvatar = i < 100;
-      const avatarUrl = useBoringAvatar 
-        ? `https://api.dicebear.com/7.x/lorelei/svg?seed=${username}&size=120&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`
-        : `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}&size=120`;
+      // All bots use the fun 3D cartoon avataaars style
+      const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}&size=120&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf,65c9ff,8be9fd,9c88ff,ff6b9d,ffeaa7&mouth=smile,twinkle,default&eyes=happy,default,wink&clothesColor=3c4f5c,65c9ff,5199e4,25557c,e6e6e6,929598,a7ffc4,ffdeb5,ffafb9,ffffb1,ff488e,ff5c5c,b1e2ff`;
       
       const style = DISPLAY_STYLES[Math.floor(Math.random() * DISPLAY_STYLES.length)];
       const emoji = EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
