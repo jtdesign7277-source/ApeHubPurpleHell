@@ -1045,9 +1045,9 @@
     async function updateRealTimeMarketData(region) {
       const marketOverview = document.getElementById('market-overview');
       
-      // Symbol mappings for each region
+      // Symbol mappings - use Yahoo Finance index symbols
       const regionSymbols = {
-        us: ['SPY', 'QQQ', 'DIA', 'IWM'],
+        us: ['^GSPC', '^IXIC', '^DJI', '^RUT'],
         europe: ['^GDAXI', '^FTSE', '^FCHI', '^STOXX'],
         asia: ['^N225', '^HSI', '000001.SS', '^KS11']
       };
@@ -1064,34 +1064,22 @@
       try {
         let quotes = [];
         
-        if (region === 'us') {
-          // Fetch real data for US markets via Finnhub
-          quotes = await StockAPI.getMultipleQuotes(symbols);
-        } else {
-          // Fetch real data for international markets via Yahoo Finance proxy
-          const promises = symbols.map(symbol => fetchIndexQuote(symbol));
-          const results = await Promise.all(promises);
-          
-          quotes = results.map((data, i) => {
-            if (data) {
-              return {
-                symbol: names[i],
-                name: names[i],
-                price: data.price,
-                change: data.change,
-                changePercent: data.changePercent
-              };
-            }
-            // Fallback if API fails
+        // Fetch all markets via Yahoo Finance proxy for consistency
+        const promises = symbols.map(symbol => fetchIndexQuote(symbol));
+        const results = await Promise.all(promises);
+        
+        quotes = results.map((data, i) => {
+          if (data) {
             return {
               symbol: names[i],
               name: names[i],
-              price: 0,
-              change: 0,
-              changePercent: 0
+              price: data.price,
+              change: data.change,
+              changePercent: data.changePercent
             };
-          }).filter(q => q.price > 0);
-        }
+          }
+          return null;
+        }).filter(q => q && q.price > 0);
         
         if (quotes.length > 0) {
           marketOverview.innerHTML = quotes.map((q, i) => {
@@ -1255,17 +1243,6 @@
       }
     }
 
-    // Region tab switching
-    document.querySelectorAll('.region-tab').forEach(tab => {
-      tab.addEventListener('click', function() {
-        document.querySelectorAll('.region-tab').forEach(t => t.classList.remove('active'));
-        this.classList.add('active');
-        
-        const region = this.dataset.region;
-        updateRealTimeMarketData(region);
-      });
-    });
-
     // Gainers/Losers toggle
     const gainersBtn = document.getElementById('gainers-btn');
     const losersBtn = document.getElementById('losers-btn');
@@ -1298,8 +1275,7 @@
       
       // Refresh every 60 seconds
       setInterval(() => {
-        const activeRegion = document.querySelector('.region-tab.active')?.dataset.region || 'us';
-        updateRealTimeMarketData(activeRegion);
+        updateRealTimeMarketData('us');
         updateTrendingScroll();
         updateMostActive();
         updateTrendingSection();
