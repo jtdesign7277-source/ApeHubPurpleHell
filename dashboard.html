@@ -904,17 +904,11 @@
     .wl-search-container {
       position: relative;
       margin-bottom: 24px;
-      padding-top: 24px;
+      padding-top: 0;
     }
     
     .wl-search-container::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -24px;
-      right: -24px;
-      height: 1px;
-      background: var(--border-light);
+      display: none;
     }
 
     .wl-search-input {
@@ -947,6 +941,7 @@
       transform: translateY(-50%);
       color: var(--text-muted);
       pointer-events: none;
+      margin-top: 0;
     }
 
     .wl-search-clear {
@@ -2236,7 +2231,7 @@
           type="text" 
           class="wl-search-input" 
           id="search-input"
-          placeholder="Search stocks..."
+          placeholder="Search"
           autocomplete="off"
         />
         <button class="wl-search-clear" id="search-clear" onclick="clearSearch()">
