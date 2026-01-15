@@ -2454,8 +2454,18 @@
             <input type="number" class="form-input" id="modal-cost" placeholder="$0.00" min="0" step="0.01">
           </div>
           <div class="form-group">
+            <label class="form-label">Purchase Date</label>
+            <input type="date" class="form-input" id="modal-purchase-date">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
             <label class="form-label">Avg Cost</label>
             <div class="form-display" id="modal-avg-cost">$0.00</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">First Purchase</label>
+            <div class="form-display" id="modal-first-purchase">--</div>
           </div>
         </div>
         <div class="position-summary">
@@ -3039,7 +3049,7 @@
       if (!stock) return;
       
       currentEditSymbol = symbol;
-      const position = positions[symbol] || { shares: 0, avgCost: 0 };
+      const position = positions[symbol] || { shares: 0, avgCost: 0, history: [], firstPurchase: null };
       const isUp = stock.changePercent >= 0;
       
       document.getElementById('modal-symbol').textContent = stock.symbol;
@@ -3055,6 +3065,19 @@
       document.getElementById('modal-shares').value = '';
       document.getElementById('modal-cost').value = '';
       document.getElementById('modal-avg-cost').textContent = '$' + (position.avgCost || 0).toFixed(2);
+      
+      // Set default purchase date to today
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('modal-purchase-date').value = today;
+      
+      // Show first purchase date if exists
+      const firstPurchaseEl = document.getElementById('modal-first-purchase');
+      if (position.firstPurchase) {
+        const fpDate = new Date(position.firstPurchase);
+        firstPurchaseEl.textContent = fpDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      } else {
+        firstPurchaseEl.textContent = '--';
+      }
       
       updateModalCalculations();
       
@@ -3098,14 +3121,33 @@
       const existingShares = parseFloat(document.getElementById('modal-total-shares').textContent) || 0;
       const addShares = parseFloat(document.getElementById('modal-shares').value) || 0;
       const newCost = parseFloat(document.getElementById('modal-cost').value) || 0;
-      const existing = positions[currentEditSymbol] || { shares: 0, avgCost: 0 };
+      const purchaseDate = document.getElementById('modal-purchase-date').value || new Date().toISOString().split('T')[0];
+      const existing = positions[currentEditSymbol] || { shares: 0, avgCost: 0, history: [] };
       
       const totalShares = existingShares + addShares;
       const totalCostValue = (existing.shares * existing.avgCost) + (addShares * newCost);
       const avgCost = totalShares > 0 ? totalCostValue / totalShares : 0;
       
       if (totalShares > 0) {
-        positions[currentEditSymbol] = { shares: totalShares, avgCost: avgCost };
+        // Initialize history array if it doesn't exist
+        const history = existing.history || [];
+        
+        // Add new purchase to history if adding shares
+        if (addShares > 0) {
+          history.push({
+            date: purchaseDate,
+            shares: addShares,
+            price: newCost,
+            type: 'buy'
+          });
+        }
+        
+        positions[currentEditSymbol] = { 
+          shares: totalShares, 
+          avgCost: avgCost,
+          history: history,
+          firstPurchase: existing.firstPurchase || purchaseDate
+        };
         // Trigger confetti celebration!
         triggerConfetti();
       } else {

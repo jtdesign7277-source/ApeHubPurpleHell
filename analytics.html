@@ -866,57 +866,114 @@
         }
       });
 
-      // Line Chart (simulated historical data based on actual positions)
+      // Line Chart (historical data based on actual purchase dates)
       let currentTimeframe = '1M';
       
+      // Get earliest purchase date from all positions
+      function getEarliestPurchaseDate() {
+        let earliest = new Date();
+        Object.values(positions).forEach(pos => {
+          if (pos.firstPurchase) {
+            const date = new Date(pos.firstPurchase);
+            if (date < earliest) earliest = date;
+          }
+          if (pos.history) {
+            pos.history.forEach(h => {
+              const date = new Date(h.date);
+              if (date < earliest) earliest = date;
+            });
+          }
+        });
+        return earliest;
+      }
+
+      // Build cumulative value over time based on purchase history
+      function buildPortfolioTimeline() {
+        const timeline = [];
+        const purchaseEvents = [];
+        
+        // Collect all purchase events from all positions
+        Object.entries(positions).forEach(([symbol, pos]) => {
+          if (pos.history) {
+            pos.history.forEach(h => {
+              purchaseEvents.push({
+                date: new Date(h.date),
+                symbol: symbol,
+                shares: h.shares,
+                price: h.price
+              });
+            });
+          } else if (pos.firstPurchase) {
+            // Legacy position without history array
+            purchaseEvents.push({
+              date: new Date(pos.firstPurchase),
+              symbol: symbol,
+              shares: pos.shares,
+              price: pos.avgCost
+            });
+          }
+        });
+        
+        // Sort by date
+        purchaseEvents.sort((a, b) => a.date - b.date);
+        
+        return purchaseEvents;
+      }
+      
       function generateHistoricalData(period) {
-        let days, dateFormat, startValue;
+        let days, dateFormat;
         const now = new Date();
+        const earliestPurchase = getEarliestPurchaseDate();
+        const purchaseEvents = buildPortfolioTimeline();
         
         switch(period) {
           case '1D':
             days = 1;
             dateFormat = { hour: 'numeric', minute: '2-digit' };
-            startValue = totalValue * 0.995; // Small daily variance
             break;
           case '1W':
             days = 7;
             dateFormat = { weekday: 'short' };
-            startValue = totalValue * 0.97;
             break;
           case '1M':
             days = 30;
             dateFormat = { month: 'short', day: 'numeric' };
-            startValue = totalValue * 0.85;
             break;
           case 'YTD':
-            // Days from Jan 1 to now
             const jan1 = new Date(now.getFullYear(), 0, 1);
             days = Math.floor((now - jan1) / (1000 * 60 * 60 * 24));
             dateFormat = { month: 'short', day: 'numeric' };
-            startValue = totalValue * 0.75;
             break;
           case '1Y':
             days = 365;
             dateFormat = { month: 'short', year: '2-digit' };
-            startValue = totalValue * 0.6;
             break;
           case 'ALL':
-            days = 730; // 2 years
+            // Calculate days from earliest purchase
+            days = Math.max(Math.floor((now - earliestPurchase) / (1000 * 60 * 60 * 24)), 30);
             dateFormat = { month: 'short', year: '2-digit' };
-            startValue = totalValue * 0.4;
             break;
           default:
             days = 30;
             dateFormat = { month: 'short', day: 'numeric' };
-            startValue = totalValue * 0.85;
         }
         
         const data = [];
-        let value = startValue;
         const pointCount = Math.min(days, period === '1D' ? 24 : period === '1W' ? 7 : period === '1M' ? 30 : 60);
         const step = days / pointCount;
         
+        // Calculate starting cost basis for the period
+        let startingCost = 0;
+        const periodStart = new Date(now);
+        periodStart.setDate(periodStart.getDate() - days);
+        
+        purchaseEvents.forEach(event => {
+          if (event.date <= periodStart) {
+            startingCost += event.shares * event.price;
+          }
+        });
+        
+        // Generate data points
         for (let i = pointCount; i >= 0; i--) {
           const date = new Date();
           if (period === '1D') {
@@ -925,16 +982,34 @@
             date.setDate(date.getDate() - Math.floor(i * step));
           }
           
-          // Add some randomness based on period volatility
-          const volatility = period === '1D' ? 0.003 : period === '1W' ? 0.008 : 0.015;
-          const change = (Math.random() - 0.45) * (value * volatility);
-          value = Math.max(value + change, startValue * 0.8);
+          // Calculate portfolio value at this point
+          let cumulativeCost = startingCost;
+          purchaseEvents.forEach(event => {
+            if (event.date > periodStart && event.date <= date) {
+              cumulativeCost += event.shares * event.price;
+            }
+          });
           
-          if (i === 0) value = totalValue; // End at current value
+          // Apply market movement simulation based on cost basis
+          const daysSinceStart = Math.floor((date - periodStart) / (1000 * 60 * 60 * 24));
+          const progress = daysSinceStart / days;
+          
+          // Simulate growth from cost basis to current value
+          const growthFactor = totalCost > 0 ? (totalValue / totalCost) : 1;
+          const currentGrowth = 1 + (growthFactor - 1) * progress;
+          
+          // Add some daily volatility
+          const volatility = period === '1D' ? 0.002 : period === '1W' ? 0.005 : 0.01;
+          const noise = (Math.random() - 0.5) * volatility * cumulativeCost;
+          
+          let value = cumulativeCost * currentGrowth + noise;
+          
+          // Ensure we end at actual current value
+          if (i === 0) value = totalValue;
           
           data.push({
             date: date.toLocaleDateString('en-US', dateFormat),
-            value: value
+            value: Math.max(value, 0)
           });
         }
         return data;
