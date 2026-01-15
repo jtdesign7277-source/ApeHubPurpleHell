@@ -3718,12 +3718,22 @@
     const searchInput = document.getElementById('search-input');
     const searchResults = document.getElementById('search-results');
     const searchClear = document.getElementById('search-clear');
+    let searchPricesUpdating = false;
 
-    searchInput.addEventListener('focus', () => {
+    searchInput.addEventListener('focus', async () => {
       showSearchResults(stockDatabase);
+      
+      // Update prices for visible stocks when search is focused
+      if (!searchPricesUpdating) {
+        searchPricesUpdating = true;
+        const visibleSymbols = stockDatabase.slice(0, 20).map(s => s.symbol);
+        await updateSearchResultPrices(visibleSymbols);
+        showSearchResults(stockDatabase);
+        searchPricesUpdating = false;
+      }
     });
 
-    searchInput.addEventListener('input', (e) => {
+    searchInput.addEventListener('input', async (e) => {
       const query = e.target.value.trim().toUpperCase();
       
       if (query.length > 0) {
@@ -3733,6 +3743,17 @@
           stock.name.toUpperCase().includes(query)
         );
         showSearchResults(results);
+        
+        // Fetch real prices for filtered results
+        if (results.length > 0 && results.length <= 10) {
+          const symbols = results.map(s => s.symbol);
+          await updateSearchResultPrices(symbols);
+          const updatedResults = stockDatabase.filter(stock => 
+            stock.symbol.includes(query) || 
+            stock.name.toUpperCase().includes(query)
+          );
+          showSearchResults(updatedResults);
+        }
       } else {
         searchClear.classList.remove('visible');
         showSearchResults(stockDatabase);
@@ -4469,6 +4490,10 @@
       // Fetch real-time data immediately (force update)
       updateIndices();
       updateWatchlistPrices(true); // Force update on page load
+      
+      // Update popular stocks in search database
+      const popularStocks = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'META', 'NVDA', 'SPY', 'QQQ', 'AMD'];
+      updateSearchResultPrices(popularStocks);
       
       // Refresh prices every 60 seconds
       setInterval(() => {
