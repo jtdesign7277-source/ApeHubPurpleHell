@@ -3746,13 +3746,13 @@
     }
 
     // ============================================
-    // AVATAR SELECTOR (BORING AVATARS - COINBASE STYLE)
+    // AVATAR SELECTOR (DICEBEAR LORELEI - GRADIENT FACES)
     // ============================================
     let avatarVariations = [];
     let avatarShuffleSeed = Date.now();
     
     function generateAvatarUrl(seed) {
-      return `https://source.boringavatars.com/beam/120/${encodeURIComponent(seed)}?colors=264653,2a9d8f,e9c46a,f4a261,e76f51`;
+      return `https://api.dicebear.com/7.x/lorelei/svg?seed=${encodeURIComponent(seed)}&size=120&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`;
     }
     
     function generateVariations(count = 12) {
@@ -3787,7 +3787,7 @@
     
     function selectVariation(seed, url, evt) {
       const avatarData = { 
-        type: 'boring', 
+        type: 'dicebear', 
         value: url, 
         seed: seed 
       };
