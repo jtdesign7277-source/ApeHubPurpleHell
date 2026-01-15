@@ -762,7 +762,8 @@
           // Draw total value
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          ctx.fillStyle = '#fff';
+          const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim() || '#fff';
+          ctx.fillStyle = textColor;
           ctx.font = 'bold 15px -apple-system, BlinkMacSystemFont, sans-serif';
           ctx.fillText('$' + totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), centerX, centerY - 8);
           
