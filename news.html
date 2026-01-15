@@ -2018,18 +2018,6 @@
       });
     });
 
-    // Update time
-    function updateTime() {
-      const now = new Date();
-      const hours = now.getHours();
-      const minutes = now.getMinutes().toString().padStart(2, '0');
-      const ampm = hours >= 12 ? 'PM' : 'AM';
-      const displayHours = hours % 12 || 12;
-      document.getElementById('update-time').textContent = `${displayHours}:${minutes} ${ampm} EST`;
-    }
-    updateTime();
-    setInterval(updateTime, 60000);
-
     // Typewriter effect for AI Market Summary
     function typeWriter(element, text, speed = 20) {
       let i = 0;
