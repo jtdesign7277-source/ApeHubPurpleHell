@@ -187,6 +187,55 @@
       color: var(--color-down);
     }
 
+    /* Clock Section */
+    .clock-section {
+      padding: 8px 24px 16px;
+    }
+
+    .clock-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .time-row {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .current-time {
+      font-size: 24px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -1px;
+      color: var(--text-primary);
+    }
+
+    .time-period {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .market-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .countdown {
+      font-size: 11px;
+      font-weight: 600;
+      color: #7c3aed;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .countdown-label {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
     .apehub-logo {
       font-size: 15px;
       font-weight: 600;
@@ -2043,6 +2092,20 @@
       <div class="welcome" onclick="openProfile()">Welcome, <span id="userName">User</span> <svg class="welcome-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
     </div>
 
+    <!-- Clock Section -->
+    <div class="clock-section">
+      <div class="clock-left">
+        <div class="time-row">
+          <span class="current-time" id="currentTime">00:00:00</span>
+          <span class="time-period" id="timePeriod">AM</span>
+        </div>
+        <div class="market-row">
+          <span class="countdown" id="countdown">00:00:00</span>
+          <span class="countdown-label" id="countdownLabel">until open</span>
+        </div>
+      </div>
+    </div>
+
     <!-- Futures Cards -->
     <div class="futures-container" id="futuresContainer">
       <div class="futures-card">
@@ -3416,6 +3479,89 @@
     // Refresh futures every 30 seconds
     setInterval(fetchFuturesData, 30000);
     setInterval(updateMarketHeader, 60000);
+
+    // ============================================
+    // CLOCK & COUNTDOWN
+    // ============================================
+    function updateClock() {
+      const now = new Date();
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+      const seconds = now.getSeconds();
+      
+      const hours12 = hours % 12 || 12;
+      const period = hours < 12 ? 'AM' : 'PM';
+      
+      const timeString = `${hours12}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      document.getElementById('currentTime').textContent = timeString;
+      document.getElementById('timePeriod').textContent = period;
+      
+      updateMarketCountdown(now);
+    }
+
+    function updateMarketCountdown(now) {
+      const day = now.getDay();
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+      const currentMinutes = hours * 60 + minutes;
+      
+      const marketOpen = 9 * 60 + 30;  // 9:30 AM
+      const marketClose = 16 * 60;      // 4:00 PM
+      
+      const countdown = document.getElementById('countdown');
+      const countdownLabel = document.getElementById('countdownLabel');
+      
+      if (day === 0 || day === 6) {
+        const daysUntilMonday = day === 0 ? 1 : 2;
+        const targetTime = new Date(now);
+        targetTime.setDate(targetTime.getDate() + daysUntilMonday);
+        targetTime.setHours(9, 30, 0, 0);
+        
+        const diff = targetTime - now;
+        countdown.textContent = formatCountdown(diff);
+        countdownLabel.textContent = 'until Monday';
+        return;
+      }
+      
+      if (currentMinutes >= marketOpen && currentMinutes < marketClose) {
+        // Market is OPEN
+        const closeTime = new Date(now);
+        closeTime.setHours(16, 0, 0, 0);
+        const diff = closeTime - now;
+        countdown.textContent = formatCountdown(diff);
+        countdownLabel.textContent = 'until close';
+      } else {
+        // Market is CLOSED
+        const openTime = new Date(now);
+        if (currentMinutes >= marketClose) {
+          openTime.setDate(openTime.getDate() + 1);
+        }
+        openTime.setHours(9, 30, 0, 0);
+        
+        while (openTime.getDay() === 0 || openTime.getDay() === 6) {
+          openTime.setDate(openTime.getDate() + 1);
+        }
+        
+        const diff = openTime - now;
+        countdown.textContent = formatCountdown(diff);
+        countdownLabel.textContent = 'until open';
+      }
+    }
+
+    function formatCountdown(ms) {
+      if (ms < 0) return '00:00:00';
+      
+      const totalSeconds = Math.floor(ms / 1000);
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+      
+      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    // Start clock
+    updateClock();
+    setInterval(updateClock, 1000);
 
     // ============================================
     // SEARCH
