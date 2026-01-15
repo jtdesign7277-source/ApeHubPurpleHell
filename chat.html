@@ -1091,22 +1091,22 @@
       return `${Math.floor(hrs / 24)}d`;
     }
     
-    // Generate random engagement
+    // Generate random engagement (realistic for ~220 users)
     function generateEngagement() {
       const rand = Math.random();
       let likes, dislikes;
       if (rand < 0.05) {
-        // Viral post (5%)
-        likes = Math.floor(Math.random() * 150) + 50;
-        dislikes = Math.floor(Math.random() * 15);
-      } else if (rand < 0.3) {
-        // Popular post (25%)
-        likes = Math.floor(Math.random() * 40) + 10;
-        dislikes = Math.floor(Math.random() * 8);
+        // Hot post (5%) - max ~25 likes for small community
+        likes = Math.floor(Math.random() * 15) + 12;
+        dislikes = Math.floor(Math.random() * 3);
+      } else if (rand < 0.25) {
+        // Popular post (20%) - 5-12 likes
+        likes = Math.floor(Math.random() * 8) + 5;
+        dislikes = Math.floor(Math.random() * 2);
       } else {
-        // Normal post (70%)
-        likes = Math.floor(Math.random() * 15) + 1;
-        dislikes = Math.floor(Math.random() * 4);
+        // Normal post (75%) - 0-6 likes
+        likes = Math.floor(Math.random() * 7);
+        dislikes = Math.floor(Math.random() * 2);
       }
       return { likes, dislikes };
     }
