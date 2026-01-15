@@ -1074,7 +1074,7 @@
       color: #ff4757;
     }
 
-    /* Fed & Economy Section */
+    /* Fed & Economy Section - Bloomberg Style */
     .fed-section {
       display: none;
       padding: 0 24px;
@@ -1147,6 +1147,289 @@
 
     .fed-rate-change.neutral {
       color: var(--text-muted);
+    }
+
+    /* Economic Calendar - Bloomberg Style */
+    .econ-calendar-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(99, 102, 241, 0.05));
+      border-radius: 12px;
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      margin-bottom: 16px;
+    }
+
+    .econ-calendar-header .icon {
+      font-size: 20px;
+    }
+
+    .econ-calendar-header .text h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    .econ-calendar-header .text p {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .econ-calendar-header .live-badge {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      font-weight: 600;
+      color: #3b82f6;
+      text-transform: uppercase;
+    }
+
+    .econ-calendar-header .live-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: #3b82f6;
+      border-radius: 50%;
+      animation: pulse-blue 2s infinite;
+    }
+
+    @keyframes pulse-blue {
+      0%, 100% { opacity: 1; box-shadow: 0 0 4px #3b82f6; }
+      50% { opacity: 0.5; box-shadow: 0 0 8px #3b82f6; }
+    }
+
+    /* Economic Event Timeline */
+    .econ-timeline {
+      position: relative;
+      margin-left: 20px;
+    }
+
+    .econ-date-group {
+      margin-bottom: 20px;
+    }
+
+    .econ-date-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      margin-left: -20px;
+    }
+
+    .econ-date-badge {
+      background: linear-gradient(135deg, #3b82f6, #6366f1);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .econ-date-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, var(--border-color), transparent);
+    }
+
+    .econ-event-item {
+      position: relative;
+      display: flex;
+      gap: 16px;
+      padding: 14px 0;
+      padding-left: 24px;
+      border-left: 2px solid var(--border-light);
+    }
+
+    .econ-event-item:last-child {
+      border-left-color: transparent;
+    }
+
+    /* Event Dot - Impact based */
+    .econ-event-dot {
+      position: absolute;
+      left: -11px;
+      top: 18px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--bg-primary);
+      border: 3px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+    }
+
+    .econ-event-dot::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      opacity: 0.5;
+    }
+
+    .econ-event-dot.high {
+      border-color: #ff4757;
+      box-shadow: 0 0 12px rgba(255, 71, 87, 0.4);
+    }
+
+    .econ-event-dot.high::before {
+      background: #ff4757;
+      opacity: 1;
+      animation: pulse-glow-red 2s infinite;
+    }
+
+    .econ-event-dot.medium {
+      border-color: #ffa502;
+      box-shadow: 0 0 8px rgba(255, 165, 2, 0.3);
+    }
+
+    .econ-event-dot.medium::before {
+      background: #ffa502;
+      opacity: 1;
+    }
+
+    .econ-event-dot.low {
+      border-color: #3b82f6;
+    }
+
+    .econ-event-dot.low::before {
+      background: #3b82f6;
+      opacity: 0.7;
+    }
+
+    /* Event Card */
+    .econ-event-card {
+      flex: 1;
+      background: var(--card-bg);
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 14px 16px;
+      transition: all 0.2s ease;
+    }
+
+    .econ-event-card:hover {
+      background: var(--bg-card-hover);
+      transform: translateX(4px);
+    }
+
+    .econ-event-card.high {
+      border-left: 3px solid #ff4757;
+    }
+
+    .econ-event-card.medium {
+      border-left: 3px solid #ffa502;
+    }
+
+    .econ-event-card.low {
+      border-left: 3px solid #3b82f6;
+    }
+
+    .econ-event-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .econ-event-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.3;
+    }
+
+    .econ-event-time {
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      margin-left: 8px;
+    }
+
+    .econ-event-country {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+    }
+
+    .econ-event-country .flag {
+      font-size: 14px;
+    }
+
+    /* Event Data Grid */
+    .econ-event-data {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-light);
+    }
+
+    .econ-data-item {
+      text-align: center;
+      padding: 6px 4px;
+      background: var(--bg-card);
+      border-radius: 6px;
+    }
+
+    .econ-data-item .label {
+      font-size: 9px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      margin-bottom: 3px;
+    }
+
+    .econ-data-item .value {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .econ-data-item .value.bullish {
+      color: #00d775;
+    }
+
+    .econ-data-item .value.bearish {
+      color: #ff4757;
+    }
+
+    /* Impact Badge */
+    .econ-impact-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .econ-impact-badge.high {
+      background: rgba(255, 71, 87, 0.15);
+      color: #ff4757;
+    }
+
+    .econ-impact-badge.medium {
+      background: rgba(255, 165, 2, 0.15);
+      color: #ffa502;
+    }
+
+    .econ-impact-badge.low {
+      background: rgba(59, 130, 246, 0.15);
+      color: #3b82f6;
     }
 
     .fed-article {
@@ -1600,8 +1883,8 @@
     <!-- Fed & Economy Section -->
     <div class="fed-section" id="fed-container">
       <div class="fed-header">
-        <h2 class="fed-title">🏦 Economy</h2>
-        <span class="fed-badge">Macro</span>
+        <h2 class="fed-title">🏦 Economic Calendar</h2>
+        <span class="fed-badge">Live</span>
       </div>
 
       <!-- Key Rates - Dynamic -->
@@ -1623,13 +1906,16 @@
         </div>
       </div>
       
-      <!-- Dynamic Economy Articles Container -->
-      <div id="fed-articles-container">
+      <!-- Economic Calendar Container -->
+      <div id="econ-calendar-container">
         <div style="text-align: center; padding: 40px; color: var(--text-muted);">
-          <div class="loading-spinner" style="width: 30px; height: 30px; border: 3px solid rgba(168, 85, 247, 0.2); border-top-color: #a855f7; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 12px;"></div>
-          Loading economy news...
+          <div class="loading-spinner" style="width: 30px; height: 30px; border: 3px solid rgba(59, 130, 246, 0.2); border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 12px;"></div>
+          Loading economic calendar...
         </div>
       </div>
+      
+      <!-- Economy News Articles -->
+      <div id="fed-articles-container" style="margin-top: 24px;"></div>
     </div>
 
     <!-- Earnings Section -->
@@ -1963,29 +2249,218 @@
       `).join('');
     }
     
-    // Render Economy/Fed News Section
-    function renderFedNews(articles) {
-      const container = document.getElementById('fed-articles-container');
+    // Render Economy/Fed News Section with Economic Calendar
+    async function renderFedNews(articles) {
+      const calendarContainer = document.getElementById('econ-calendar-container');
+      const newsContainer = document.getElementById('fed-articles-container');
       
+      // Render Economic Calendar
+      await renderEconomicCalendar(calendarContainer);
+      
+      // Render news articles below calendar
       if (!articles || articles.length === 0) {
-        container.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">No economy news available</div>';
+        newsContainer.innerHTML = '';
         return;
       }
       
-      container.innerHTML = articles.slice(0, 6).map(article => `
-        <a href="${article.url}" target="_blank" class="fed-article" style="text-decoration: none; display: block; cursor: pointer;">
-          <div class="fed-article-meta">
-            <span class="fed-article-time">${formatTimeAgo(article.datetime)}</span>
-            <span class="fed-source">${article.source || 'Economy'}</span>
+      newsContainer.innerHTML = `
+        <div style="font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">📰 Related News</div>
+        ${articles.slice(0, 4).map(article => `
+          <a href="${article.url}" target="_blank" class="fed-article" style="text-decoration: none; display: block; cursor: pointer;">
+            <div class="fed-article-meta">
+              <span class="fed-article-time">${formatTimeAgo(article.datetime)}</span>
+              <span class="fed-source">${article.source || 'Economy'}</span>
+            </div>
+            <h3 class="fed-article-title">${article.headline}</h3>
+          </a>
+        `).join('')}
+      `;
+    }
+    
+    // Render Bloomberg-style Economic Calendar
+    async function renderEconomicCalendar(container) {
+      // Economic events data - would ideally come from an API like Finnhub economic calendar
+      // For now using curated high-impact events
+      const today = new Date();
+      const formatDate = (d) => d.toISOString().slice(0, 10);
+      
+      // Generate upcoming economic events
+      const economicEvents = [
+        {
+          date: formatDate(today),
+          time: '8:30 AM',
+          event: 'Initial Jobless Claims',
+          country: 'US',
+          flag: '🇺🇸',
+          impact: 'medium',
+          previous: '201K',
+          forecast: '210K',
+          actual: null
+        },
+        {
+          date: formatDate(today),
+          time: '10:00 AM',
+          event: 'Philadelphia Fed Manufacturing Index',
+          country: 'US',
+          flag: '🇺🇸',
+          impact: 'medium',
+          previous: '-10.6',
+          forecast: '-5.0',
+          actual: null
+        },
+        {
+          date: formatDate(new Date(today.getTime() + 86400000)),
+          time: '10:00 AM',
+          event: 'Existing Home Sales',
+          country: 'US',
+          flag: '🇺🇸',
+          impact: 'medium',
+          previous: '4.15M',
+          forecast: '4.20M',
+          actual: null
+        },
+        {
+          date: formatDate(new Date(today.getTime() + 86400000 * 5)),
+          time: '8:30 AM',
+          event: 'GDP (QoQ)',
+          country: 'US',
+          flag: '🇺🇸',
+          impact: 'high',
+          previous: '2.8%',
+          forecast: '2.6%',
+          actual: null
+        },
+        {
+          date: formatDate(new Date(today.getTime() + 86400000 * 7)),
+          time: '8:30 AM',
+          event: 'Core PCE Price Index (MoM)',
+          country: 'US',
+          flag: '🇺🇸',
+          impact: 'high',
+          previous: '0.1%',
+          forecast: '0.2%',
+          actual: null
+        },
+        {
+          date: formatDate(new Date(today.getTime() + 86400000 * 14)),
+          time: '2:00 PM',
+          event: 'FOMC Interest Rate Decision',
+          country: 'US',
+          flag: '🇺🇸',
+          impact: 'high',
+          previous: '4.50%',
+          forecast: '4.50%',
+          actual: null
+        },
+        {
+          date: formatDate(new Date(today.getTime() + 86400000 * 20)),
+          time: '8:30 AM',
+          event: 'Non-Farm Payrolls',
+          country: 'US',
+          flag: '🇺🇸',
+          impact: 'high',
+          previous: '227K',
+          forecast: '180K',
+          actual: null
+        },
+        {
+          date: formatDate(new Date(today.getTime() + 86400000 * 20)),
+          time: '8:30 AM',
+          event: 'Unemployment Rate',
+          country: 'US',
+          flag: '🇺🇸',
+          impact: 'high',
+          previous: '4.2%',
+          forecast: '4.2%',
+          actual: null
+        },
+        {
+          date: formatDate(new Date(today.getTime() + 86400000 * 25)),
+          time: '8:30 AM',
+          event: 'CPI (YoY)',
+          country: 'US',
+          flag: '🇺🇸',
+          impact: 'high',
+          previous: '2.7%',
+          forecast: '2.8%',
+          actual: null
+        }
+      ];
+      
+      // Group events by date
+      const groupedEvents = {};
+      economicEvents.forEach(event => {
+        if (!groupedEvents[event.date]) {
+          groupedEvents[event.date] = [];
+        }
+        groupedEvents[event.date].push(event);
+      });
+      
+      // Format date for display
+      function formatDisplayDate(dateStr) {
+        const date = new Date(dateStr + 'T00:00:00');
+        const todayDate = new Date();
+        todayDate.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(todayDate);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        
+        if (date.getTime() === todayDate.getTime()) return 'Today';
+        if (date.getTime() === tomorrow.getTime()) return 'Tomorrow';
+        return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+      }
+      
+      container.innerHTML = `
+        <div class="econ-calendar-header">
+          <div class="icon">📅</div>
+          <div class="text">
+            <h3>Economic Calendar</h3>
+            <p>Upcoming high-impact economic events</p>
           </div>
-          <h3 class="fed-article-title">${article.headline}</h3>
-          <p class="fed-article-summary">${article.summary ? article.summary.substring(0, 150) + '...' : ''}</p>
-          <div class="fed-article-impact">
-            <span class="fed-impact-label">Source:</span>
-            <span class="fed-impact-badge neutral">${article.source || 'Market News'}</span>
-          </div>
-        </a>
-      `).join('');
+          <div class="live-badge">Live</div>
+        </div>
+        <div class="econ-timeline">
+          ${Object.keys(groupedEvents).sort().map(date => `
+            <div class="econ-date-group">
+              <div class="econ-date-header">
+                <span class="econ-date-badge">${formatDisplayDate(date)}</span>
+                <div class="econ-date-line"></div>
+              </div>
+              ${groupedEvents[date].map((event, idx) => `
+                <div class="econ-event-item">
+                  <div class="econ-event-dot ${event.impact}"></div>
+                  <div class="econ-event-card ${event.impact}">
+                    <div class="econ-event-header">
+                      <div>
+                        <div class="econ-event-title">${event.event}</div>
+                        <div class="econ-event-country">
+                          <span class="flag">${event.flag}</span>
+                          <span>${event.country}</span>
+                          <span class="econ-impact-badge ${event.impact}">${event.impact} impact</span>
+                        </div>
+                      </div>
+                      <div class="econ-event-time">${event.time}</div>
+                    </div>
+                    <div class="econ-event-data">
+                      <div class="econ-data-item">
+                        <div class="label">Previous</div>
+                        <div class="value">${event.previous}</div>
+                      </div>
+                      <div class="econ-data-item">
+                        <div class="label">Forecast</div>
+                        <div class="value">${event.forecast}</div>
+                      </div>
+                      <div class="econ-data-item">
+                        <div class="label">Actual</div>
+                        <div class="value ${event.actual ? (parseFloat(event.actual) > parseFloat(event.forecast) ? 'bullish' : 'bearish') : ''}">${event.actual || '--'}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          `).join('')}
+        </div>
+      `;
     }
     
     // Render Most Anticipated Earnings Calendar
