@@ -107,32 +107,29 @@
     .futures-container {
       display: flex;
       gap: 6px;
-      padding: 0 24px 12px;
-      overflow-x: auto;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-    }
-
-    .futures-container::-webkit-scrollbar {
-      display: none;
+      padding: 0 16px 12px;
+      overflow-x: hidden;
     }
 
     .futures-card {
-      flex: 0 0 auto;
-      min-width: 70px;
+      flex: 1 1 0;
+      min-width: 0;
       background: var(--bg-card);
       border: 1px solid var(--border-color);
       border-radius: 6px;
-      padding: 6px 8px;
+      padding: 6px 6px;
       display: flex;
       flex-direction: column;
-      gap: 3px;
+      gap: 2px;
     }
 
     .futures-name {
-      font-size: 9px;
+      font-size: 8px;
       font-weight: 500;
       color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .futures-chart {
@@ -169,7 +166,7 @@
     }
 
     .futures-price {
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 600;
       color: var(--text-primary);
       font-variant-numeric: tabular-nums;
