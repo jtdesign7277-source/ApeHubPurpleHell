@@ -400,6 +400,382 @@
       color: #ff4757;
     }
 
+    /* Earnings Period Tabs - Modern Pill Style */
+    .earnings-period-tabs {
+      display: flex;
+      gap: 8px;
+      padding: 4px;
+      background: var(--bg-card);
+      border-radius: 12px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border-light);
+    }
+
+    .earnings-period-tab {
+      flex: 1;
+      padding: 10px 16px;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .earnings-period-tab::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--accent), #6366f1);
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      border-radius: 8px;
+    }
+
+    .earnings-period-tab span,
+    .earnings-period-tab {
+      position: relative;
+      z-index: 1;
+    }
+
+    .earnings-period-tab:hover:not(.active) {
+      color: var(--text-secondary);
+      background: var(--bg-card-hover);
+    }
+
+    .earnings-period-tab.active {
+      color: #fff;
+      background: linear-gradient(135deg, var(--accent), #6366f1);
+      box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4), 
+                  0 0 20px rgba(168, 85, 247, 0.2);
+    }
+
+    .earnings-period-tab:active {
+      transform: scale(0.97);
+    }
+
+    /* Bloomberg-Style Earnings Timeline */
+    .earnings-timeline {
+      position: relative;
+      padding-left: 0;
+    }
+
+    .earnings-timeline-item {
+      position: relative;
+      display: flex;
+      gap: 16px;
+      padding: 16px 0;
+      margin-left: 20px;
+      border-left: 2px solid var(--border-light);
+      padding-left: 24px;
+    }
+
+    .earnings-timeline-item:first-child {
+      padding-top: 0;
+    }
+
+    .earnings-timeline-item:last-child {
+      border-left-color: transparent;
+    }
+
+    /* Timeline Dot/Bowl */
+    .earnings-timeline-dot {
+      position: absolute;
+      left: -11px;
+      top: 16px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--bg-primary);
+      border: 3px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      z-index: 2;
+    }
+
+    .earnings-timeline-item:first-child .earnings-timeline-dot {
+      top: 0;
+    }
+
+    .earnings-timeline-dot::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    /* Pending/Neutral State */
+    .earnings-timeline-dot.pending {
+      border-color: rgba(168, 85, 247, 0.4);
+    }
+
+    .earnings-timeline-dot.pending::before {
+      background: var(--accent);
+      opacity: 0.6;
+    }
+
+    /* Bullish/Beat State */
+    .earnings-timeline-dot.bullish {
+      border-color: #00d775;
+      box-shadow: 0 0 12px rgba(0, 215, 117, 0.5), 0 0 24px rgba(0, 215, 117, 0.2);
+    }
+
+    .earnings-timeline-dot.bullish::before {
+      background: #00d775;
+      opacity: 1;
+      animation: pulse-glow 2s infinite;
+    }
+
+    /* Bearish/Miss State */
+    .earnings-timeline-dot.bearish {
+      border-color: #ff4757;
+      box-shadow: 0 0 12px rgba(255, 71, 87, 0.5), 0 0 24px rgba(255, 71, 87, 0.2);
+    }
+
+    .earnings-timeline-dot.bearish::before {
+      background: #ff4757;
+      opacity: 1;
+      animation: pulse-glow-red 2s infinite;
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 4px rgba(0, 215, 117, 0.8); }
+      50% { box-shadow: 0 0 10px rgba(0, 215, 117, 1); }
+    }
+
+    @keyframes pulse-glow-red {
+      0%, 100% { box-shadow: 0 0 4px rgba(255, 71, 87, 0.8); }
+      50% { box-shadow: 0 0 10px rgba(255, 71, 87, 1); }
+    }
+
+    /* Earnings Card - Bloomberg Style */
+    .earnings-bloomberg-card {
+      flex: 1;
+      background: var(--card-bg);
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 16px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .earnings-bloomberg-card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-color);
+      transform: translateX(4px);
+    }
+
+    .earnings-bloomberg-card.bullish {
+      border-left: 3px solid #00d775;
+    }
+
+    .earnings-bloomberg-card.bearish {
+      border-left: 3px solid #ff4757;
+    }
+
+    .earnings-bloomberg-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .earnings-bloomberg-company {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .earnings-bloomberg-logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(99, 102, 241, 0.1));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--accent);
+      border: 1px solid var(--border-light);
+    }
+
+    .earnings-bloomberg-logo.bullish {
+      background: linear-gradient(135deg, rgba(0, 215, 117, 0.15), rgba(0, 215, 117, 0.05));
+      color: #00d775;
+      border-color: rgba(0, 215, 117, 0.3);
+    }
+
+    .earnings-bloomberg-logo.bearish {
+      background: linear-gradient(135deg, rgba(255, 71, 87, 0.15), rgba(255, 71, 87, 0.05));
+      color: #ff4757;
+      border-color: rgba(255, 71, 87, 0.3);
+    }
+
+    .earnings-bloomberg-info h4 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .earnings-bloomberg-info .company-name {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .earnings-bloomberg-timing {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
+
+    .earnings-timing-badge {
+      font-size: 10px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .earnings-timing-badge.bmo {
+      background: rgba(99, 102, 241, 0.15);
+      color: #818cf8;
+    }
+
+    .earnings-timing-badge.amc {
+      background: rgba(168, 85, 247, 0.15);
+      color: var(--accent);
+    }
+
+    .earnings-timing-badge.tbd {
+      background: var(--bg-card);
+      color: var(--text-muted);
+    }
+
+    .earnings-date-label {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Metrics Grid */
+    .earnings-bloomberg-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-light);
+    }
+
+    .earnings-metric-box {
+      text-align: center;
+      padding: 8px 4px;
+      background: var(--bg-card);
+      border-radius: 8px;
+    }
+
+    .earnings-metric-box .label {
+      font-size: 9px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .earnings-metric-box .value {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .earnings-metric-box .value.bullish {
+      color: #00d775;
+    }
+
+    .earnings-metric-box .value.bearish {
+      color: #ff4757;
+    }
+
+    /* Result Badge */
+    .earnings-result-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .earnings-result-tag.beat {
+      background: rgba(0, 215, 117, 0.15);
+      color: #00d775;
+    }
+
+    .earnings-result-tag.miss {
+      background: rgba(255, 71, 87, 0.15);
+      color: #ff4757;
+    }
+
+    .earnings-result-tag.pending {
+      background: rgba(168, 85, 247, 0.1);
+      color: var(--accent);
+    }
+
+    /* Section Header */
+    .earnings-section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.08), rgba(99, 102, 241, 0.05));
+      border-radius: 12px;
+      border: 1px solid rgba(168, 85, 247, 0.15);
+      margin-bottom: 20px;
+    }
+
+    .earnings-section-header .icon {
+      font-size: 20px;
+    }
+
+    .earnings-section-header .text h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    .earnings-section-header .text p {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .earnings-section-header .count {
+      margin-left: auto;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      background: rgba(168, 85, 247, 0.15);
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
     /* Crypto Section */
     .crypto-section {
       display: none;
@@ -1699,32 +2075,63 @@
       }
 
       container.innerHTML = `
-        <div style="margin-bottom: 16px; padding: 12px 16px; background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(99, 102, 241, 0.1)); border-radius: 12px; border: 1px solid rgba(168, 85, 247, 0.2);">
-          <div style="font-size: 14px; font-weight: 600; color: var(--accent); margin-bottom: 4px;">📅 Most Anticipated Earnings</div>
-          <div style="font-size: 12px; color: var(--text-muted);">${period === 'today' ? "Today's" : period === 'week' ? 'This Week\'s' : 'This Month\'s'} upcoming earnings reports</div>
-        </div>
-        ${topEarnings.map(e => `
-          <div class="earnings-card" style="background: var(--card-bg); border: 1px solid var(--border-light); border-radius: 14px; margin-bottom: 12px; padding: 16px; display: flex; align-items: center; gap: 14px; transition: all 0.2s;">
-            <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #1a1a2e, #16161d); display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; color: var(--accent); border: 1px solid var(--border-light);">
-              ${e.symbol.substring(0, 3)}
-            </div>
-            <div style="flex:1; min-width:0;">
-              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                <span style="font-size:16px;font-weight:700;color:var(--text-primary);">${e.symbol}</span>
-                <span style="font-size:11px;padding:3px 8px;background:rgba(168,85,247,0.15);color:var(--accent);border-radius:6px;font-weight:600;">${getTimingLabel(e.hour)}</span>
-              </div>
-              <div style="font-size:13px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:6px;">${e.symbol}</div>
-              <div style="display:flex;gap:16px;flex-wrap:wrap;">
-                <div><span style="font-size:10px;color:var(--text-muted);text-transform:uppercase;">Est. EPS</span><div style="font-size:14px;font-weight:600;color:var(--text-primary);">${e.epsEstimate != null ? '$' + e.epsEstimate.toFixed(2) : '--'}</div></div>
-                <div><span style="font-size:10px;color:var(--text-muted);text-transform:uppercase;">Est. Revenue</span><div style="font-size:14px;font-weight:600;color:var(--text-primary);">${e.revenueEstimate != null ? '$' + (e.revenueEstimate / 1e9).toFixed(2) + 'B' : '--'}</div></div>
-              </div>
-            </div>
-            <div style="text-align:right;min-width:70px;">
-              <div style="font-size:13px;font-weight:700;color:var(--accent);">${formatEarningsDate(e.date)}</div>
-              <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">${e.date}</div>
-            </div>
+        <div class="earnings-section-header">
+          <div class="icon">📊</div>
+          <div class="text">
+            <h3>Earnings Calendar</h3>
+            <p>${period === 'today' ? "Today's" : period === 'week' ? 'This Week\'s' : 'This Month\'s'} reporting companies</p>
           </div>
-        `).join('')}
+          <div class="count">${topEarnings.length} reports</div>
+        </div>
+        <div class="earnings-timeline">
+          ${topEarnings.map((e, index) => {
+            // Simulate some having results (for demo - in reality you'd check actual vs estimate)
+            const hasReported = false; // Set to true when earnings are released
+            const beat = e.epsActual && e.epsEstimate && e.epsActual > e.epsEstimate;
+            const miss = e.epsActual && e.epsEstimate && e.epsActual < e.epsEstimate;
+            const status = hasReported ? (beat ? 'bullish' : miss ? 'bearish' : 'pending') : 'pending';
+            const timingClass = e.hour === 'bmo' ? 'bmo' : e.hour === 'amc' ? 'amc' : 'tbd';
+            
+            return `
+            <div class="earnings-timeline-item">
+              <div class="earnings-timeline-dot ${status}"></div>
+              <div class="earnings-bloomberg-card ${hasReported ? status : ''}">
+                <div class="earnings-bloomberg-header">
+                  <div class="earnings-bloomberg-company">
+                    <div class="earnings-bloomberg-logo ${hasReported ? status : ''}">
+                      ${e.symbol.substring(0, 3)}
+                    </div>
+                    <div class="earnings-bloomberg-info">
+                      <h4>
+                        ${e.symbol}
+                        ${hasReported ? `<span class="earnings-result-tag ${beat ? 'beat' : miss ? 'miss' : 'pending'}">${beat ? '▲ Beat' : miss ? '▼ Miss' : 'In-Line'}</span>` : ''}
+                      </h4>
+                      <div class="company-name">${e.symbol}</div>
+                    </div>
+                  </div>
+                  <div class="earnings-bloomberg-timing">
+                    <span class="earnings-timing-badge ${timingClass}">${getTimingLabel(e.hour)}</span>
+                    <span class="earnings-date-label">${formatEarningsDate(e.date)}</span>
+                  </div>
+                </div>
+                <div class="earnings-bloomberg-metrics">
+                  <div class="earnings-metric-box">
+                    <div class="label">Est. EPS</div>
+                    <div class="value">${e.epsEstimate != null ? '$' + e.epsEstimate.toFixed(2) : '--'}</div>
+                  </div>
+                  <div class="earnings-metric-box">
+                    <div class="label">Est. Rev</div>
+                    <div class="value">${e.revenueEstimate != null ? '$' + (e.revenueEstimate / 1e9).toFixed(2) + 'B' : '--'}</div>
+                  </div>
+                  <div class="earnings-metric-box">
+                    <div class="label">${hasReported ? 'Actual EPS' : 'Reporting'}</div>
+                    <div class="value ${hasReported ? (beat ? 'bullish' : miss ? 'bearish' : '') : ''}">${hasReported && e.epsActual != null ? '$' + e.epsActual.toFixed(2) : e.date}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `}).join('')}
+        </div>
       `;
     }
     
