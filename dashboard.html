@@ -85,26 +85,26 @@
     .market-header {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 16px 24px 12px;
+      gap: 6px;
+      padding: 8px 24px 6px;
     }
 
     .market-header-icon {
-      font-size: 20px;
+      font-size: 12px;
     }
 
     .market-header-text {
-      font-size: 14px;
+      font-size: 10px;
       font-weight: 600;
       color: var(--text-primary);
-      letter-spacing: 0.5px;
+      letter-spacing: 0.3px;
     }
 
     /* Futures Cards Container */
     .futures-container {
       display: flex;
-      gap: 12px;
-      padding: 0 24px 20px;
+      gap: 6px;
+      padding: 0 24px 12px;
       overflow-x: auto;
       scrollbar-width: none;
       -ms-overflow-style: none;
@@ -116,24 +116,24 @@
 
     .futures-card {
       flex: 0 0 auto;
-      min-width: 140px;
+      min-width: 70px;
       background: var(--bg-card);
       border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 14px;
+      border-radius: 6px;
+      padding: 6px 8px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 3px;
     }
 
     .futures-name {
-      font-size: 13px;
+      font-size: 9px;
       font-weight: 500;
       color: var(--text-secondary);
     }
 
     .futures-chart {
-      height: 30px;
+      height: 16px;
       display: flex;
       align-items: center;
       position: relative;
@@ -146,7 +146,7 @@
 
     .futures-chart .chart-line {
       fill: none;
-      stroke-width: 1.5;
+      stroke-width: 1;
       stroke-linecap: round;
       stroke-linejoin: round;
     }
@@ -166,14 +166,14 @@
     }
 
     .futures-price {
-      font-size: 18px;
+      font-size: 11px;
       font-weight: 600;
       color: var(--text-primary);
       font-variant-numeric: tabular-nums;
     }
 
     .futures-change {
-      font-size: 14px;
+      font-size: 9px;
       font-weight: 600;
       font-variant-numeric: tabular-nums;
     }
@@ -2229,6 +2229,20 @@
       <div class="welcome" onclick="openProfile()">Welcome, <span id="userName">User</span> <svg class="welcome-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
     </div>
 
+    <!-- Clock Section -->
+    <div class="clock-section">
+      <div class="clock-left">
+        <div class="time-row">
+          <span class="current-time" id="currentTime">00:00:00</span>
+          <span class="time-period" id="timePeriod">AM</span>
+        </div>
+        <div class="market-row">
+          <span class="countdown" id="countdown">00:00:00</span>
+          <span class="countdown-label" id="countdownLabel">until open</span>
+        </div>
+      </div>
+    </div>
+
     <!-- Market Status Header (Yahoo Finance Style) -->
     <div class="market-header">
       <span class="market-header-icon" id="marketIcon">🌙</span>
@@ -2260,20 +2274,6 @@
         <div class="futures-chart" id="chart-rty"></div>
         <div class="futures-price" id="price-rty">--</div>
         <div class="futures-change up" id="change-rty">--</div>
-      </div>
-    </div>
-
-    <!-- Clock Section -->
-    <div class="clock-section">
-      <div class="clock-left">
-        <div class="time-row">
-          <span class="current-time" id="currentTime">00:00:00</span>
-          <span class="time-period" id="timePeriod">AM</span>
-        </div>
-        <div class="market-row">
-          <span class="countdown" id="countdown">00:00:00</span>
-          <span class="countdown-label" id="countdownLabel">until open</span>
-        </div>
       </div>
     </div>
 
