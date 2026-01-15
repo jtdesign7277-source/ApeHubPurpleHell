@@ -2092,17 +2092,11 @@
       <div class="welcome" onclick="openProfile()">Welcome, <span id="userName">User</span> <svg class="welcome-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
     </div>
 
-    <!-- Clock Section -->
+    <!-- Countdown Timer -->
     <div class="clock-section">
-      <div class="clock-left">
-        <div class="time-row">
-          <span class="current-time" id="currentTime">00:00:00</span>
-          <span class="time-period" id="timePeriod">AM</span>
-        </div>
-        <div class="market-row">
-          <span class="countdown" id="countdown">00:00:00</span>
-          <span class="countdown-label" id="countdownLabel">until open</span>
-        </div>
+      <div class="market-row">
+        <span class="countdown" id="countdown">00:00:00</span>
+        <span class="countdown-label" id="countdownLabel">until open</span>
       </div>
     </div>
 
@@ -3481,21 +3475,10 @@
     setInterval(updateMarketHeader, 60000);
 
     // ============================================
-    // CLOCK & COUNTDOWN
+    // COUNTDOWN TIMER
     // ============================================
-    function updateClock() {
+    function updateCountdown() {
       const now = new Date();
-      const hours = now.getHours();
-      const minutes = now.getMinutes();
-      const seconds = now.getSeconds();
-      
-      const hours12 = hours % 12 || 12;
-      const period = hours < 12 ? 'AM' : 'PM';
-      
-      const timeString = `${hours12}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-      document.getElementById('currentTime').textContent = timeString;
-      document.getElementById('timePeriod').textContent = period;
-      
       updateMarketCountdown(now);
     }
 
@@ -3559,9 +3542,9 @@
       return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     }
 
-    // Start clock
-    updateClock();
-    setInterval(updateClock, 1000);
+    // Start countdown timer
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
 
     // ============================================
     // SEARCH
