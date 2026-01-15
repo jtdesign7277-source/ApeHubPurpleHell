@@ -268,94 +268,27 @@
       color: #ff4757;
     }
 
-    /* Earnings Section */
-    // Render Earnings News Section with live, prioritized, accurate upcoming earnings
-    async function renderEarningsNews(articles, period = 'today') {
-      const container = document.getElementById('earnings-articles-container');
-      container.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">Loading earnings...</div>';
-
-      // Get date range for period
-      const now = new Date();
-      let from, to;
-      if (period === 'today') {
-        from = to = now.toISOString().slice(0, 10);
-      } else if (period === 'week') {
-        const weekStart = new Date(now);
-        weekStart.setDate(now.getDate() - now.getDay());
-        from = weekStart.toISOString().slice(0, 10);
-        const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekStart.getDate() + 6);
-        to = weekEnd.toISOString().slice(0, 10);
-      } else if (period === 'month') {
-        from = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
-        to = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().slice(0, 10);
-      }
-
-      // Fetch upcoming earnings from Finnhub
-      const FINNHUB_API_KEY = 'd5c3ijpr01qsbmgib7u0d5c3ijpr01qsbmgib7ug';
-      let earnings = [];
-      try {
-        const resp = await fetch(`https://finnhub.io/api/v1/calendar/earnings?from=${from}&to=${to}&token=${FINNHUB_API_KEY}`);
-        const data = await resp.json();
-        // Only keep US companies
-        earnings = (data.earningsCalendar || []).filter(e => e.symbol && e.company && (e.country === 'US' || e.country === undefined));
-      } catch (e) {
-        container.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">Error loading earnings</div>';
-        return;
-      }
-
-      // Curated list of most anticipated US earnings (most watched, high-impact)
-      const anticipatedSymbols = [
-        'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA', 'NVDA', 'NFLX', 'AMD', 'JPM', 'BAC', 'WFC', 'V', 'MA', 'PYPL', 'DIS', 'CRM', 'COST', 'PEP', 'KO', 'MCD', 'SBUX', 'QCOM', 'AVGO', 'ADBE', 'ORCL', 'CSCO', 'XOM', 'CVX', 'UNH', 'PFE', 'JNJ', 'LLY', 'MRK', 'HD', 'WMT', 'TGT', 'NKE', 'GM', 'F', 'PLTR', 'SNOW', 'SHOP', 'SQ', 'ROKU', 'ZM', 'ABNB', 'UBER', 'LYFT', 'BABA', 'BIDU', 'TSM', 'ASML', 'PANW', 'CRWD', 'ZS', 'DDOG', 'NET', 'MDB', 'OKTA', 'TEAM', 'NOW', 'DOCU', 'SPOT', 'TWLO', 'ROKU', 'RIVN', 'LCID', 'FSLR', 'ENPH', 'SEDG', 'SPWR', 'F', 'GM', 'BA', 'LMT', 'UPS', 'FDX', 'TMO', 'ABT', 'MRNA', 'REGN', 'VRTX', 'GILD', 'BIIB', 'ISRG', 'ILMN', 'ZTS', 'CVS', 'CI', 'ANTM', 'HUM', 'CNC', 'MOH', 'UNH', 'AET', 'HCA', 'UHS', 'DGX', 'LH', 'DHR', 'MTD', 'PKI', 'WAT', 'A', 'BIO', 'BRKR', 'IDXX', 'IQV', 'SYNH', 'PPD', 'CRL', 'PRAH', 'MEDP', 'ICON', 'CTLT', 'ALGN', 'STE', 'RMD', 'EW', 'BSX', 'SYK', 'ZBH', 'TFX', 'A', 'DHR', 'TMO', 'WAT', 'PKI', 'MTD', 'BIO', 'BRKR', 'IDXX', 'IQV', 'SYNH', 'PPD', 'CRL', 'PRAH', 'MEDP', 'ICON', 'CTLT', 'ALGN', 'STE', 'RMD', 'EW', 'BSX', 'SYK', 'ZBH', 'TFX'
-      ];
-      // Filter for most anticipated companies only
-      let topEarnings = earnings.filter(e => anticipatedSymbols.includes(e.symbol));
-      // If not enough, fill with top by market cap
-      if (topEarnings.length < 12) {
-        const byCap = earnings
-          .filter(e => !topEarnings.includes(e))
-          .sort((a, b) => (b.marketCap || 0) - (a.marketCap || 0));
-        topEarnings = topEarnings.concat(byCap.slice(0, 12 - topEarnings.length));
-      }
-      topEarnings = topEarnings.slice(0, 12);
-
-      if (topEarnings.length === 0) {
-        container.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">No major earnings for this period</div>';
-        return;
-      }
-
-      // Fetch company logos in parallel
-      const logoMap = {};
-      await Promise.all(topEarnings.map(async (e) => {
-        try {
-          const logoResp = await fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${e.symbol}&token=${FINNHUB_API_KEY}`);
-          const logoData = await logoResp.json();
-          if (logoData.logo) logoMap[e.symbol] = logoData.logo;
-        } catch {}
-      }));
-
-      container.innerHTML = topEarnings.map(e => `
-        <div class="earnings-card" style="background: var(--card-bg); border-radius: 16px; margin-bottom: 16px; padding: 18px 16px; display: flex; align-items: center; gap: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
-          <div style="width: 44px; height: 44px; border-radius: 12px; background: #18181b; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; color: #fff;">
-            ${logoMap[e.symbol] ? `<img src="${logoMap[e.symbol]}" alt="logo" style="width:32px;height:32px;border-radius:8px;">` : e.symbol[0]}
-          </div>
-          <div style="flex:1; min-width:0;">
-            <div style="font-size:15px;font-weight:700;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${e.company}</div>
-            <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">${e.symbol} • ${e.date}</div>
-            <div style="display:flex;gap:18px;margin-top:8px;">
-              <div><span style="font-size:11px;color:var(--text-muted);">Forecast</span><br><span style="font-size:14px;font-weight:600;">${e.epsEstimate != null ? e.epsEstimate : '--'}</span></div>
-              <div><span style="font-size:11px;color:var(--text-muted);">Actual</span><br><span style="font-size:14px;font-weight:600;">${e.epsActual != null ? e.epsActual : '--'}</span></div>
-              <div><span style="font-size:11px;color:var(--text-muted);">Revenue</span><br><span style="font-size:14px;font-weight:600;">${e.revenueEstimate != null ? (e.revenueEstimate/1e6).toFixed(1)+'M' : '--'}</span></div>
-            </div>
-          </div>
-          <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
-            <span style="background:var(--bg-card);border-radius:8px;padding:7px 8px;display:flex;align-items:center;cursor:pointer;">
-              <svg width="20" height="20" fill="none" stroke="#a855f7" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="4"/><path d="M16 2v4M8 2v4M3 10h18M12 14v4"/></svg>
-            </span>
-          </div>
-        </div>
-      `).join('');
+    /* Earnings Section Styles */
+    .earnings-section {
+      display: none;
+      padding: 0 24px;
     }
+
+    .earnings-section.active {
+      display: block;
+    }
+
+    .earnings-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .earnings-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
     }
 
     .earnings-symbol {
@@ -1326,7 +1259,7 @@
     <!-- Earnings Section -->
     <div class="earnings-section" id="earnings-container">
       <div class="earnings-header">
-        <h2 class="earnings-title">Earnings</h2>
+        <h2 class="earnings-title">📊 Most Anticipated Earnings</h2>
       </div>
       <div class="earnings-period-tabs">
         <button class="earnings-period-tab active" data-period="today">Today</button>
@@ -1703,59 +1636,120 @@
       `).join('');
     }
     
-    // Render Earnings News Section
-    // Webull-style earnings card rendering with period filtering
-    function renderEarningsNews(articles, period = 'today') {
+    // Render Most Anticipated Earnings Calendar
+    // Fetches real earnings calendar data from Finnhub API
+    async function renderEarningsNews(articles, period = 'today') {
       const container = document.getElementById('earnings-articles-container');
-      if (!articles || articles.length === 0) {
-        container.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">No earnings news available</div>';
-        return;
-      }
+      container.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);"><div class="loading-spinner" style="width: 30px; height: 30px; border: 3px solid rgba(168, 85, 247, 0.2); border-top-color: #a855f7; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 12px;"></div>Loading upcoming earnings...</div>';
 
-      // Filter by period
+      // Get date range for period
       const now = new Date();
-      let filtered = articles.filter(article => {
-        const artDate = new Date(article.datetime * 1000);
-        if (period === 'today') {
-          return artDate.toDateString() === now.toDateString();
-        } else if (period === 'week') {
-          const weekStart = new Date(now);
-          weekStart.setDate(now.getDate() - now.getDay());
-          const weekEnd = new Date(weekStart);
-          weekEnd.setDate(weekStart.getDate() + 6);
-          return artDate >= weekStart && artDate <= weekEnd;
-        } else if (period === 'month') {
-          return artDate.getMonth() === now.getMonth() && artDate.getFullYear() === now.getFullYear();
-        }
-        return true;
-      });
+      let from, to;
+      if (period === 'today') {
+        from = to = now.toISOString().slice(0, 10);
+      } else if (period === 'week') {
+        from = now.toISOString().slice(0, 10);
+        const weekEnd = new Date(now);
+        weekEnd.setDate(now.getDate() + 7);
+        to = weekEnd.toISOString().slice(0, 10);
+      } else if (period === 'month') {
+        from = now.toISOString().slice(0, 10);
+        to = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().slice(0, 10);
+      }
 
-      if (filtered.length === 0) {
-        container.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">No earnings for this period</div>';
+      // Most anticipated earnings symbols (high-impact, most watched companies)
+      const anticipatedSymbols = [
+        'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA', 'NVDA', 'NFLX', 'AMD', 'JPM', 
+        'BAC', 'WFC', 'V', 'MA', 'PYPL', 'DIS', 'CRM', 'COST', 'PEP', 'KO', 'MCD', 
+        'SBUX', 'QCOM', 'AVGO', 'ADBE', 'ORCL', 'CSCO', 'XOM', 'CVX', 'UNH', 'PFE', 
+        'JNJ', 'LLY', 'MRK', 'HD', 'WMT', 'TGT', 'NKE', 'GM', 'F', 'PLTR', 'SNOW', 
+        'SHOP', 'SQ', 'ROKU', 'ZM', 'ABNB', 'UBER', 'LYFT', 'BA', 'LMT', 'UPS', 'FDX',
+        'COIN', 'HOOD', 'SOFI', 'RIVN', 'LCID', 'INTC', 'MU', 'DELL', 'HPQ', 'IBM'
+      ];
+
+      let earnings = [];
+      try {
+        const resp = await fetch(`https://finnhub.io/api/v1/calendar/earnings?from=${from}&to=${to}&token=${FINNHUB_API_KEY}`);
+        const data = await resp.json();
+        // Filter for US companies with valid data
+        earnings = (data.earningsCalendar || []).filter(e => e.symbol && e.date);
+      } catch (e) {
+        container.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">Error loading earnings calendar</div>';
         return;
       }
 
-      container.innerHTML = filtered.map(article => `
-        <div class="earnings-card" style="background: var(--card-bg); border-radius: 16px; margin-bottom: 16px; padding: 18px 16px; display: flex; align-items: center; gap: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
-          <div style="width: 44px; height: 44px; border-radius: 12px; background: #18181b; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; color: #fff;">
-            ${article.logo ? `<img src="${article.logo}" alt="logo" style="width:32px;height:32px;border-radius:8px;">` : (article.related ? article.related.split(',')[0][0] : '📊')}
-          </div>
-          <div style="flex:1; min-width:0;">
-            <div style="font-size:15px;font-weight:700;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${article.headline}</div>
-            <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">${article.source || 'Earnings'} • ${new Date(article.datetime*1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric'})}</div>
-            <div style="display:flex;gap:18px;margin-top:8px;">
-              <div><span style="font-size:11px;color:var(--text-muted);">Forecast</span><br><span style="font-size:14px;font-weight:600;">${article.forecast || '--'}</span></div>
-              <div><span style="font-size:11px;color:var(--text-muted);">Actual</span><br><span style="font-size:14px;font-weight:600;">${article.actual || '--'}</span></div>
-              <div><span style="font-size:11px;color:var(--text-muted);">EPS Growth</span><br><span style="font-size:14px;font-weight:600;">${article.epsGrowth || '--'}</span></div>
+      // Prioritize most anticipated companies
+      let topEarnings = earnings.filter(e => anticipatedSymbols.includes(e.symbol));
+      
+      // If not enough anticipated, add others sorted alphabetically
+      if (topEarnings.length < 15) {
+        const others = earnings
+          .filter(e => !anticipatedSymbols.includes(e.symbol))
+          .sort((a, b) => a.symbol.localeCompare(b.symbol));
+        topEarnings = topEarnings.concat(others.slice(0, 15 - topEarnings.length));
+      }
+      
+      // Sort by date, then by symbol
+      topEarnings = topEarnings.sort((a, b) => {
+        const dateCompare = new Date(a.date) - new Date(b.date);
+        if (dateCompare !== 0) return dateCompare;
+        return a.symbol.localeCompare(b.symbol);
+      }).slice(0, 15);
+
+      if (topEarnings.length === 0) {
+        container.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--text-muted);">No earnings scheduled for ${period === 'today' ? 'today' : period === 'week' ? 'this week' : 'this month'}</div>`;
+        return;
+      }
+
+      // Format earnings date nicely
+      function formatEarningsDate(dateStr) {
+        const date = new Date(dateStr + 'T00:00:00');
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        
+        if (date.getTime() === today.getTime()) return 'Today';
+        if (date.getTime() === tomorrow.getTime()) return 'Tomorrow';
+        return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+      }
+
+      // Get timing label
+      function getTimingLabel(hour) {
+        if (hour === 'bmo' || hour === 'amc') {
+          return hour === 'bmo' ? 'Before Open' : 'After Close';
+        }
+        return 'TBD';
+      }
+
+      container.innerHTML = `
+        <div style="margin-bottom: 16px; padding: 12px 16px; background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(99, 102, 241, 0.1)); border-radius: 12px; border: 1px solid rgba(168, 85, 247, 0.2);">
+          <div style="font-size: 14px; font-weight: 600; color: var(--accent); margin-bottom: 4px;">📅 Most Anticipated Earnings</div>
+          <div style="font-size: 12px; color: var(--text-muted);">${period === 'today' ? "Today's" : period === 'week' ? 'This Week\'s' : 'This Month\'s'} upcoming earnings reports</div>
+        </div>
+        ${topEarnings.map(e => `
+          <div class="earnings-card" style="background: var(--card-bg); border: 1px solid var(--border-light); border-radius: 14px; margin-bottom: 12px; padding: 16px; display: flex; align-items: center; gap: 14px; transition: all 0.2s;">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #1a1a2e, #16161d); display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; color: var(--accent); border: 1px solid var(--border-light);">
+              ${e.symbol.substring(0, 3)}
+            </div>
+            <div style="flex:1; min-width:0;">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span style="font-size:16px;font-weight:700;color:var(--text-primary);">${e.symbol}</span>
+                <span style="font-size:11px;padding:3px 8px;background:rgba(168,85,247,0.15);color:var(--accent);border-radius:6px;font-weight:600;">${getTimingLabel(e.hour)}</span>
+              </div>
+              <div style="font-size:13px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:6px;">${e.symbol}</div>
+              <div style="display:flex;gap:16px;flex-wrap:wrap;">
+                <div><span style="font-size:10px;color:var(--text-muted);text-transform:uppercase;">Est. EPS</span><div style="font-size:14px;font-weight:600;color:var(--text-primary);">${e.epsEstimate != null ? '$' + e.epsEstimate.toFixed(2) : '--'}</div></div>
+                <div><span style="font-size:10px;color:var(--text-muted);text-transform:uppercase;">Est. Revenue</span><div style="font-size:14px;font-weight:600;color:var(--text-primary);">${e.revenueEstimate != null ? '$' + (e.revenueEstimate / 1e9).toFixed(2) + 'B' : '--'}</div></div>
+              </div>
+            </div>
+            <div style="text-align:right;min-width:70px;">
+              <div style="font-size:13px;font-weight:700;color:var(--accent);">${formatEarningsDate(e.date)}</div>
+              <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">${e.date}</div>
             </div>
           </div>
-          <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
-            <span style="background:var(--bg-card);border-radius:8px;padding:7px 8px;display:flex;align-items:center;cursor:pointer;">
-              <svg width="20" height="20" fill="none" stroke="#a855f7" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="4"/><path d="M16 2v4M8 2v4M3 10h18M12 14v4"/></svg>
-            </span>
-          </div>
-        </div>
-      `).join('');
+        `).join('')}
+      `;
     }
     
     // Render Crypto News Section
@@ -1876,33 +1870,24 @@
       renderBreakingNews(categorized.breaking);
       renderTechNews(categorized.tech.length > 0 ? categorized.tech : allArticles.filter(a => categorizeArticle(a) === 'tech' || a.headline.toLowerCase().includes('tech')).slice(0, 8));
       renderFedNews(categorized.fed.length > 0 ? categorized.fed : allArticles.slice(5, 11));
-      // Default to 'today' period
-      renderEarningsNews(categorized.earnings.length > 0 ? categorized.earnings : allArticles.slice(8, 14), 'today');
-          // Earnings period tab switching
-          document.addEventListener('DOMContentLoaded', function() {
-            const earningsTabs = document.querySelectorAll('.earnings-period-tab');
-            let currentPeriod = 'today';
-            earningsTabs.forEach(tab => {
-              tab.addEventListener('click', function() {
-                earningsTabs.forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
-                currentPeriod = this.dataset.period;
-                // Re-render earnings with new period
-                if (window._latestEarningsArticles) {
-                  renderEarningsNews(window._latestEarningsArticles, currentPeriod);
-                }
-              });
-            });
-          });
-
-          // Patch: Save latest earnings for tab switching
-          const _origRenderEarningsNews = renderEarningsNews;
-          renderEarningsNews = function(articles, period) {
-            window._latestEarningsArticles = articles;
-            _origRenderEarningsNews(articles, period);
-          }
+      // Render earnings calendar (fetches its own data)
+      renderEarningsNews(null, 'today');
       renderCryptoNews(categorized.crypto.length > 0 ? categorized.crypto : allArticles.filter(a => a.headline.toLowerCase().includes('crypto') || a.headline.toLowerCase().includes('bitcoin')).slice(0, 8));
       renderNewsArticles(allArticles);
+    }
+
+    // Earnings period tab switching
+    document.addEventListener('DOMContentLoaded', function() {
+      const earningsTabs = document.querySelectorAll('.earnings-period-tab');
+      earningsTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+          earningsTabs.forEach(t => t.classList.remove('active'));
+          this.classList.add('active');
+          const period = this.dataset.period;
+          renderEarningsNews(null, period);
+        });
+      });
+    });
     }
 
     // Start loading when page loads
