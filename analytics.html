@@ -775,7 +775,9 @@
           datasets: [{
             label: 'Value',
             data: holdingsData.map(h => h.value),
-            backgroundColor: holdingsData.map(h => h.color),
+            backgroundColor: 'transparent',
+            borderColor: holdingsData.map(h => h.color),
+            borderWidth: 2,
             borderRadius: 6,
             borderSkipped: false,
             barPercentage: 0.4,
