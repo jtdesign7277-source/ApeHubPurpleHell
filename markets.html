@@ -569,43 +569,8 @@
         <span class="section-badge">AI Pick</span>
       </div>
       <div class="section-content">
-        <div class="scroll-container">
-          <div class="scroll-card">
-            <div class="scroll-card-symbol">NVDA</div>
-          <div class="scroll-card-name">NVIDIA Corp</div>
-          <div class="scroll-card-price">$140.14</div>
-          <div class="scroll-card-change up">+4.52%</div>
-        </div>
-        <div class="scroll-card">
-          <div class="scroll-card-symbol">TSLA</div>
-          <div class="scroll-card-name">Tesla Inc</div>
-          <div class="scroll-card-price">$394.36</div>
-          <div class="scroll-card-change up">+3.87%</div>
-        </div>
-        <div class="scroll-card">
-          <div class="scroll-card-symbol">PLTR</div>
-          <div class="scroll-card-name">Palantir</div>
-          <div class="scroll-card-price">$78.34</div>
-          <div class="scroll-card-change up">+4.56%</div>
-        </div>
-        <div class="scroll-card">
-          <div class="scroll-card-symbol">SMCI</div>
-          <div class="scroll-card-name">Super Micro</div>
-          <div class="scroll-card-price">$38.34</div>
-          <div class="scroll-card-change up">+5.67%</div>
-        </div>
-        <div class="scroll-card">
-          <div class="scroll-card-symbol">ARM</div>
-          <div class="scroll-card-name">Arm Holdings</div>
-          <div class="scroll-card-price">$168.92</div>
-          <div class="scroll-card-change up">+3.45%</div>
-        </div>
-        <div class="scroll-card">
-          <div class="scroll-card-symbol">COIN</div>
-          <div class="scroll-card-name">Coinbase</div>
-          <div class="scroll-card-price">$278.34</div>
-          <div class="scroll-card-change up">+5.67%</div>
-        </div>
+        <div class="scroll-container" id="trending-scroll">
+          <!-- Will be populated by JavaScript -->
         </div>
       </div>
     </div>
@@ -622,7 +587,7 @@
         <span class="section-badge">By Volume</span>
       </div>
       <div class="section-content">
-        <div class="stock-list">
+        <div class="stock-list" id="most-active-list">
           <div class="stock-row">
             <div class="stock-rank">1</div>
             <div class="stock-info">
@@ -699,7 +664,7 @@
         <span class="section-badge">High Momentum</span>
       </div>
       <div class="section-content">
-        <div class="stock-list">
+        <div class="stock-list" id="top-movers-list">
           <div class="stock-row">
             <div class="stock-rank">1</div>
             <div class="stock-info">
@@ -1218,7 +1183,7 @@
       const symbols = ['NVDA', 'TSLA', 'AAPL', 'AMD', 'PLTR'];
       const quotes = await StockAPI.getMultipleQuotes(symbols);
       
-      const activeList = document.querySelector('.stock-section:first-of-type .stock-list');
+      const activeList = document.getElementById('most-active-list');
       if (activeList && quotes.length > 0) {
         activeList.innerHTML = quotes.map((stock, i) => {
           const isUp = stock.changePercent >= 0;
@@ -1243,7 +1208,7 @@
       const symbols = ['RGTI', 'IONQ', 'SMCI', 'COIN', 'MSTR'];
       const quotes = await StockAPI.getMultipleQuotes(symbols);
       
-      const trendingList = document.querySelectorAll('.stock-section')[1]?.querySelector('.stock-list');
+      const trendingList = document.getElementById('top-movers-list');
       if (trendingList && quotes.length > 0) {
         trendingList.innerHTML = quotes.map((stock, i) => {
           const isUp = stock.changePercent >= 0;
@@ -1258,6 +1223,36 @@
               <div class="stock-change-col">
                 <span class="stock-change ${isUp ? 'up' : 'down'}">${isUp ? '+' : ''}${stock.changePercent.toFixed(2)}%</span>
               </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    // Update Trending Scroll (horizontal cards at top)
+    async function updateTrendingScroll() {
+      const symbols = ['NVDA', 'TSLA', 'PLTR', 'SMCI', 'ARM', 'COIN'];
+      const names = {
+        'NVDA': 'NVIDIA Corp',
+        'TSLA': 'Tesla Inc',
+        'PLTR': 'Palantir',
+        'SMCI': 'Super Micro',
+        'ARM': 'Arm Holdings',
+        'COIN': 'Coinbase'
+      };
+      
+      const quotes = await StockAPI.getMultipleQuotes(symbols);
+      const scrollContainer = document.getElementById('trending-scroll');
+      
+      if (scrollContainer && quotes.length > 0) {
+        scrollContainer.innerHTML = quotes.map(stock => {
+          const isUp = stock.changePercent >= 0;
+          return `
+            <div class="scroll-card">
+              <div class="scroll-card-symbol">${stock.symbol}</div>
+              <div class="scroll-card-name">${names[stock.symbol] || stock.symbol}</div>
+              <div class="scroll-card-price">$${stock.price.toFixed(2)}</div>
+              <div class="scroll-card-change ${isUp ? 'up' : 'down'}">${isUp ? '+' : ''}${stock.changePercent.toFixed(2)}%</div>
             </div>
           `;
         }).join('');
@@ -1300,6 +1295,7 @@
     // Initialize with real data
     document.addEventListener('DOMContentLoaded', function() {
       updateRealTimeMarketData('us');
+      updateTrendingScroll();
       updateMostActive();
       updateTrendingSection();
       updateGainersLosers();
@@ -1308,6 +1304,7 @@
       setInterval(() => {
         const activeRegion = document.querySelector('.region-tab.active')?.dataset.region || 'us';
         updateRealTimeMarketData(activeRegion);
+        updateTrendingScroll();
         updateMostActive();
         updateTrendingSection();
         updateGainersLosers();
