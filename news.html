@@ -1292,10 +1292,13 @@
     <!-- Earnings Section -->
     <div class="earnings-section" id="earnings-container">
       <div class="earnings-header">
-        <h2 class="earnings-title">📊 Latest Earnings</h2>
-        <span class="earnings-badge">Q4 2025</span>
+        <h2 class="earnings-title">Earnings</h2>
       </div>
-      
+      <div class="earnings-period-tabs">
+        <button class="earnings-period-tab active" data-period="today">Today</button>
+        <button class="earnings-period-tab" data-period="week">This Week</button>
+        <button class="earnings-period-tab" data-period="month">This Month</button>
+      </div>
       <!-- Dynamic Earnings Container -->
       <div id="earnings-articles-container">
         <div style="text-align: center; padding: 40px; color: var(--text-muted);">
@@ -1304,6 +1307,30 @@
         </div>
       </div>
     </div>
+    /* Earnings Period Tabs */
+    .earnings-period-tabs {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-start;
+      margin: 0 0 18px 0;
+      padding: 0 0 0 2px;
+    }
+    .earnings-period-tab {
+      background: var(--bg-card);
+      border: none;
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 7px 18px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .earnings-period-tab.active {
+      background: #1a1a22;
+      color: #fff;
+      box-shadow: 0 0 0 2px var(--accent-glow);
+    }
 
     <!-- Crypto Section -->
     <div class="crypto-section" id="crypto-container">
@@ -1643,28 +1670,57 @@
     }
     
     // Render Earnings News Section
-    function renderEarningsNews(articles) {
+    // Webull-style earnings card rendering with period filtering
+    function renderEarningsNews(articles, period = 'today') {
       const container = document.getElementById('earnings-articles-container');
-      
       if (!articles || articles.length === 0) {
         container.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">No earnings news available</div>';
         return;
       }
-      
-      container.innerHTML = articles.slice(0, 6).map(article => `
-        <a href="${article.url}" target="_blank" class="earnings-card" style="text-decoration: none; display: block; cursor: pointer;">
-          <div class="earnings-card-header">
-            <div class="earnings-company">
-              <span class="earnings-symbol">${article.related ? article.related.split(',')[0] : '📊'}</span>
-              <span class="earnings-name">${article.source || 'Earnings Report'}</span>
-            </div>
-            <div class="earnings-result">
-              <span class="earnings-date">${formatTimeAgo(article.datetime)}</span>
+
+      // Filter by period
+      const now = new Date();
+      let filtered = articles.filter(article => {
+        const artDate = new Date(article.datetime * 1000);
+        if (period === 'today') {
+          return artDate.toDateString() === now.toDateString();
+        } else if (period === 'week') {
+          const weekStart = new Date(now);
+          weekStart.setDate(now.getDate() - now.getDay());
+          const weekEnd = new Date(weekStart);
+          weekEnd.setDate(weekStart.getDate() + 6);
+          return artDate >= weekStart && artDate <= weekEnd;
+        } else if (period === 'month') {
+          return artDate.getMonth() === now.getMonth() && artDate.getFullYear() === now.getFullYear();
+        }
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">No earnings for this period</div>';
+        return;
+      }
+
+      container.innerHTML = filtered.map(article => `
+        <div class="earnings-card" style="background: var(--card-bg); border-radius: 16px; margin-bottom: 16px; padding: 18px 16px; display: flex; align-items: center; gap: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+          <div style="width: 44px; height: 44px; border-radius: 12px; background: #18181b; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; color: #fff;">
+            ${article.logo ? `<img src="${article.logo}" alt="logo" style="width:32px;height:32px;border-radius:8px;">` : (article.related ? article.related.split(',')[0][0] : '📊')}
+          </div>
+          <div style="flex:1; min-width:0;">
+            <div style="font-size:15px;font-weight:700;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${article.headline}</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">${article.source || 'Earnings'} • ${new Date(article.datetime*1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric'})}</div>
+            <div style="display:flex;gap:18px;margin-top:8px;">
+              <div><span style="font-size:11px;color:var(--text-muted);">Forecast</span><br><span style="font-size:14px;font-weight:600;">${article.forecast || '--'}</span></div>
+              <div><span style="font-size:11px;color:var(--text-muted);">Actual</span><br><span style="font-size:14px;font-weight:600;">${article.actual || '--'}</span></div>
+              <div><span style="font-size:11px;color:var(--text-muted);">EPS Growth</span><br><span style="font-size:14px;font-weight:600;">${article.epsGrowth || '--'}</span></div>
             </div>
           </div>
-          <h3 style="color: var(--text-primary); margin: 12px 0 8px; font-size: 15px; line-height: 1.4;">${article.headline}</h3>
-          <p style="color: var(--text-secondary); font-size: 13px; line-height: 1.5;">${article.summary ? article.summary.substring(0, 150) + '...' : ''}</p>
-        </a>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+            <span style="background:var(--bg-card);border-radius:8px;padding:7px 8px;display:flex;align-items:center;cursor:pointer;">
+              <svg width="20" height="20" fill="none" stroke="#a855f7" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="4"/><path d="M16 2v4M8 2v4M3 10h18M12 14v4"/></svg>
+            </span>
+          </div>
+        </div>
       `).join('');
     }
     
@@ -1786,7 +1842,31 @@
       renderBreakingNews(categorized.breaking);
       renderTechNews(categorized.tech.length > 0 ? categorized.tech : allArticles.filter(a => categorizeArticle(a) === 'tech' || a.headline.toLowerCase().includes('tech')).slice(0, 8));
       renderFedNews(categorized.fed.length > 0 ? categorized.fed : allArticles.slice(5, 11));
-      renderEarningsNews(categorized.earnings.length > 0 ? categorized.earnings : allArticles.slice(8, 14));
+      // Default to 'today' period
+      renderEarningsNews(categorized.earnings.length > 0 ? categorized.earnings : allArticles.slice(8, 14), 'today');
+          // Earnings period tab switching
+          document.addEventListener('DOMContentLoaded', function() {
+            const earningsTabs = document.querySelectorAll('.earnings-period-tab');
+            let currentPeriod = 'today';
+            earningsTabs.forEach(tab => {
+              tab.addEventListener('click', function() {
+                earningsTabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                currentPeriod = this.dataset.period;
+                // Re-render earnings with new period
+                if (window._latestEarningsArticles) {
+                  renderEarningsNews(window._latestEarningsArticles, currentPeriod);
+                }
+              });
+            });
+          });
+
+          // Patch: Save latest earnings for tab switching
+          const _origRenderEarningsNews = renderEarningsNews;
+          renderEarningsNews = function(articles, period) {
+            window._latestEarningsArticles = articles;
+            _origRenderEarningsNews(articles, period);
+          }
       renderCryptoNews(categorized.crypto.length > 0 ? categorized.crypto : allArticles.filter(a => a.headline.toLowerCase().includes('crypto') || a.headline.toLowerCase().includes('bitcoin')).slice(0, 8));
       renderNewsArticles(allArticles);
     }
