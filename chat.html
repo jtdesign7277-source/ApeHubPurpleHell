@@ -1061,8 +1061,13 @@
       const isCurrentUser = post.user.handle === currentUser.handle;
       let avatarContent = post.user.avatar;
       
-      // For current user's posts, use their saved avatar (which might be an image)
-      if (isCurrentUser && post.user.avatarType === 'image') {
+      // For current user's posts, use their latest saved avatar
+      if (isCurrentUser) {
+        avatarContent = currentUser.avatarType === 'image' 
+          ? `<img src="${currentUser.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` 
+          : currentUser.avatar;
+      } else if (post.user.avatarType === 'image') {
+        // For other users with image avatars
         avatarContent = `<img src="${post.user.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
       }
       
@@ -1116,7 +1121,12 @@
                 ${post.replies.map(reply => {
                   const isCurrentUserReply = reply.user.handle === currentUser.handle;
                   let replyAvatarContent = reply.user.avatar;
-                  if (isCurrentUserReply && reply.user.avatarType === 'image') {
+                  // For current user's replies, use their latest saved avatar
+                  if (isCurrentUserReply) {
+                    replyAvatarContent = currentUser.avatarType === 'image' 
+                      ? `<img src="${currentUser.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` 
+                      : currentUser.avatar;
+                  } else if (reply.user.avatarType === 'image') {
                     replyAvatarContent = `<img src="${reply.user.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
                   }
                   return `
