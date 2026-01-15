@@ -2194,11 +2194,12 @@
         console.log('Finnhub TNX fallback');
       }
       
-      // Final fallback
-      if (yieldEl) yieldEl.textContent = '4.65%';
+      // Final fallback - 10Y yield around 4.14% (Jan 2026)
+      // Down from 4.2% high after softer inflation data
+      if (yieldEl) yieldEl.textContent = '4.14%';
       if (yieldChangeEl) {
-        yieldChangeEl.textContent = 'Live';
-        yieldChangeEl.className = 'fed-rate-change neutral';
+        yieldChangeEl.textContent = '-0.02%';
+        yieldChangeEl.className = 'fed-rate-change down';
       }
     }
     
@@ -2254,9 +2255,9 @@
         fedRateEl.nextElementSibling.className = 'fed-rate-change neutral';
       }
       if (yieldEl) {
-        yieldEl.textContent = '4.62%';
-        document.getElementById('yield-10y-change').textContent = '+0.03%';
-        document.getElementById('yield-10y-change').className = 'fed-rate-change up';
+        yieldEl.textContent = '4.14%';
+        document.getElementById('yield-10y-change').textContent = '-0.02%';
+        document.getElementById('yield-10y-change').className = 'fed-rate-change down';
       }
       if (cpiEl) {
         cpiEl.textContent = '2.7%';
