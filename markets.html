@@ -1079,24 +1079,52 @@
     async function updateRealTimeMarketData(region) {
       const marketOverview = document.getElementById('market-overview');
       
-      // Use ETFs instead of index symbols for Finnhub compatibility
+      // Use ETFs for US (Finnhub supported), simulated data for international
       const regionSymbols = {
-        us: ['SPY', 'QQQ', 'DIA', 'IWM'],
-        europe: ['EWG', 'EWU', 'EWQ', 'VGK'],
-        asia: ['EWJ', 'EWH', 'FXI', 'EWY']
+        us: ['SPY', 'QQQ', 'DIA', 'IWM']
       };
       
       const regionNames = {
         us: ['S&P 500', 'NASDAQ', 'DOW JONES', 'RUSSELL 2000'],
-        europe: ['GERMANY', 'UK', 'FRANCE', 'EUROPE'],
-        asia: ['JAPAN', 'HONG KONG', 'CHINA', 'KOREA']
+        europe: ['DAX', 'FTSE 100', 'CAC 40', 'STOXX 600'],
+        asia: ['NIKKEI 225', 'HANG SENG', 'SHANGHAI', 'KOSPI']
       };
       
-      const symbols = regionSymbols[region] || regionSymbols.us;
+      // Simulated international data (Finnhub free tier only supports US)
+      const simulatedData = {
+        europe: [
+          { price: 18245.32, change: 87.45, changePercent: 0.48 },
+          { price: 8156.78, change: -23.12, changePercent: -0.28 },
+          { price: 7589.45, change: 45.67, changePercent: 0.61 },
+          { price: 512.34, change: 3.21, changePercent: 0.63 }
+        ],
+        asia: [
+          { price: 38456.78, change: -156.34, changePercent: -0.41 },
+          { price: 19234.56, change: 234.56, changePercent: 1.23 },
+          { price: 3156.78, change: 12.34, changePercent: 0.39 },
+          { price: 2567.89, change: -34.56, changePercent: -1.33 }
+        ]
+      };
+      
       const names = regionNames[region] || regionNames.us;
       
       try {
-        const quotes = await StockAPI.getMultipleQuotes(symbols);
+        let quotes = [];
+        
+        if (region === 'us') {
+          // Fetch real data for US markets
+          const symbols = regionSymbols.us;
+          quotes = await StockAPI.getMultipleQuotes(symbols);
+        } else {
+          // Use simulated data for international markets
+          quotes = simulatedData[region].map((data, i) => ({
+            symbol: names[i],
+            name: names[i],
+            price: data.price,
+            change: data.change,
+            changePercent: data.changePercent
+          }));
+        }
         
         if (quotes.length > 0) {
           marketOverview.innerHTML = quotes.map((q, i) => {
