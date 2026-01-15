@@ -180,6 +180,38 @@
       height: 280px;
     }
 
+    /* Time Frame Tabs */
+    .timeframe-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .timeframe-tab {
+      padding: 6px 12px;
+      border: 1px solid var(--border-color);
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 16px;
+      transition: all 0.2s;
+    }
+
+    .timeframe-tab:hover {
+      border-color: var(--accent);
+      color: var(--text-primary);
+    }
+
+    .timeframe-tab.active {
+      background: transparent;
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 8px var(--accent-glow);
+    }
+
     /* Holdings Breakdown */
     .holdings-section {
       padding: 0 20px;
@@ -426,6 +458,14 @@
     <div class="chart-view" id="line-view">
       <div class="chart-container">
         <div class="chart-title">Portfolio Value Over Time</div>
+        <div class="timeframe-tabs">
+          <button class="timeframe-tab" data-period="1D">1D</button>
+          <button class="timeframe-tab" data-period="1W">1W</button>
+          <button class="timeframe-tab active" data-period="1M">1M</button>
+          <button class="timeframe-tab" data-period="YTD">YTD</button>
+          <button class="timeframe-tab" data-period="1Y">1Y</button>
+          <button class="timeframe-tab" data-period="ALL">All</button>
+        </div>
         <div class="chart-wrapper">
           <canvas id="lineChart"></canvas>
         </div>
@@ -775,7 +815,7 @@
           datasets: [{
             label: 'Value',
             data: holdingsData.map(h => h.value),
-            backgroundColor: 'transparent',
+            backgroundColor: holdingsData.map(h => h.color + '20'),
             borderColor: holdingsData.map(h => h.color),
             borderWidth: 2,
             borderRadius: 0,
@@ -827,30 +867,89 @@
       });
 
       // Line Chart (simulated historical data based on actual positions)
-      function generateHistoricalData() {
-        const days = 30;
-        const data = [];
-        let value = totalValue * 0.85; // Start 15% lower
+      let currentTimeframe = '1M';
+      
+      function generateHistoricalData(period) {
+        let days, dateFormat, startValue;
+        const now = new Date();
         
-        for (let i = days; i >= 0; i--) {
+        switch(period) {
+          case '1D':
+            days = 1;
+            dateFormat = { hour: 'numeric', minute: '2-digit' };
+            startValue = totalValue * 0.995; // Small daily variance
+            break;
+          case '1W':
+            days = 7;
+            dateFormat = { weekday: 'short' };
+            startValue = totalValue * 0.97;
+            break;
+          case '1M':
+            days = 30;
+            dateFormat = { month: 'short', day: 'numeric' };
+            startValue = totalValue * 0.85;
+            break;
+          case 'YTD':
+            // Days from Jan 1 to now
+            const jan1 = new Date(now.getFullYear(), 0, 1);
+            days = Math.floor((now - jan1) / (1000 * 60 * 60 * 24));
+            dateFormat = { month: 'short', day: 'numeric' };
+            startValue = totalValue * 0.75;
+            break;
+          case '1Y':
+            days = 365;
+            dateFormat = { month: 'short', year: '2-digit' };
+            startValue = totalValue * 0.6;
+            break;
+          case 'ALL':
+            days = 730; // 2 years
+            dateFormat = { month: 'short', year: '2-digit' };
+            startValue = totalValue * 0.4;
+            break;
+          default:
+            days = 30;
+            dateFormat = { month: 'short', day: 'numeric' };
+            startValue = totalValue * 0.85;
+        }
+        
+        const data = [];
+        let value = startValue;
+        const pointCount = Math.min(days, period === '1D' ? 24 : period === '1W' ? 7 : period === '1M' ? 30 : 60);
+        const step = days / pointCount;
+        
+        for (let i = pointCount; i >= 0; i--) {
           const date = new Date();
-          date.setDate(date.getDate() - i);
+          if (period === '1D') {
+            date.setHours(date.getHours() - i);
+          } else {
+            date.setDate(date.getDate() - Math.floor(i * step));
+          }
           
-          // Add some randomness
-          const change = (Math.random() - 0.45) * (value * 0.02);
-          value = Math.max(value + change, totalValue * 0.7);
+          // Add some randomness based on period volatility
+          const volatility = period === '1D' ? 0.003 : period === '1W' ? 0.008 : 0.015;
+          const change = (Math.random() - 0.45) * (value * volatility);
+          value = Math.max(value + change, startValue * 0.8);
           
           if (i === 0) value = totalValue; // End at current value
           
           data.push({
-            date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            date: date.toLocaleDateString('en-US', dateFormat),
             value: value
           });
         }
         return data;
       }
 
-      const historicalData = generateHistoricalData();
+      function updateLineChart(period) {
+        currentTimeframe = period;
+        const historicalData = generateHistoricalData(period);
+        
+        lineChart.data.labels = historicalData.map(d => d.date);
+        lineChart.data.datasets[0].data = historicalData.map(d => d.value);
+        lineChart.update();
+      }
+
+      const historicalData = generateHistoricalData(currentTimeframe);
       const lineCtx = document.getElementById('lineChart').getContext('2d');
       lineChart = new Chart(lineCtx, {
         type: 'line',
@@ -927,6 +1026,20 @@
         // Show corresponding view
         document.querySelectorAll('.chart-view').forEach(v => v.classList.remove('active'));
         document.getElementById(view + '-view').classList.add('active');
+      });
+    });
+
+    // Timeframe tab switching
+    document.querySelectorAll('.timeframe-tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        const period = this.dataset.period;
+        
+        // Update active tab
+        document.querySelectorAll('.timeframe-tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        
+        // Update line chart
+        updateLineChart(period);
       });
     });
 
