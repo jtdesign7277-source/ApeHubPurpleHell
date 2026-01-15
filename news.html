@@ -269,59 +269,81 @@
     }
 
     /* Earnings Section */
-    .earnings-section {
-      display: none;
-      padding: 0 24px;
-    }
+    // Render Earnings News Section with live, prioritized, accurate upcoming earnings
+    async function renderEarningsNews(articles, period = 'today') {
+      const container = document.getElementById('earnings-articles-container');
+      container.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">Loading earnings...</div>';
 
-    .earnings-section.active {
-      display: block;
-    }
+      // Get date range for period
+      const now = new Date();
+      let from, to;
+      if (period === 'today') {
+        from = to = now.toISOString().slice(0, 10);
+      } else if (period === 'week') {
+        const weekStart = new Date(now);
+        weekStart.setDate(now.getDate() - now.getDay());
+        from = weekStart.toISOString().slice(0, 10);
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6);
+        to = weekEnd.toISOString().slice(0, 10);
+      } else if (period === 'month') {
+        from = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
+        to = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().slice(0, 10);
+      }
 
-    .earnings-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
+      // Fetch upcoming earnings from Finnhub
+      const FINNHUB_API_KEY = 'd5c3ijpr01qsbmgib7u0d5c3ijpr01qsbmgib7ug';
+      let earnings = [];
+      try {
+        const resp = await fetch(`https://finnhub.io/api/v1/calendar/earnings?from=${from}&to=${to}&token=${FINNHUB_API_KEY}`);
+        const data = await resp.json();
+        earnings = (data.earningsCalendar || []).filter(e => e.symbol && e.company);
+      } catch (e) {
+        container.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">Error loading earnings</div>';
+        return;
+      }
 
-    .earnings-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
+      // Prioritize by market cap (if available) or just show top companies
+      earnings.sort((a, b) => (b.marketCap || 0) - (a.marketCap || 0));
+      const topEarnings = earnings.slice(0, 12);
 
-    .earnings-badge {
-      font-size: 11px;
-      font-weight: 600;
-      color: #a855f7;
-      text-transform: uppercase;
-    }
+      if (topEarnings.length === 0) {
+        container.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">No major earnings for this period</div>';
+        return;
+      }
 
-    .earnings-card {
-      background: transparent;
-      border: none;
-      border-bottom: 1px solid var(--border-light);
-      border-radius: 0;
-      padding: 16px 0;
-      margin-bottom: 0;
-    }
+      // Fetch company logos in parallel
+      const logoMap = {};
+      await Promise.all(topEarnings.map(async (e) => {
+        try {
+          const logoResp = await fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${e.symbol}&token=${FINNHUB_API_KEY}`);
+          const logoData = await logoResp.json();
+          if (logoData.logo) logoMap[e.symbol] = logoData.logo;
+        } catch {}
+      }));
 
-    .earnings-card:last-child {
-      border-bottom: none;
+      container.innerHTML = topEarnings.map(e => `
+        <div class="earnings-card" style="background: var(--card-bg); border-radius: 16px; margin-bottom: 16px; padding: 18px 16px; display: flex; align-items: center; gap: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+          <div style="width: 44px; height: 44px; border-radius: 12px; background: #18181b; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; color: #fff;">
+            ${logoMap[e.symbol] ? `<img src="${logoMap[e.symbol]}" alt="logo" style="width:32px;height:32px;border-radius:8px;">` : e.symbol[0]}
+          </div>
+          <div style="flex:1; min-width:0;">
+            <div style="font-size:15px;font-weight:700;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${e.company}</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">${e.symbol} • ${e.date}</div>
+            <div style="display:flex;gap:18px;margin-top:8px;">
+              <div><span style="font-size:11px;color:var(--text-muted);">Forecast</span><br><span style="font-size:14px;font-weight:600;">${e.epsEstimate != null ? e.epsEstimate : '--'}</span></div>
+              <div><span style="font-size:11px;color:var(--text-muted);">Actual</span><br><span style="font-size:14px;font-weight:600;">${e.epsActual != null ? e.epsActual : '--'}</span></div>
+              <div><span style="font-size:11px;color:var(--text-muted);">Revenue</span><br><span style="font-size:14px;font-weight:600;">${e.revenueEstimate != null ? (e.revenueEstimate/1e6).toFixed(1)+'M' : '--'}</span></div>
+            </div>
+          </div>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+            <span style="background:var(--bg-card);border-radius:8px;padding:7px 8px;display:flex;align-items:center;cursor:pointer;">
+              <svg width="20" height="20" fill="none" stroke="#a855f7" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="4"/><path d="M16 2v4M8 2v4M3 10h18M12 14v4"/></svg>
+            </span>
+          </div>
+        </div>
+      `).join('');
     }
-
-    .earnings-card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 14px;
-    }
-
-    .earnings-company {
-      display: flex;
-      align-items: center;
-      gap: 12px;
     }
 
     .earnings-symbol {
