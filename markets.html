@@ -89,43 +89,6 @@
       color: var(--text-muted);
     }
 
-    /* Region Tabs */
-    .region-tabs {
-      display: flex;
-      gap: 6px;
-      margin: 0 24px 24px;
-      background: var(--input-bg);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 4px;
-    }
-
-    .region-tab {
-      flex: 1;
-      padding: 10px 16px;
-      background: var(--bg-card);
-      border: 2px solid transparent;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-muted);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .region-tab:hover {
-      background: rgba(124, 58, 237, 0.1);
-      color: var(--text-secondary);
-    }
-
-    .region-tab.active {
-      background: rgba(124, 58, 237, 0.15);
-      border-color: #7c3aed;
-      color: #7c3aed;
-    }
-
     /* Section Headers */
     .section-header {
       display: flex;
@@ -507,13 +470,6 @@
         <path d="M12 2a4 4 0 0 1 4 4v1h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h2V6a4 4 0 0 1 4-4z"/>
       </svg>
       AI-generated market data • Updated every minute
-    </div>
-
-    <!-- Region Tabs -->
-    <div class="region-tabs">
-      <button class="region-tab active" data-region="us">🇺🇸 US</button>
-      <button class="region-tab" data-region="europe">🇪🇺 Europe</button>
-      <button class="region-tab" data-region="asia">🌏 Asia</button>
     </div>
 
     <!-- Market Overview -->
