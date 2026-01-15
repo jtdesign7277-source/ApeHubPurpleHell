@@ -26,6 +26,8 @@
       --nav-bg: rgba(10, 10, 15, 0.95);
       --card-bg: #16161d;
       --input-bg: rgba(255, 255, 255, 0.08);
+      --color-up: #00d775;
+      --color-down: #ff4757;
     }
 
     [data-theme="light"] {
@@ -43,6 +45,8 @@
       --nav-bg: rgba(255, 255, 255, 0.95);
       --card-bg: #ffffff;
       --input-bg: #f0f0f5;
+      --color-up: #16a34a;
+      --color-down: #dc2626;
     }
 
     body {
@@ -91,7 +95,7 @@
     .online-dot {
       width: 6px;
       height: 6px;
-      background: #00d775;
+      background: var(--color-up);
       border-radius: 50%;
       animation: pulse 2s infinite;
     }
@@ -244,20 +248,20 @@
 
     .action-btn.like:hover,
     .action-btn.like:active {
-      color: #00d775;
+      color: var(--color-up);
     }
 
     .action-btn.like.active {
-      color: #00d775;
+      color: var(--color-up);
     }
 
     .action-btn.dislike:hover,
     .action-btn.dislike:active {
-      color: #ff4757;
+      color: var(--color-down);
     }
 
     .action-btn.dislike.active {
-      color: #ff4757;
+      color: var(--color-down);
     }
 
     /* Reply Section */
@@ -620,7 +624,7 @@
     }
 
     .char-count.danger {
-      color: #ff4757;
+      color: var(--color-down);
     }
 
     .post-image {

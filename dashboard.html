@@ -33,6 +33,8 @@
       --nav-bg: rgba(10, 10, 15, 0.95);
       --card-bg: #16161d;
       --input-bg: rgba(255, 255, 255, 0.08);
+      --color-up: #00d775;
+      --color-down: #ff4757;
     }
 
     [data-theme="light"] {
@@ -51,6 +53,8 @@
       --nav-bg: rgba(255, 255, 255, 0.95);
       --card-bg: #ffffff;
       --input-bg: #f0f0f5;
+      --color-up: #16a34a;
+      --color-down: #dc2626;
     }
 
     body {
@@ -149,11 +153,11 @@
     }
 
     .futures-chart .chart-line.up {
-      stroke: #00d775;
+      stroke: var(--color-up);
     }
 
     .futures-chart .chart-line.down {
-      stroke: #ff4757;
+      stroke: var(--color-down);
     }
 
     .futures-chart .zero-line {
@@ -176,11 +180,11 @@
     }
 
     .futures-change.up {
-      color: #00d775;
+      color: var(--color-up);
     }
 
     .futures-change.down {
-      color: #ff4757;
+      color: var(--color-down);
     }
 
     .apehub-logo {
@@ -396,7 +400,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #00d775;
+      color: var(--color-up);
       font-size: 18px;
       border: 1px solid rgba(0, 215, 117, 0.3);
       box-shadow: 0 0 8px rgba(0, 215, 117, 0.2);
@@ -486,7 +490,7 @@
 
     .chat-message.user {
       background: rgba(0, 215, 117, 0.1);
-      border: 2px solid #00d775;
+      border: 2px solid var(--color-up);
       color: #fff;
       align-self: flex-end;
       border-bottom-right-radius: 4px;
@@ -517,7 +521,7 @@
     }
 
     .chat-input:focus {
-      border-color: #00d775;
+      border-color: var(--color-up);
       background: rgba(0, 215, 117, 0.15);
       box-shadow: 0 0 12px rgba(0, 215, 117, 0.3);
     }
@@ -530,7 +534,7 @@
       width: 44px;
       height: 44px;
       border-radius: 50%;
-      background: #00d775;
+      background: var(--color-up);
       border: none;
       color: #fff;
       font-size: 18px;
@@ -556,9 +560,9 @@
       width: 100%;
       padding: 16px;
       background: rgba(0, 215, 117, 0.1);
-      border: 2px solid #00d775;
+      border: 2px solid var(--color-up);
       border-radius: 12px;
-      color: #00d775;
+      color: var(--color-up);
       font-size: 15px;
       font-weight: 600;
       cursor: pointer;
@@ -686,11 +690,11 @@
     }
 
     .market-change.up {
-      color: #00d775;
+      color: var(--color-up);
     }
 
     .market-change.down {
-      color: #ff4757;
+      color: var(--color-down);
     }
 
     /* ============================================
@@ -744,11 +748,11 @@
     .wl-today-change {
       font-size: 13px;
       font-weight: 600;
-      color: #00d775;
+      color: var(--color-up);
     }
 
     .wl-today-change.down {
-      color: #ff4757;
+      color: var(--color-down);
     }
 
     .wl-alltime-row {
@@ -760,11 +764,11 @@
     .wl-alltime-change {
       font-size: 13px;
       font-weight: 600;
-      color: #00d775;
+      color: var(--color-up);
     }
 
     .wl-alltime-change.down {
-      color: #ff4757;
+      color: var(--color-down);
     }
 
     .wl-change-label {
@@ -1055,7 +1059,7 @@
     }
 
     .wl-result-change.up {
-      background: #00d775;
+      background: var(--color-up);
       color: #000;
     }
 
@@ -1213,11 +1217,11 @@
     }
 
     .wl-stock-change.up {
-      color: #00d775;
+      color: var(--color-up);
     }
 
     .wl-stock-change.down {
-      color: #ff4757;
+      color: var(--color-down);
     }
 
     /* Remove button */
@@ -1239,7 +1243,7 @@
     }
 
     .wl-remove-btn:hover {
-      color: #ff4757;
+      color: var(--color-down);
     }
 
     /* ============================================
@@ -1295,7 +1299,7 @@
     }
 
     .wl-toast.success {
-      border-left: 3px solid #00d775;
+      border-left: 3px solid var(--color-up);
     }
 
     .wl-toast.removed {
@@ -1388,11 +1392,11 @@
     }
 
     .modal-price-change.up {
-      color: #00d775;
+      color: var(--color-up);
     }
 
     .modal-price-change.down {
-      color: #ff4757;
+      color: var(--color-down);
     }
 
     .modal-form {
@@ -1506,11 +1510,11 @@
     }
 
     .summary-value.gain {
-      color: #00d775;
+      color: var(--color-up);
     }
 
     .summary-value.loss {
-      color: #ff4757;
+      color: var(--color-down);
     }
 
     .modal-buttons {
@@ -1559,8 +1563,8 @@
 
     .modal-btn-add {
       background: rgba(0, 215, 117, 0.1);
-      border-color: #00d775;
-      color: #00d775;
+      border-color: var(--color-up);
+      color: var(--color-up);
       box-shadow: 0 0 12px rgba(0, 215, 117, 0.3), inset 0 0 8px rgba(0, 215, 117, 0.1);
     }
 
@@ -3145,7 +3149,9 @@
       }
       
       const pathData = points.map((p, i) => (i === 0 ? `M ${p.x},${p.y}` : `L ${p.x},${p.y}`)).join(' ');
-      const color = trend === 'up' ? '#00d775' : '#ff4757';
+      const upColor = getComputedStyle(document.documentElement).getPropertyValue('--color-up').trim() || '#00d775';
+      const downColor = getComputedStyle(document.documentElement).getPropertyValue('--color-down').trim() || '#ff4757';
+      const color = trend === 'up' ? upColor : downColor;
       
       return `
         <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
@@ -3313,7 +3319,9 @@
     function generateFuturesMiniChart(data, isUp) {
       const width = 100;
       const height = 30;
-      const color = isUp ? '#00d775' : '#ff4757';
+      const upColor = getComputedStyle(document.documentElement).getPropertyValue('--color-up').trim() || '#00d775';
+      const downColor = getComputedStyle(document.documentElement).getPropertyValue('--color-down').trim() || '#ff4757';
+      const color = isUp ? upColor : downColor;
       
       const min = Math.min(...data);
       const max = Math.max(...data);

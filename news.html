@@ -26,6 +26,8 @@
       --nav-bg: rgba(10, 10, 15, 0.95);
       --card-bg: #16161d;
       --input-bg: rgba(255, 255, 255, 0.08);
+      --color-up: #00d775;
+      --color-down: #ff4757;
     }
 
     [data-theme="light"] {
@@ -43,6 +45,8 @@
       --nav-bg: rgba(255, 255, 255, 0.95);
       --card-bg: #ffffff;
       --input-bg: #f0f0f5;
+      --color-up: #16a34a;
+      --color-down: #dc2626;
     }
 
     body {
@@ -107,7 +111,7 @@
     }
 
     .last-updated span {
-      color: #00d775;
+      color: var(--color-up);
     }
 
     /* Category Tabs */
@@ -227,12 +231,12 @@
 
     .news-tag.bullish {
       background: rgba(0, 215, 117, 0.1);
-      color: #00d775;
+      color: var(--color-up);
     }
 
     .news-tag.bearish {
       background: rgba(255, 71, 87, 0.1);
-      color: #ff4757;
+      color: var(--color-down);
     }
 
     .news-stocks {
@@ -260,11 +264,11 @@
     }
 
     .news-stock-change.up {
-      color: #00d775;
+      color: var(--color-up);
     }
 
     .news-stock-change.down {
-      color: #ff4757;
+      color: var(--color-down);
     }
 
     /* Earnings Section Styles */
@@ -319,12 +323,12 @@
 
     .earnings-result-badge.beat {
       background: rgba(0, 215, 117, 0.12);
-      color: #00d775;
+      color: var(--color-up);
     }
 
     .earnings-result-badge.miss {
       background: rgba(255, 71, 87, 0.12);
-      color: #ff4757;
+      color: var(--color-down);
     }
 
     .earnings-result-badge.inline {
@@ -368,11 +372,11 @@
     }
 
     .earnings-metric-value.up {
-      color: #00d775;
+      color: var(--color-up);
     }
 
     .earnings-metric-value.down {
-      color: #ff4757;
+      color: var(--color-down);
     }
 
     .earnings-stock-move {
@@ -395,11 +399,11 @@
     }
 
     .earnings-stock-change.up {
-      color: #00d775;
+      color: var(--color-up);
     }
 
     .earnings-stock-change.down {
-      color: #ff4757;
+      color: var(--color-down);
     }
 
     /* Earnings Period Tabs - Modern Pill Style */
@@ -526,19 +530,19 @@
 
     /* Bullish/Beat State */
     .earnings-timeline-dot.bullish {
-      border-color: #00d775;
+      border-color: var(--color-up);
       box-shadow: 0 0 12px rgba(0, 215, 117, 0.5), 0 0 24px rgba(0, 215, 117, 0.2);
     }
 
     .earnings-timeline-dot.bullish::before {
-      background: #00d775;
+      background: var(--color-up);
       opacity: 1;
       animation: pulse-glow 2s infinite;
     }
 
     /* Bearish/Miss State */
     .earnings-timeline-dot.bearish {
-      border-color: #ff4757;
+      border-color: var(--color-down);
       box-shadow: 0 0 12px rgba(255, 71, 87, 0.5), 0 0 24px rgba(255, 71, 87, 0.2);
     }
 
@@ -576,7 +580,7 @@
     }
 
     .earnings-bloomberg-card.bullish {
-      border-left: 3px solid #00d775;
+      border-left: 3px solid var(--color-up);
     }
 
     .earnings-bloomberg-card.bearish {
@@ -612,13 +616,13 @@
 
     .earnings-bloomberg-logo.bullish {
       background: linear-gradient(135deg, rgba(0, 215, 117, 0.15), rgba(0, 215, 117, 0.05));
-      color: #00d775;
+      color: var(--color-up);
       border-color: rgba(0, 215, 117, 0.3);
     }
 
     .earnings-bloomberg-logo.bearish {
       background: linear-gradient(135deg, rgba(255, 71, 87, 0.15), rgba(255, 71, 87, 0.05));
-      color: #ff4757;
+      color: var(--color-down);
       border-color: rgba(255, 71, 87, 0.3);
     }
 
@@ -704,11 +708,11 @@
     }
 
     .earnings-metric-box .value.bullish {
-      color: #00d775;
+      color: var(--color-up);
     }
 
     .earnings-metric-box .value.bearish {
-      color: #ff4757;
+      color: var(--color-down);
     }
 
     /* Result Badge */
@@ -726,12 +730,12 @@
 
     .earnings-result-tag.beat {
       background: rgba(0, 215, 117, 0.15);
-      color: #00d775;
+      color: var(--color-up);
     }
 
     .earnings-result-tag.miss {
       background: rgba(255, 71, 87, 0.15);
-      color: #ff4757;
+      color: var(--color-down);
     }
 
     .earnings-result-tag.pending {
@@ -852,11 +856,11 @@
     }
 
     .crypto-pct.up {
-      color: #00d775;
+      color: var(--color-up);
     }
 
     .crypto-pct.down {
-      color: #ff4757;
+      color: var(--color-down);
     }
 
     .crypto-article {
@@ -913,12 +917,12 @@
 
     .crypto-sentiment.bullish {
       background: rgba(0, 215, 117, 0.1);
-      color: #00d775;
+      color: var(--color-up);
     }
 
     .crypto-sentiment.bearish {
       background: rgba(255, 71, 87, 0.1);
-      color: #ff4757;
+      color: var(--color-down);
     }
 
     .crypto-sentiment.neutral {
@@ -955,7 +959,7 @@
       gap: 6px;
       font-size: 11px;
       font-weight: 600;
-      color: #ff4757;
+      color: var(--color-down);
       text-transform: uppercase;
     }
 
@@ -984,7 +988,7 @@
     .breaking-alert-label {
       font-size: 10px;
       font-weight: 700;
-      color: #ff4757;
+      color: var(--color-down);
       text-transform: uppercase;
       letter-spacing: 1px;
       margin-bottom: 6px;
@@ -1021,7 +1025,7 @@
     .breaking-urgent {
       font-size: 9px;
       font-weight: 700;
-      color: #ff4757;
+      color: var(--color-down);
       background: rgba(255, 71, 87, 0.15);
       padding: 3px 8px;
       border-radius: 4px;
@@ -1068,11 +1072,11 @@
     }
 
     .breaking-stock-change.up {
-      color: #00d775;
+      color: var(--color-up);
     }
 
     .breaking-stock-change.down {
-      color: #ff4757;
+      color: var(--color-down);
     }
 
     /* Fed & Economy Section - Bloomberg Style */
@@ -1139,11 +1143,11 @@
     }
 
     .fed-rate-change.up {
-      color: #ff4757;
+      color: var(--color-down);
     }
 
     .fed-rate-change.down {
-      color: #00d775;
+      color: var(--color-up);
     }
 
     .fed-rate-change.neutral {
@@ -1277,7 +1281,7 @@
     }
 
     .econ-event-dot.high {
-      border-color: #ff4757;
+      border-color: var(--color-down);
       box-shadow: 0 0 12px rgba(255, 71, 87, 0.4);
     }
 
@@ -1398,11 +1402,11 @@
     }
 
     .econ-data-item .value.bullish {
-      color: #00d775;
+      color: var(--color-up);
     }
 
     .econ-data-item .value.bearish {
-      color: #ff4757;
+      color: var(--color-down);
     }
 
     /* Impact Badge */
@@ -1420,7 +1424,7 @@
 
     .econ-impact-badge.high {
       background: rgba(255, 71, 87, 0.15);
-      color: #ff4757;
+      color: var(--color-down);
     }
 
     .econ-impact-badge.medium {
@@ -1498,12 +1502,12 @@
 
     .fed-impact-badge.bullish {
       background: rgba(0, 215, 117, 0.1);
-      color: #00d775;
+      color: var(--color-up);
     }
 
     .fed-impact-badge.bearish {
       background: rgba(255, 71, 87, 0.1);
-      color: #ff4757;
+      color: var(--color-down);
     }
 
     .fed-impact-badge.neutral {
@@ -1575,11 +1579,11 @@
     }
 
     .tech-mover-change.up {
-      color: #00d775;
+      color: var(--color-up);
     }
 
     .tech-mover-change.down {
-      color: #ff4757;
+      color: var(--color-down);
     }
 
     .tech-article {
@@ -1651,11 +1655,11 @@
     }
 
     .tech-stock-change.up {
-      color: #00d775;
+      color: var(--color-up);
     }
 
     .tech-stock-change.down {
-      color: #ff4757;
+      color: var(--color-down);
     }
 
     /* Featured Article */
