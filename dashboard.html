@@ -4456,19 +4456,23 @@
       // Simulate support response after delay
       setTimeout(() => {
         const responses = [
-          "Thanks for reaching out! I've noted your concern and our team will look into it.",
-          "Got it! We appreciate your feedback. Is there anything else I can help with?",
-          "Thank you for your message! Our team typically responds within 24 hours for detailed inquiries.",
-          "I understand. Let me check on that for you. You'll receive an update via email shortly.",
-          "Thanks for letting us know! We're always working to improve ApeHub."
+          "Thanks for reaching out! 🙌 I've noted your concern and our team will look into it right away.",
+          "Got it! We appreciate you taking the time to message us. Is there anything else I can help with today?",
+          "Thank you for your message! Our team typically responds within 24 hours for detailed inquiries. We'll get back to you soon!",
+          "I understand completely. Let me check on that for you. You'll receive an update via email shortly. 📧",
+          "Thanks for letting us know! We're always working to improve ApeHub and feedback like yours helps a lot.",
+          "Great question! Let me look into that for you. In the meantime, feel free to browse our FAQ section for quick answers.",
+          "Appreciate you reaching out! 💜 Our support team has been notified and will follow up with you shortly.",
+          "Hey there! Thanks for the message. I'm forwarding this to our specialists who can better assist you.",
+          "Thanks for your patience! We're currently experiencing high volume but rest assured, we'll get to your inquiry ASAP.",
+          "Noted! ✅ We value your input and will use it to make ApeHub even better. Anything else on your mind?"
         ];
         const response = responses[Math.floor(Math.random() * responses.length)];
-        const responseTime = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
         
         chatMessages.push({ type: 'support', text: response, time: 'Support Team' });
         renderChatMessages();
         saveChatMessages();
-      }, 1500);
+      }, 1000 + Math.random() * 1500);
     }
 
     function handleChatKeypress(e) {
