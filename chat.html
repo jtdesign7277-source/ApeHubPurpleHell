@@ -812,12 +812,17 @@
     function loadCurrentUser() {
       const firstName = localStorage.getItem('userFirstName') || 'User';
       const lastName = localStorage.getItem('userLastName') || '';
+      const email = localStorage.getItem('userEmail') || '';
       const savedAvatar = JSON.parse(localStorage.getItem('userAvatar') || 'null');
       
       console.log('Loading user avatar:', savedAvatar);
       
       currentUser.name = firstName + (lastName ? ' ' + lastName : '');
-      currentUser.handle = '@' + firstName.toLowerCase();
+      // Use email username as handle (before @) to match how posts are created
+      const emailHandle = email ? email.split('@')[0] : firstName.toLowerCase();
+      currentUser.handle = '@' + emailHandle;
+      
+      console.log('Current user handle:', currentUser.handle);
       
       if (savedAvatar && savedAvatar.value) {
         if (savedAvatar.type === 'emoji') {
