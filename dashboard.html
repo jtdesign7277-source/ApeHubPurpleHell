@@ -3746,13 +3746,13 @@
     }
 
     // ============================================
-    // AVATAR SELECTOR (DICEBEAR SHAPES - SIMPLE)
+    // AVATAR SELECTOR (BORING AVATARS - COINBASE STYLE)
     // ============================================
     let avatarVariations = [];
     let avatarShuffleSeed = Date.now();
     
     function generateAvatarUrl(seed) {
-      return `https://api.dicebear.com/7.x/shapes/png?seed=${encodeURIComponent(seed)}&size=200`;
+      return `https://source.boringavatars.com/beam/120/${encodeURIComponent(seed)}?colors=264653,2a9d8f,e9c46a,f4a261,e76f51`;
     }
     
     function generateVariations(count = 12) {
@@ -3787,7 +3787,7 @@
     
     function selectVariation(seed, url, evt) {
       const avatarData = { 
-        type: 'dicebear', 
+        type: 'boring', 
         value: url, 
         seed: seed 
       };
@@ -3884,7 +3884,7 @@
         return;
       }
       
-      if (avatarData.type === 'image' || avatarData.type === 'dicebear' || avatarData.type === 'trading' || avatarData.type === 'multiavatar') {
+      if (avatarData.type === 'image' || avatarData.type === 'boring' || avatarData.type === 'dicebear' || avatarData.type === 'trading' || avatarData.type === 'multiavatar') {
         profileAvatarEl.innerHTML = `<img src="${avatarData.value}" alt="Avatar">`;
         profileAvatarEl.className = 'profile-avatar has-image';
       }
