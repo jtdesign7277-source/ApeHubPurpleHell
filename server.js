@@ -446,6 +446,26 @@ app.get('/login', (req, res) => {
 app.use('/LandingPurpleFiles', express.static(path.join(__dirname, 'LandingPurpleFiles')));
 app.use('/intro-music.mp3', express.static(path.join(__dirname, 'intro-music.mp3')));
 
+// ===== YAHOO FINANCE PROXY =====
+app.get('/api/futures/:symbol', async (req, res) => {
+  try {
+    const symbol = req.params.symbol;
+    const validSymbols = ['ES=F', 'YM=F', 'NQ=F', 'RTY=F'];
+    
+    if (!validSymbols.includes(symbol)) {
+      return res.status(400).json({ error: 'Invalid symbol' });
+    }
+    
+    const response = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=5m&range=1d`);
+    const data = await response.json();
+    
+    res.json(data);
+  } catch (error) {
+    console.error('Futures API error:', error);
+    res.status(500).json({ error: 'Failed to fetch futures data' });
+  }
+});
+
 // 404 handler
 app.use((req, res) => {
   console.log('BLOCKED REQUEST:', req.method, req.path);

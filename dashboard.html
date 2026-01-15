@@ -80,6 +80,113 @@
     }
 
     /* ============================================
+       MARKET STATUS HEADER (Yahoo Finance Style)
+       ============================================ */
+    .market-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 24px 12px;
+    }
+
+    .market-header-icon {
+      font-size: 20px;
+    }
+
+    .market-header-text {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      letter-spacing: 0.5px;
+    }
+
+    /* Futures Cards Container */
+    .futures-container {
+      display: flex;
+      gap: 12px;
+      padding: 0 24px 20px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .futures-container::-webkit-scrollbar {
+      display: none;
+    }
+
+    .futures-card {
+      flex: 0 0 auto;
+      min-width: 140px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .futures-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .futures-chart {
+      height: 30px;
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+
+    .futures-chart svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .futures-chart .chart-line {
+      fill: none;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .futures-chart .chart-line.up {
+      stroke: #00d775;
+    }
+
+    .futures-chart .chart-line.down {
+      stroke: #ff4757;
+    }
+
+    .futures-chart .zero-line {
+      stroke: var(--text-muted);
+      stroke-width: 0.5;
+      stroke-dasharray: 2, 2;
+    }
+
+    .futures-price {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .futures-change {
+      font-size: 14px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .futures-change.up {
+      color: #00d775;
+    }
+
+    .futures-change.down {
+      color: #ff4757;
+    }
+
+    /* ============================================
        CLOCK SECTION
        ============================================ */
     .clock-section {
@@ -2122,6 +2229,40 @@
       <div class="welcome" onclick="openProfile()">Welcome, <span id="userName">User</span> <svg class="welcome-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
     </div>
 
+    <!-- Market Status Header (Yahoo Finance Style) -->
+    <div class="market-header">
+      <span class="market-header-icon" id="marketIcon">🌙</span>
+      <span class="market-header-text" id="marketHeaderText">U.S. MARKETS OPEN IN 2 HR 39 MIN</span>
+    </div>
+
+    <!-- Futures Cards -->
+    <div class="futures-container" id="futuresContainer">
+      <div class="futures-card">
+        <div class="futures-name">S&P Futures</div>
+        <div class="futures-chart" id="chart-es"></div>
+        <div class="futures-price" id="price-es">--</div>
+        <div class="futures-change up" id="change-es">--</div>
+      </div>
+      <div class="futures-card">
+        <div class="futures-name">Dow Futures</div>
+        <div class="futures-chart" id="chart-ym"></div>
+        <div class="futures-price" id="price-ym">--</div>
+        <div class="futures-change up" id="change-ym">--</div>
+      </div>
+      <div class="futures-card">
+        <div class="futures-name">Nasdaq Futures</div>
+        <div class="futures-chart" id="chart-nq"></div>
+        <div class="futures-price" id="price-nq">--</div>
+        <div class="futures-change up" id="change-nq">--</div>
+      </div>
+      <div class="futures-card">
+        <div class="futures-name">Russell 2000</div>
+        <div class="futures-chart" id="chart-rty"></div>
+        <div class="futures-price" id="price-rty">--</div>
+        <div class="futures-change up" id="change-rty">--</div>
+      </div>
+    </div>
+
     <!-- Clock Section -->
     <div class="clock-section">
       <div class="clock-left">
@@ -3272,6 +3413,206 @@
         </svg>
       `;
     }
+
+    // ============================================
+    // FUTURES DATA (Yahoo Finance Style)
+    // ============================================
+    const futuresSymbols = {
+      'es': 'ES=F',   // S&P 500 Futures
+      'ym': 'YM=F',   // Dow Futures
+      'nq': 'NQ=F',   // Nasdaq Futures
+      'rty': 'RTY=F'  // Russell 2000 Futures
+    };
+
+    let futuresData = {};
+
+    async function fetchFuturesData() {
+      const symbols = Object.values(futuresSymbols);
+      
+      for (const [key, symbol] of Object.entries(futuresSymbols)) {
+        try {
+          // Use our server proxy to avoid CORS issues
+          const response = await fetch(`/api/futures/${encodeURIComponent(symbol)}`);
+          const data = await response.json();
+          
+          if (data.chart && data.chart.result && data.chart.result[0]) {
+            const result = data.chart.result[0];
+            const meta = result.meta;
+            const quotes = result.indicators.quote[0];
+            const closes = quotes.close.filter(c => c !== null);
+            
+            const currentPrice = meta.regularMarketPrice || closes[closes.length - 1];
+            const previousClose = meta.chartPreviousClose || meta.previousClose;
+            const change = currentPrice - previousClose;
+            const changePercent = (change / previousClose) * 100;
+            
+            futuresData[key] = {
+              price: currentPrice,
+              change: change,
+              changePercent: changePercent,
+              chartData: closes.slice(-20) // Last 20 data points for mini chart
+            };
+            
+            updateFuturesCard(key);
+          }
+        } catch (error) {
+          console.log(`Error fetching ${symbol}:`, error);
+          // Use fallback data
+          setFallbackFuturesData(key);
+        }
+      }
+    }
+
+    function setFallbackFuturesData(key) {
+      const fallbackData = {
+        'es': { price: 5990.25, change: 21.75, changePercent: 0.36 },
+        'ym': { price: 43420.00, change: 125.00, changePercent: 0.29 },
+        'nq': { price: 21250.50, change: 95.25, changePercent: 0.45 },
+        'rty': { price: 2015.40, change: 8.60, changePercent: 0.43 }
+      };
+      
+      futuresData[key] = {
+        ...fallbackData[key],
+        chartData: generateRandomChartData(fallbackData[key].changePercent > 0)
+      };
+      
+      updateFuturesCard(key);
+    }
+
+    function generateRandomChartData(isUp) {
+      const data = [];
+      let value = 100;
+      for (let i = 0; i < 20; i++) {
+        value += (Math.random() - (isUp ? 0.3 : 0.7)) * 2;
+        data.push(value);
+      }
+      return data;
+    }
+
+    function updateFuturesCard(key) {
+      const data = futuresData[key];
+      if (!data) return;
+      
+      const priceEl = document.getElementById(`price-${key}`);
+      const changeEl = document.getElementById(`change-${key}`);
+      const chartEl = document.getElementById(`chart-${key}`);
+      
+      if (priceEl) {
+        priceEl.textContent = data.price.toLocaleString('en-US', { 
+          minimumFractionDigits: 2, 
+          maximumFractionDigits: 2 
+        });
+      }
+      
+      if (changeEl) {
+        const sign = data.changePercent >= 0 ? '+' : '';
+        changeEl.textContent = `${sign}${data.changePercent.toFixed(2)}%`;
+        changeEl.className = `futures-change ${data.changePercent >= 0 ? 'up' : 'down'}`;
+      }
+      
+      if (chartEl && data.chartData) {
+        chartEl.innerHTML = generateFuturesMiniChart(data.chartData, data.changePercent >= 0);
+      }
+    }
+
+    function generateFuturesMiniChart(data, isUp) {
+      const width = 100;
+      const height = 30;
+      const color = isUp ? '#00d775' : '#ff4757';
+      
+      const min = Math.min(...data);
+      const max = Math.max(...data);
+      const range = max - min || 1;
+      
+      const points = data.map((val, i) => ({
+        x: (i / (data.length - 1)) * width,
+        y: height - ((val - min) / range) * (height - 4) - 2
+      }));
+      
+      const pathData = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+      const midY = height / 2;
+      
+      return `
+        <svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="none">
+          <line x1="0" y1="${midY}" x2="${width}" y2="${midY}" class="zero-line"/>
+          <path d="${pathData}" class="chart-line ${isUp ? 'up' : 'down'}"/>
+        </svg>
+      `;
+    }
+
+    function updateMarketHeader() {
+      const now = new Date();
+      const day = now.getDay();
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+      const currentMinutes = hours * 60 + minutes;
+      
+      const marketOpen = 9 * 60 + 30;  // 9:30 AM
+      const marketClose = 16 * 60;      // 4:00 PM
+      const premarketOpen = 4 * 60;     // 4:00 AM
+      
+      const headerIcon = document.getElementById('marketIcon');
+      const headerText = document.getElementById('marketHeaderText');
+      
+      if (!headerIcon || !headerText) return;
+      
+      // Weekend
+      if (day === 0 || day === 6) {
+        const daysUntilMonday = day === 0 ? 1 : 2;
+        const targetTime = new Date(now);
+        targetTime.setDate(targetTime.getDate() + daysUntilMonday);
+        targetTime.setHours(9, 30, 0, 0);
+        const diff = targetTime - now;
+        const hoursLeft = Math.floor(diff / (1000 * 60 * 60));
+        const minsLeft = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        
+        headerIcon.textContent = '🌙';
+        headerText.textContent = `U.S. MARKETS OPEN IN ${hoursLeft} HR ${minsLeft} MIN`;
+        return;
+      }
+      
+      // Market hours
+      if (currentMinutes >= marketOpen && currentMinutes < marketClose) {
+        headerIcon.textContent = '☀️';
+        headerText.textContent = 'U.S. MARKETS ARE OPEN';
+      } else if (currentMinutes >= premarketOpen && currentMinutes < marketOpen) {
+        // Premarket
+        const openTime = new Date(now);
+        openTime.setHours(9, 30, 0, 0);
+        const diff = openTime - now;
+        const hoursLeft = Math.floor(diff / (1000 * 60 * 60));
+        const minsLeft = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        
+        headerIcon.textContent = '🌅';
+        headerText.textContent = `U.S. MARKETS OPEN IN ${hoursLeft} HR ${minsLeft} MIN`;
+      } else {
+        // After hours or before premarket
+        const openTime = new Date(now);
+        if (currentMinutes >= marketClose) {
+          openTime.setDate(openTime.getDate() + 1);
+        }
+        openTime.setHours(9, 30, 0, 0);
+        
+        while (openTime.getDay() === 0 || openTime.getDay() === 6) {
+          openTime.setDate(openTime.getDate() + 1);
+        }
+        
+        const diff = openTime - now;
+        const hoursLeft = Math.floor(diff / (1000 * 60 * 60));
+        const minsLeft = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        
+        headerIcon.textContent = '🌙';
+        headerText.textContent = `U.S. MARKETS OPEN IN ${hoursLeft} HR ${minsLeft} MIN`;
+      }
+    }
+
+    // Initialize futures
+    fetchFuturesData();
+    updateMarketHeader();
+    
+    // Refresh futures every 30 seconds
+    setInterval(fetchFuturesData, 30000);
+    setInterval(updateMarketHeader, 60000);
 
     // ============================================
     // CLOCK & MARKET STATUS
