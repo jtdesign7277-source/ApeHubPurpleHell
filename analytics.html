@@ -455,6 +455,9 @@
   </nav>
 
   <script>
+    // Finnhub API for live prices
+    const FINNHUB_API_KEY = 'd5c3ijpr01qsbmgib7u0d5c3ijpr01qsbmgib7ug';
+    
     // Chart colors
     const COLORS = [
       '#a855f7', // Purple
@@ -469,249 +472,372 @@
       '#14b8a6', // Teal
     ];
 
-    // Load watchlist from localStorage
+    // Load watchlist from localStorage (same format as dashboard.html)
     function loadWatchlist() {
-      const saved = localStorage.getItem('apehub_watchlist');
-      if (saved) {
-        try {
-          return JSON.parse(saved);
-        } catch (e) {
-          return [];
-        }
+      try {
+        return JSON.parse(localStorage.getItem('watchlist')) || [];
+      } catch (e) {
+        return [];
       }
-      return [];
     }
 
-    const watchlist = loadWatchlist();
-    
-    // Calculate portfolio data
+    // Load positions (shares/avgCost) from localStorage
+    function loadPositions() {
+      try {
+        return JSON.parse(localStorage.getItem('positions')) || {};
+      } catch (e) {
+        return {};
+      }
+    }
+
+    // Fetch live price from Finnhub
+    async function fetchLivePrice(symbol) {
+      try {
+        const response = await fetch(`https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${FINNHUB_API_KEY}`);
+        const data = await response.json();
+        if (data.c && data.c > 0) {
+          return {
+            price: data.c,
+            change: data.d || 0,
+            changePercent: data.dp || 0
+          };
+        }
+      } catch (e) {
+        console.error(`Failed to fetch price for ${symbol}:`, e);
+      }
+      return null;
+    }
+
+    let watchlist = loadWatchlist();
+    let positions = loadPositions();
+    let holdingsData = [];
     let totalValue = 0;
     let totalCost = 0;
-    const holdingsData = watchlist.map((stock, i) => {
-      const shares = stock.shares || 0;
-      const avgCost = stock.avgCost || stock.price;
-      const currentPrice = stock.price;
-      const value = shares * currentPrice;
-      const cost = shares * avgCost;
-      const change = value - cost;
-      const changePercent = cost > 0 ? ((change / cost) * 100) : 0;
-      
-      totalValue += value;
-      totalCost += cost;
-      
-      return {
-        symbol: stock.symbol,
-        name: stock.name || stock.symbol,
-        shares: shares,
-        avgCost: avgCost,
-        currentPrice: currentPrice,
-        value: value,
-        change: change,
-        changePercent: changePercent,
-        color: COLORS[i % COLORS.length]
-      };
-    }).filter(h => h.value > 0).sort((a, b) => b.value - a.value);
+    let pieChart, barChart, lineChart;
 
-    const totalChange = totalValue - totalCost;
-    const totalChangePercent = totalCost > 0 ? ((totalChange / totalCost) * 100) : 0;
+    // Calculate and render portfolio data
+    async function initializePortfolio() {
+      // Show loading state
+      document.getElementById('total-value').textContent = 'Loading...';
+      document.getElementById('total-change').textContent = '';
+      
+      // Filter to only stocks with positions (shares > 0)
+      const stocksWithPositions = watchlist.filter(stock => {
+        const position = positions[stock.symbol];
+        return position && position.shares > 0;
+      });
 
-    // Update summary
-    document.getElementById('total-value').textContent = '$' + totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const changeEl = document.getElementById('total-change');
-    const sign = totalChange >= 0 ? '+' : '';
-    changeEl.textContent = `${sign}$${Math.abs(totalChange).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${sign}${totalChangePercent.toFixed(2)}%)`;
-    if (totalChange < 0) {
-      changeEl.classList.add('down');
+      if (stocksWithPositions.length === 0) {
+        document.getElementById('total-value').textContent = '$0.00';
+        document.getElementById('total-change').textContent = 'No holdings yet';
+        document.getElementById('holdings-list').innerHTML = '<div class="holdings-title">Holdings Breakdown</div><div style="color: var(--text-muted); padding: 20px; text-align: center;">Add shares to your watchlist to see analytics</div>';
+        return;
+      }
+
+      // Fetch live prices for all positions
+      const pricePromises = stocksWithPositions.map(async (stock, i) => {
+        // Small delay to avoid rate limiting
+        await new Promise(r => setTimeout(r, i * 100));
+        const liveData = await fetchLivePrice(stock.symbol);
+        return {
+          stock,
+          liveData
+        };
+      });
+
+      const results = await Promise.all(pricePromises);
+      
+      totalValue = 0;
+      totalCost = 0;
+      
+      holdingsData = results.map((result, i) => {
+        const { stock, liveData } = result;
+        const position = positions[stock.symbol];
+        const shares = position.shares;
+        const avgCost = position.avgCost || stock.price;
+        
+        // Use live price if available, otherwise fall back to stored price
+        const currentPrice = liveData ? liveData.price : stock.price;
+        const priceChangePercent = liveData ? liveData.changePercent : (stock.changePercent || 0);
+        
+        const value = shares * currentPrice;
+        const cost = shares * avgCost;
+        const change = value - cost;
+        const changePercent = cost > 0 ? ((change / cost) * 100) : 0;
+        
+        totalValue += value;
+        totalCost += cost;
+        
+        return {
+          symbol: stock.symbol,
+          name: stock.name || stock.symbol,
+          shares: shares,
+          avgCost: avgCost,
+          currentPrice: currentPrice,
+          priceChangePercent: priceChangePercent,
+          value: value,
+          change: change,
+          changePercent: changePercent,
+          color: COLORS[i % COLORS.length]
+        };
+      }).sort((a, b) => b.value - a.value);
+
+      const totalChange = totalValue - totalCost;
+      const totalChangePercent = totalCost > 0 ? ((totalChange / totalCost) * 100) : 0;
+
+      // Update summary
+      document.getElementById('total-value').textContent = '$' + totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const changeEl = document.getElementById('total-change');
+      const sign = totalChange >= 0 ? '+' : '';
+      changeEl.textContent = `${sign}$${Math.abs(totalChange).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${sign}${totalChangePercent.toFixed(2)}%)`;
+      changeEl.classList.remove('down');
+      if (totalChange < 0) {
+        changeEl.classList.add('down');
+      }
+
+      // Render all views
+      renderHoldingsList();
+      renderTable();
+      renderCharts();
     }
 
     // Render holdings list
     function renderHoldingsList() {
       const container = document.getElementById('holdings-list');
+      if (holdingsData.length === 0) {
+        container.innerHTML = '<div class="holdings-title">Holdings Breakdown</div><div style="color: var(--text-muted); padding: 20px; text-align: center;">Add shares to your watchlist to see analytics</div>';
+        return;
+      }
       container.innerHTML = '<div class="holdings-title">Holdings Breakdown</div>' + 
         holdingsData.map(h => `
           <div class="holding-item">
             <div class="holding-color" style="background: ${h.color}"></div>
             <div class="holding-info">
               <div class="holding-symbol">${h.symbol}</div>
-              <div class="holding-name">${h.shares} shares</div>
+              <div class="holding-name">${h.shares.toLocaleString()} shares @ $${h.avgCost.toFixed(2)}</div>
             </div>
             <div class="holding-value">
               <div class="holding-amount">$${h.value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-              <div class="holding-percent">${totalValue > 0 ? ((h.value / totalValue) * 100).toFixed(1) : 0}%</div>
+              <div class="holding-percent ${h.changePercent >= 0 ? 'up' : 'down'}">${h.changePercent >= 0 ? '+' : ''}${h.changePercent.toFixed(2)}%</div>
             </div>
           </div>
         `).join('');
     }
-    renderHoldingsList();
 
     // Render table
     function renderTable() {
       const tbody = document.getElementById('table-body');
+      if (holdingsData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 20px;">No holdings to display</td></tr>';
+        return;
+      }
       tbody.innerHTML = holdingsData.map(h => `
         <tr>
           <td class="table-symbol">${h.symbol}</td>
-          <td>${h.shares}</td>
+          <td>${h.shares.toLocaleString()}</td>
           <td class="table-value">$${h.value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-          <td class="table-change ${h.change >= 0 ? 'up' : 'down'}">${h.change >= 0 ? '+' : ''}${h.changePercent.toFixed(2)}%</td>
+          <td class="table-change ${h.changePercent >= 0 ? 'up' : 'down'}">${h.changePercent >= 0 ? '+' : ''}${h.changePercent.toFixed(2)}%</td>
         </tr>
       `).join('');
     }
-    renderTable();
 
     // Chart.js defaults
     Chart.defaults.color = 'rgba(255, 255, 255, 0.6)';
     Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
 
-    // Pie Chart
-    const pieCtx = document.getElementById('pieChart').getContext('2d');
-    const pieChart = new Chart(pieCtx, {
-      type: 'doughnut',
-      data: {
-        labels: holdingsData.map(h => h.symbol),
-        datasets: [{
-          data: holdingsData.map(h => h.value),
-          backgroundColor: holdingsData.map(h => h.color),
-          borderWidth: 0,
-          hoverOffset: 8
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        cutout: '60%',
-        plugins: {
-          legend: {
-            display: true,
-            position: 'bottom',
-            labels: {
-              padding: 16,
-              usePointStyle: true,
-              pointStyle: 'circle'
+    // Render all charts
+    function renderCharts() {
+      if (holdingsData.length === 0) return;
+
+      // Destroy existing charts if they exist
+      if (pieChart) pieChart.destroy();
+      if (barChart) barChart.destroy();
+      if (lineChart) lineChart.destroy();
+
+      // Pie Chart
+      const pieCtx = document.getElementById('pieChart').getContext('2d');
+      pieChart = new Chart(pieCtx, {
+        type: 'doughnut',
+        data: {
+          labels: holdingsData.map(h => h.symbol),
+          datasets: [{
+            data: holdingsData.map(h => h.value),
+            backgroundColor: holdingsData.map(h => h.color),
+            borderWidth: 0,
+            hoverOffset: 8
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '60%',
+          plugins: {
+            legend: {
+              display: true,
+              position: 'bottom',
+              labels: {
+                padding: 16,
+                usePointStyle: true,
+                pointStyle: 'circle'
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const value = context.parsed;
+                  const percent = ((value / totalValue) * 100).toFixed(1);
+                  return ` $${value.toLocaleString('en-US', { minimumFractionDigits: 2 })} (${percent}%)`;
+                }
+              }
             }
           }
         }
-      }
-    });
+      });
 
-    // Bar Chart
-    const barCtx = document.getElementById('barChart').getContext('2d');
-    const barChart = new Chart(barCtx, {
-      type: 'bar',
-      data: {
-        labels: holdingsData.map(h => h.symbol),
-        datasets: [{
-          data: holdingsData.map(h => h.value),
-          backgroundColor: holdingsData.map(h => h.color),
-          borderRadius: 6,
-          borderSkipped: false
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: false
-          }
+      // Bar Chart
+      const barCtx = document.getElementById('barChart').getContext('2d');
+      barChart = new Chart(barCtx, {
+        type: 'bar',
+        data: {
+          labels: holdingsData.map(h => h.symbol),
+          datasets: [{
+            label: 'Value',
+            data: holdingsData.map(h => h.value),
+            backgroundColor: holdingsData.map(h => h.color),
+            borderRadius: 6,
+            borderSkipped: false
+          }]
         },
-        scales: {
-          y: {
-            beginAtZero: true,
-            grid: {
-              color: 'rgba(255, 255, 255, 0.05)'
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
             },
-            ticks: {
-              callback: function(value) {
-                return '$' + value.toLocaleString();
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const h = holdingsData[context.dataIndex];
+                  return [
+                    `Value: $${h.value.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+                    `Shares: ${h.shares.toLocaleString()}`,
+                    `Price: $${h.currentPrice.toFixed(2)}`,
+                    `P/L: ${h.changePercent >= 0 ? '+' : ''}${h.changePercent.toFixed(2)}%`
+                  ];
+                }
               }
             }
           },
-          x: {
-            grid: {
-              display: false
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: {
+                color: 'rgba(255, 255, 255, 0.05)'
+              },
+              ticks: {
+                callback: function(value) {
+                  return '$' + value.toLocaleString();
+                }
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              }
             }
           }
         }
-      }
-    });
+      });
 
-    // Line Chart (simulated historical data)
-    function generateHistoricalData() {
-      const days = 30;
-      const data = [];
-      let value = totalValue * 0.85; // Start 15% lower
-      
-      for (let i = days; i >= 0; i--) {
-        const date = new Date();
-        date.setDate(date.getDate() - i);
+      // Line Chart (simulated historical data based on actual positions)
+      function generateHistoricalData() {
+        const days = 30;
+        const data = [];
+        let value = totalValue * 0.85; // Start 15% lower
         
-        // Add some randomness
-        const change = (Math.random() - 0.45) * (value * 0.02);
-        value = Math.max(value + change, totalValue * 0.7);
-        
-        if (i === 0) value = totalValue; // End at current value
-        
-        data.push({
-          date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-          value: value
-        });
+        for (let i = days; i >= 0; i--) {
+          const date = new Date();
+          date.setDate(date.getDate() - i);
+          
+          // Add some randomness
+          const change = (Math.random() - 0.45) * (value * 0.02);
+          value = Math.max(value + change, totalValue * 0.7);
+          
+          if (i === 0) value = totalValue; // End at current value
+          
+          data.push({
+            date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            value: value
+          });
+        }
+        return data;
       }
-      return data;
+
+      const historicalData = generateHistoricalData();
+      const lineCtx = document.getElementById('lineChart').getContext('2d');
+      lineChart = new Chart(lineCtx, {
+        type: 'line',
+        data: {
+          labels: historicalData.map(d => d.date),
+          datasets: [{
+            data: historicalData.map(d => d.value),
+            borderColor: '#a855f7',
+            backgroundColor: 'rgba(168, 85, 247, 0.1)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 0,
+            pointHoverRadius: 6,
+            pointHoverBackgroundColor: '#a855f7',
+            pointHoverBorderColor: '#fff',
+            pointHoverBorderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return '$' + context.parsed.y.toLocaleString('en-US', { minimumFractionDigits: 2 });
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              grid: {
+                color: 'rgba(255, 255, 255, 0.05)'
+              },
+              ticks: {
+                callback: function(value) {
+                  if (value >= 1000) {
+                    return '$' + (value / 1000).toFixed(0) + 'K';
+                  }
+                  return '$' + value.toFixed(0);
+                }
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              },
+              ticks: {
+                maxTicksLimit: 6
+              }
+            }
+          },
+          interaction: {
+            intersect: false,
+            mode: 'index'
+          }
+        }
+      });
     }
-
-    const historicalData = generateHistoricalData();
-    const lineCtx = document.getElementById('lineChart').getContext('2d');
-    const lineChart = new Chart(lineCtx, {
-      type: 'line',
-      data: {
-        labels: historicalData.map(d => d.date),
-        datasets: [{
-          data: historicalData.map(d => d.value),
-          borderColor: '#a855f7',
-          backgroundColor: 'rgba(168, 85, 247, 0.1)',
-          fill: true,
-          tension: 0.4,
-          pointRadius: 0,
-          pointHoverRadius: 6,
-          pointHoverBackgroundColor: '#a855f7',
-          pointHoverBorderColor: '#fff',
-          pointHoverBorderWidth: 2
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: false
-          }
-        },
-        scales: {
-          y: {
-            grid: {
-              color: 'rgba(255, 255, 255, 0.05)'
-            },
-            ticks: {
-              callback: function(value) {
-                return '$' + (value / 1000).toFixed(0) + 'K';
-              }
-            }
-          },
-          x: {
-            grid: {
-              display: false
-            },
-            ticks: {
-              maxTicksLimit: 6
-            }
-          }
-        },
-        interaction: {
-          intersect: false,
-          mode: 'index'
-        }
-      }
-    });
 
     // Tab switching
     document.querySelectorAll('.chart-tab').forEach(tab => {
@@ -731,6 +857,9 @@
     // Apply saved theme
     const savedTheme = localStorage.getItem('apehub_theme') || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
+
+    // Initialize on page load
+    initializePortfolio();
   </script>
 </body>
 </html>
