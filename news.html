@@ -304,9 +304,20 @@
         return;
       }
 
-      // Prioritize by market cap (if available) or just show top companies
-      earnings.sort((a, b) => (b.marketCap || 0) - (a.marketCap || 0));
-      const topEarnings = earnings.slice(0, 12);
+      // List of trending/biggest US companies (FAANG, Tesla, Nvidia, Microsoft, etc.)
+      const trendingSymbols = [
+        'AAPL', 'MSFT', 'GOOGL', 'GOOG', 'AMZN', 'META', 'TSLA', 'NVDA', 'NFLX', 'AMD', 'INTC', 'JPM', 'BAC', 'WFC', 'V', 'MA', 'PYPL', 'DIS', 'CRM', 'COST', 'PEP', 'KO', 'MCD', 'SBUX', 'QCOM', 'AVGO', 'ADBE', 'ORCL', 'CSCO', 'T', 'VZ', 'XOM', 'CVX', 'UNH', 'PFE', 'JNJ', 'LLY', 'MRK', 'ABT', 'TMO', 'HD', 'LOW', 'WMT', 'TGT', 'UPS', 'FDX', 'BA', 'LMT', 'NKE', 'GM', 'F', 'UBER', 'LYFT', 'PLTR', 'SNOW', 'SHOP', 'SQ', 'ROKU', 'ZM', 'DOCU', 'SPOT', 'TWLO', 'NET', 'DDOG', 'MDB', 'ZS', 'CRWD', 'PANW', 'OKTA', 'TEAM', 'NOW', 'WORK', 'BIDU', 'BABA', 'JD', 'PDD', 'TSM', 'ASML', 'SAP', 'SONY', 'TM', 'HMC', 'NSANY', 'VWAGY', 'DMLRY', 'RACE', 'STLA', 'FCAU', 'GM', 'F', 'RIVN', 'LCID', 'NKLA', 'FSR', 'QS', 'BLNK', 'CHPT', 'PLUG', 'BE', 'ENPH', 'SEDG', 'RUN', 'SPWR', 'FSLR', 'CSIQ', 'JKS', 'DQ', 'MAXN', 'SUNE', 'VSLR', 'TSLA', 'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'NVDA', 'NFLX', 'TSLA'
+      ];
+      // Filter for trending/biggest companies only
+      let topEarnings = earnings.filter(e => trendingSymbols.includes(e.symbol));
+      // If not enough, fill with top by market cap
+      if (topEarnings.length < 12) {
+        const byCap = earnings
+          .filter(e => !topEarnings.includes(e))
+          .sort((a, b) => (b.marketCap || 0) - (a.marketCap || 0));
+        topEarnings = topEarnings.concat(byCap.slice(0, 12 - topEarnings.length));
+      }
+      topEarnings = topEarnings.slice(0, 12);
 
       if (topEarnings.length === 0) {
         container.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">No major earnings for this period</div>';
