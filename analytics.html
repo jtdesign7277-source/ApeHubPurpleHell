@@ -23,6 +23,8 @@
         --accent-glow: rgba(168, 85, 247, 0.3);
         --nav-bg: rgba(10, 10, 15, 0.95);
         --card-bg: #16161d;
+        --color-up: #00d775;
+        --color-down: #ff4757;
       }
 
       [data-theme="light"] {
@@ -39,6 +41,8 @@
         --accent-glow: rgba(168, 85, 247, 0.13);
         --nav-bg: rgba(255, 255, 255, 0.95);
         --card-bg: #fff;
+        --color-up: #16a34a;
+        --color-down: #dc2626;
       }
 
     * {
@@ -168,11 +172,11 @@
     .summary-change {
       font-size: 13px;
       font-weight: 600;
-      color: #00d775;
+      color: var(--color-up);
     }
 
     .summary-change.down {
-      color: #ff4757;
+      color: var(--color-down);
     }
 
     /* Chart Container */
@@ -334,11 +338,11 @@
     }
 
     .table-change.up {
-      color: #00d775;
+      color: var(--color-up);
     }
 
     .table-change.down {
-      color: #ff4757;
+      color: var(--color-down);
     }
 
     /* Bottom Nav */
@@ -771,7 +775,9 @@
           const totalChange = totalValue - totalCost;
           const changePercent = totalCost > 0 ? ((totalChange / totalCost) * 100) : 0;
           const sign = totalChange >= 0 ? '+' : '';
-          const changeColor = totalChange >= 0 ? '#00d775' : '#ff4757';
+          const upColor = getComputedStyle(document.documentElement).getPropertyValue('--color-up').trim() || '#00d775';
+          const downColor = getComputedStyle(document.documentElement).getPropertyValue('--color-down').trim() || '#ff4757';
+          const changeColor = totalChange >= 0 ? upColor : downColor;
           
           ctx.font = '500 11px -apple-system, BlinkMacSystemFont, sans-serif';
           ctx.fillStyle = changeColor;
