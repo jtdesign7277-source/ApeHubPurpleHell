@@ -95,6 +95,9 @@
 
     .chart-tab {
       flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
       padding: 10px 20px;
       border: 1px solid var(--border-color);
       background: transparent;
@@ -104,6 +107,11 @@
       cursor: pointer;
       border-radius: 20px;
       transition: all 0.2s;
+    }
+
+    .chart-tab svg {
+      width: 16px;
+      height: 16px;
     }
 
     .chart-tab:hover {
@@ -352,10 +360,37 @@
 
     <!-- Chart Type Tabs -->
     <div class="chart-tabs">
-      <button class="chart-tab active" data-view="pie">Pie</button>
-      <button class="chart-tab" data-view="bar">Bar</button>
-      <button class="chart-tab" data-view="line">Line</button>
-      <button class="chart-tab" data-view="table">Table</button>
+      <button class="chart-tab active" data-view="pie">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21.21 15.89A10 10 0 1 1 8 2.83"/>
+          <path d="M22 12A10 10 0 0 0 12 2v10z"/>
+        </svg>
+        Pie
+      </button>
+      <button class="chart-tab" data-view="bar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="12" width="4" height="9" rx="1"/>
+          <rect x="10" y="8" width="4" height="13" rx="1"/>
+          <rect x="17" y="3" width="4" height="18" rx="1"/>
+        </svg>
+        Bar
+      </button>
+      <button class="chart-tab" data-view="line">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 3v18h18"/>
+          <path d="m19 9-5 5-4-4-3 3"/>
+        </svg>
+        Line
+      </button>
+      <button class="chart-tab" data-view="table">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <path d="M3 9h18"/>
+          <path d="M3 15h18"/>
+          <path d="M9 3v18"/>
+        </svg>
+        Table
+      </button>
     </div>
 
     <!-- Portfolio Summary -->
