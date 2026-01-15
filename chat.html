@@ -868,146 +868,390 @@
       return currentUser.avatar;
     }
 
-    // Persona types with percentages
-    // 60% normal, 5% asshole, 10% gambler, 5% woman, 10% cocky winner, 10% retail ape
-    const PERSONA_TYPES = {
-      normal: { weight: 60, names: ['Mike', 'Dave', 'Chris', 'Ryan', 'Josh', 'Matt', 'Nick', 'Tom', 'Jake', 'Ben', 'Sam', 'Dan', 'Joe', 'Steve', 'Brian', 'Kevin', 'Mark', 'Paul', 'Tim', 'Eric', 'Jason', 'Adam', 'Alex', 'Tyler', 'Luke'], handles: ['mike', 'trades', 'investor', 'stocks23', 'charts', 'alpha', 'market', 'tech', 'growth', 'value', 'longterm', 'swing', 'daytrader'] },
-      asshole: { weight: 5, names: ['Derek', 'Kyle', 'Blake', 'Chase', 'Hunter', 'Marcus', 'Troy'], handles: ['realderek', 'kylehere', 'theblake', 'chasem', 'hunterx', 'marc', 'troyt'] },
-      gambler: { weight: 10, names: ['Pete', 'Tony', 'Vinny', 'Jay', 'Ricky', 'Eddie', 'Frank', 'Lou'], handles: ['pete_trades', 'tonyoptions', 'vinny', 'jayplays', 'rickyt', 'eddie', 'frankie', 'lou_'] },
-      woman: { weight: 5, names: ['Sarah', 'Emma', 'Olivia', 'Ava', 'Mia', 'Sophia', 'Chloe', 'Rachel', 'Lauren', 'Ashley', 'Jessica', 'Amanda'], handles: ['sarahk', 'emma_inv', 'livfinance', 'avawm', 'mia', 'soph', 'chloe', 'rach', 'laurenm', 'ash', 'jess', 'amanda'] },
-      cocky: { weight: 10, names: ['Marcus', 'Jordan', 'Trey', 'Damon', 'Vince', 'Grant', 'Cole', 'Blake'], handles: ['marcus_w', 'jord', 'treym', 'damon', 'vince', 'grantm', 'cole_', 'blake'] },
-      ape: { weight: 10, names: ['Kyle', 'Brandon', 'Zack', 'Connor', 'Dylan', 'Austin', 'Trevor', 'Cody'], handles: ['kyle_gme', 'brandon', 'zackk', 'connor', 'dylan', 'austin', 'trev', 'cody'] }
-    };
-
-    // Post templates by persona
+    // ============================================
+    // 200 BOT SYSTEM - REALISTIC AI SIMULATION
+    // ============================================
+    
+    // Bot usernames - trading themed (200 unique)
+    const BOT_USERNAMES = [
+      'DiamondDave', 'CryptoKing99', 'BearishBob', 'MoonShotMike', 'TendieQueen', 'ChartMaster', 'DipBuyer420', 
+      'OptionsWiz', 'SwingTraderX', 'BullRunBenny', 'GreenCandle', 'RedDayRay', 'FOMOFred', 'HodlHank', 
+      'PaperHandsPete', 'RocketRider', 'TheTrendIsUrFriend', 'CallsOnly', 'PutsGuy', 'YoloYoda', 
+      'VolatilityVince', 'ThetaGang', 'GammaGang', 'SPYder', 'QQQueenB', 'NasdaqNate', 'DowJonesDan',
+      'MarginCallMike', 'ShortSqueezer', 'LongTermLarry', 'ScalpKing', 'PreMarketPro', 'AfterHoursAce',
+      'EarningsEddie', 'DividendDude', 'GrowthGuru', 'ValueVictor', 'MomentumMax', 'BreakoutBrad',
+      'SupportSally', 'ResistanceRick', 'FibonacciFrank', 'MACDManny', 'RSIRandy', 'BollingerBill',
+      'VWAPVicky', 'IchimokuIke', 'ElliottWaveEd', 'PatternPaul', 'CandleChris', 'DojiDan',
+      'HammerHenry', 'EngulfingEvan', 'MorningStar99', 'EveningStar42', 'TripleTopTom', 'DoubleBottom',
+      'HeadShoulders', 'FlagPattern', 'WedgeTrade', 'ChannelChad', 'TrendlineTina', 'GapTrader',
+      'VolumeViking', 'LiquidityLuke', 'OrderFlowOscar', 'DarkPoolDave', 'SmartMoney', 'DumbMoney420',
+      'RetailRicky', 'InstitutionalIvy', 'AlgoAndy', 'QuantQueen', 'BacktestBob', 'LiveTraderLeo',
+      'PaperTrader', 'SimulatorSam', 'RealMoneyRon', 'CashGangCarl', 'AllInAlex', 'HedgedHarry',
+      'NakedOptions', 'CoveredCalls', 'IronCondor', 'StrangleSteve', 'StraddleSue', 'ButterflyBeth',
+      'CalendarSpread', 'VerticalVic', 'DiagonalDiana', 'CreditSpread', 'DebitDebbie', 'RatioRalph',
+      'JadeLizard', 'BrokenWingBob', 'ZebraTrade', 'ComboTrader', 'SyntheticSal', 'ConversionCarl',
+      'ReversalRay', 'BoxSpread', 'JellyRoll', 'RiskReversal', 'CollarCarol', 'ProtectivePut',
+      'MarriedPut', 'CashSecured', 'WheelStrategy', 'PMCCPete', 'LEAPsLarry', 'WeeklyWarrior',
+      'DailyDegen', 'ZeroDTE', 'ExpirationEve', 'AssignmentAndy', 'ExerciseEmma', 'RolloverRob',
+      'GreeksGeek', 'DeltaDan', 'ThetaThad', 'VegaVince', 'GammaGary', 'RhoRhonda',
+      'ImpliedIvan', 'HistoricalHank', 'SkewSteve', 'SmileSally', 'TermStructure', 'VolSurface',
+      'MeanReversion', 'TrendFollow', 'BreakoutBetty', 'FadeThMove', 'BuyTheDip', 'SellTheRip',
+      'CatchKnife', 'BottomFisher', 'TopPicker', 'ScalperSteve', 'PositionPete', 'SwingKing',
+      'DayTraderDan', 'IntraDayIra', 'OvernightOllie', 'MultiDayMike', 'WeekTrader', 'MonthlyMel',
+      'QuarterlyQuinn', 'YearlyYvonne', 'DecadeDave', 'LongHaul', 'ShortTerm', 'MidTermMary',
+      'MacroMike', 'MicroMary', 'SectorSam', 'IndustryIvy', 'CompanyCarl', 'IndexIrene',
+      'ETFEddie', 'MutualFundMike', 'HedgeFundHank', 'PrivateEquity', 'VentureVic', 'AngelAmy',
+      'CrowdFund', 'ICOIvan', 'TokenTom', 'CoinCarl', 'NFTNancy', 'DeFiDave', 'YieldFarmer',
+      'StakeSteve', 'MineMax', 'HashHenry', 'BlockBob', 'ChainChris', 'NodeNate', 'ValidatorVic',
+      'ProofOfWork', 'ProofOfStake', 'ConsensusCarl', 'ForkFred', 'AirdropAndy', 'BountyBob',
+      'WhitepaperWill', 'RoadmapRon', 'TokenomicsTom', 'MarketCapMike', 'VolumeVince', 'LiqPoolLarry',
+      'SlippageSam', 'GasGary', 'BridgeBob', 'WrappedWill', 'PeggedPete', 'StableSue',
+      'AlgoStable', 'FiatFred', 'RampRicky', 'OffRampOllie', 'CustodyCarl', 'WalletWill',
+      'HotWallet', 'ColdStorage', 'SeedPhrase', 'PrivateKey', 'PublicAddr', 'TxHash',
+      'BlockExplorer', 'ChainAnalysis', 'OnChainOscar', 'OffChainOllie', 'Layer1Larry', 'Layer2Leo',
+      'RollupRon', 'SidechainSam', 'PlasmaPatty', 'ShardingSheryl', 'StateChan', 'PayChan',
+      'LightningLarry', 'RaidenRay', 'PolygonPete', 'ArbitrumAndy', 'OptimismOllie', 'zkSyncZack',
+      'StarkSteve', 'LoopringLeo', 'ImmutableIvy', 'OMGCarl', 'BobaTrader', 'MetisMike'
+    ];
+    
+    // Display names with optional emojis
+    const DISPLAY_STYLES = ['plain', 'emoji', 'emoji_end'];
+    const EMOJIS = ['💎', '🚀', '📈', '💰', '🔥', '⚡', '🎯', '💪', '🦍', '🐂', '🐻', '👑', '✨', '💵'];
+    
+    // Bios
+    const BIOS = [
+      'buy high sell low', 'not financial advice', 'full time degen', 'charts dont lie',
+      'diamond hands only', 'in it for the tech', 'NFA DYOR', 'professional bag holder',
+      'tendies or bust', 'born to trade', 'sleep is overrated', 'money printer go brrr',
+      'trust the process', 'scared money dont make money', 'risk it for the biscuit',
+      'options enthusiast', 'swing trader', 'day trader', 'long term investor',
+      'crypto native', 'degen since 2020', 'stonks only go up', 'bears r fuk'
+    ];
+    
+    // Generate 200 bot profiles
+    const BOTS = BOT_USERNAMES.map((username, i) => {
+      const useBoringAvatar = i < 100;
+      const avatarUrl = useBoringAvatar 
+        ? `https://api.dicebear.com/7.x/lorelei/svg?seed=${username}&size=120&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`
+        : `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}&size=120`;
+      
+      const style = DISPLAY_STYLES[Math.floor(Math.random() * DISPLAY_STYLES.length)];
+      const emoji = EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
+      let displayName = username.replace(/([A-Z])/g, ' $1').trim().replace(/(\d+)/g, '');
+      if (style === 'emoji') displayName = emoji + ' ' + displayName;
+      if (style === 'emoji_end') displayName = displayName + ' ' + emoji;
+      
+      // Power users (20% post more frequently)
+      const frequency = i < 40 ? 'high' : (i < 100 ? 'medium' : 'low');
+      
+      const joinDate = new Date(Date.now() - Math.random() * 730 * 24 * 60 * 60 * 1000);
+      
+      return {
+        id: `bot_${i.toString().padStart(3, '0')}`,
+        username: username,
+        handle: `@${username.toLowerCase()}`,
+        displayName: displayName,
+        avatarUrl: avatarUrl,
+        bio: BIOS[Math.floor(Math.random() * BIOS.length)],
+        followers: Math.floor(Math.random() * 5000) + 50,
+        following: Math.floor(Math.random() * 500) + 20,
+        joined: joinDate.toISOString().split('T')[0],
+        frequency: frequency
+      };
+    });
+    
+    // ============================================
+    // POST CONTENT TEMPLATES - REALISTIC
+    // ============================================
+    
     const POST_TEMPLATES = {
-      normal: [
-        "$NVDA looking strong today. Added more shares",
-        "Anyone else watching $TSLA? Interesting price action",
-        "Fed meeting next week could be a catalyst",
-        "Just hit my profit target on $AAPL taking some off the table",
-        "$MSFT earnings coming up. Expecting beat",
-        "Market seems overbought short term being cautious",
-        "Added $AMD to my watchlist. Semiconductor play",
-        "Anyone have thoughts on $PLTR at these levels?",
-        "Good entry point for $GOOGL imo",
-        "Taking profits on this rally cash is a position too",
-        "Trimmed some $NVDA here still holding core position",
-        "Volume picking up on $META interesting",
-        "$AAPL holding 250 support nicely",
-        "Waiting for a pullback before adding more",
-        "Anyone playing $CRM earnings?",
-        "Market feels toppy but trends can extend",
-        "Picked up some $AMZN on that dip",
-        "Rotation into value names happening",
-        "$COST broke out of that range",
-        "Watching 10yr yields closely here"
+      // MARKET COMMENTARY (30%)
+      market: [
+        '$BTC looking strong at this level 👀', 'anyone else seeing this setup on ETH?',
+        'this dip is free money lol', 'not touching anything until after FOMC',
+        '$SPY just broke resistance', 'ES looking weak here', 'NQ holding up better than expected',
+        '$NVDA going crazy today', 'semis leading the market rn', 'tech looking heavy',
+        'financials finally waking up', 'XLF breakout incoming', 'energy sector looks cooked',
+        'bonds selling off hard', 'TLT getting destroyed', '10yr at 4.5 is wild',
+        'VIX too low imo', 'put/call ratio at extremes', 'breadth looking sus',
+        'small caps lagging badly', 'IWM needs to catch up', 'rotation out of growth',
+        'value having a moment', 'cyclicals leading', 'defensives catching a bid',
+        '$AAPL holding 250 nicely', '$TSLA below 200 is crazy', '$AMZN breakout soon?',
+        '$GOOGL undervalued here', '$META printing money', '$MSFT cloud numbers insane',
+        'mag 7 carrying the market again', 'equal weight getting crushed', 'concentration risk is real',
+        'china stocks looking interesting', 'emerging markets bouncing', 'japan breaking out',
+        'DXY strength killing everything', 'gold at ATH makes sense', 'silver lagging',
+        'oil cant catch a bid', 'nat gas at multiyear lows', 'uranium still running'
       ],
-      asshole: [
-        "lmao you guys still buying at these levels?",
-        "This is literally the top enjoy ur bags",
-        "imagine being bullish rn 😂",
-        "another day another bag holder born",
-        "bro just sell already its over",
-        "cant wait to see the loss posts tomorrow",
-        "you realize the Fed is gonna wreck this right",
-        "anyone buying here is literally giving away money",
-        "how many times do you need to learn",
-        "this sub is hopeless lol"
+      // WINS/LOSSES (20%)
+      wins: [
+        'up 12% today lets gooo 🚀', 'just got stopped out. pain.', 'finally green after 3 red days',
+        'small win but ill take it +$340', 'hit my target closed the trade', 'best trade of the week',
+        'account at ATH rn', 'revenge traded and actually won lol', 'caught that move perfectly',
+        'shouldve sized up', 'took profits too early but whatever', 'letting winners run for once',
+        'down 2% today could be worse', 'flat day hate this chop', 'gave back all my gains smh',
+        'stopped out twice in a row', 'overtraded today losing my edge', 'need to take a break',
+        'worst week in months', 'blew my monthly gains in one day', 'humbled again',
+        '+$2k day not bad', '+500 on that scalp', 'closed for +15%', 'locked in profits',
+        'up 50% on this position', 'my calls are printing', 'puts finally paying off',
+        'held through the dip and won', 'averaged down and it worked', 'got lucky tbh'
       ],
-      gambler: [
-        "$NVDA 0DTE calls here we go 🔥",
-        "Full port into weeklies wish me luck",
-        "Just yolod everything into $TSLA calls",
-        "3x leveraged ETFs are the way",
-        "all in on $PLTR dont need sleep tonight",
-        "0DTE spy puts feeling it today",
-        "maxed out margin on this play lets ride",
-        "who needs a savings account when you got options",
-        "either up 500% or down 100% by friday",
-        "put my whole check into weekly calls again"
+      // QUESTIONS (15%)  
+      questions: [
+        'whats everyones PT on this?', 'am i crazy or is this a head and shoulders?',
+        'anyone still holding?', 'thoughts on entering here?', 'too late to buy?',
+        'should i take profits?', 'hold through earnings?', 'anyone playing earnings?',
+        'whats the catalyst?', 'why is this pumping?', 'why is this dumping?',
+        'is this the bottom?', 'is this the top?', 'where do we go from here?',
+        'anyone have a target?', 'stop loss where?', 'position size recommendations?',
+        'calls or puts?', 'weekly or monthly?', 'ITM or OTM?',
+        'anyone else in this trade?', 'how long you holding?', 'exit strategy?',
+        'what am i missing here?', 'is this a trap?', 'bull trap or real breakout?',
+        'bear trap?', 'dead cat bounce?', 'capitulation soon?'
       ],
-      woman: [
-        "Building my long-term portfolio with $VTI and $SCHD",
-        "Slow and steady wins the race. Compound interest is amazing",
-        "$COST is such an underrated dividend play",
-        "DCA into index funds. Boring but it works",
-        "Just maxed out my Roth IRA for the year",
-        "Diversification isnt sexy but it works",
-        "Adding to $O for that monthly dividend",
-        "Finally hit 6 figures in my portfolio!",
-        "Rebalancing quarterly keeps me sane",
-        "Long term holder here not worried about the noise"
+      // CASUAL/SOCIAL (20%)
+      casual: [
+        'gm', 'gn', 'another day another dollar', 'coffee and charts ☕', 'wen lambo',
+        'this is the way', 'lets get this bread', 'time to make some money',
+        'market open soon 👀', 'premarket looking spicy', 'AH action interesting',
+        'slow day huh', 'this chop is killing me', 'need some volatility',
+        'taking the day off', 'touching grass today', 'mental health day',
+        'back from vacation what did i miss', 'just woke up anything happen?',
+        'charts looking boring', 'nothing to trade rn', 'sitting on hands',
+        'cash gang for now', 'waiting for a setup', 'patience paying off',
+        'love this community', 'learn something new everyday', 'still learning',
+        'trading is hard', 'getting better tho', 'small progress', 'one day at a time',
+        'lfg 🚀', 'wagmi', 'ngmi', 'bullish af', 'bearish vibes', 'idk man',
+        'lol', 'lmao', 'bruh', 'bro what', 'wild', 'insane', 'crazy day'
       ],
-      cocky: [
-        "Another 50k day honestly getting too easy",
-        "Up 400% this year when are you guys gonna figure it out",
-        "Put in my 2 weeks today trading full time now",
-        "portfolio just crossed 7 figures 💰",
-        "imagine working a 9-5 still lol",
-        "100k profit today might take a long weekend",
-        "26 and financially free stay mad",
-        "just bought another rental cash. trading income is insane",
-        "remember when people said day trading doesnt work 😂",
-        "paid off my house this month from trading gains"
-      ],
-      ape: [
-        "$GME moon soon 💎🙌",
-        "not selling. ever. holding til moass",
-        "hedgies r so fuk rn",
-        "added more $GME on this dip",
-        "apes together strong 🦍",
-        "this is not financial advice but im buying more",
-        "shorts still havent covered. we know the DD",
-        "$AMC and $GME both looking ready",
-        "RC knows what hes doing. trust the process",
-        "diamond handing these forever"
+      // REPLIES (15%)
+      replies: [
+        'facts', 'this is the move', 'idk man looks risky', 'lmaooo', 'same', 'W',
+        'bro what 😂', 'real', 'fr fr', 'no cap', 'true', 'agreed', 'disagree but ok',
+        'interesting take', 'hadnt thought of that', 'good point', 'fair enough',
+        'nah', 'yes', 'maybe', 'depends', 'need more info', 'show the chart',
+        'position or ban', 'proof?', 'source?', 'trust me bro', 'in bro we trust',
+        'nice trade', 'congrats', 'gg', 'rip', 'F', 'L', 'massive W',
+        'this aged well', 'this aged badly', 'told you so', 'called it',
+        'copium', 'hopium', 'based', 'cringe', 'valid', 'underrated comment'
       ]
     };
-
-    // Generate AI community member
-    function generateCommunityMember() {
+    
+    // Combine all templates with weights
+    function getRandomPostContent() {
       const rand = Math.random() * 100;
-      let cumulative = 0;
-      let type = 'normal';
+      let templates;
+      if (rand < 30) templates = POST_TEMPLATES.market;
+      else if (rand < 50) templates = POST_TEMPLATES.wins;
+      else if (rand < 65) templates = POST_TEMPLATES.questions;
+      else if (rand < 85) templates = POST_TEMPLATES.casual;
+      else templates = POST_TEMPLATES.replies;
       
-      for (const [key, persona] of Object.entries(PERSONA_TYPES)) {
-        cumulative += persona.weight;
-        if (rand < cumulative) {
-          type = key;
-          break;
-        }
+      let text = templates[Math.floor(Math.random() * templates.length)];
+      
+      // 40% chance to be lowercase
+      if (Math.random() < 0.4) text = text.toLowerCase();
+      
+      // 5% chance of minor typo
+      if (Math.random() < 0.05) {
+        const typos = [
+          [' the ', ' teh '], [' and ', ' adn '], ['ing ', 'ig '], 
+          ['tion', 'toin'], [' to ', ' ot '], ['this', 'tihs']
+        ];
+        const typo = typos[Math.floor(Math.random() * typos.length)];
+        text = text.replace(typo[0], typo[1]);
       }
       
-      const persona = PERSONA_TYPES[type];
-      const name = persona.names[Math.floor(Math.random() * persona.names.length)];
-      const handleBase = persona.handles[Math.floor(Math.random() * persona.handles.length)];
-      const handleNum = Math.floor(Math.random() * 999) + 1;
-      
-      return {
-        name: name,
-        handle: `@${handleBase}${handleNum}`,
-        avatar: name.charAt(0).toUpperCase(),
-        type: type
-      };
+      return text;
     }
-
-    // Generate AI post
-    function generateAIPost(member) {
-      const templates = POST_TEMPLATES[member.type];
-      const text = templates[Math.floor(Math.random() * templates.length)];
-      const timeOptions = ['1m', '2m', '3m', '5m', '8m', '12m', '15m', '23m', '34m', '45m', '1h', '2h', '3h'];
+    
+    // Get random bot (weighted by frequency)
+    function getRandomBot() {
+      const rand = Math.random();
+      let pool;
+      if (rand < 0.6) pool = BOTS.filter(b => b.frequency === 'high');
+      else if (rand < 0.9) pool = BOTS.filter(b => b.frequency === 'medium');
+      else pool = BOTS.filter(b => b.frequency === 'low');
+      return pool[Math.floor(Math.random() * pool.length)];
+    }
+    
+    // Format time ago
+    function formatTimeAgo(timestamp) {
+      const now = Date.now();
+      const diff = now - timestamp;
+      const mins = Math.floor(diff / 60000);
+      const hrs = Math.floor(diff / 3600000);
+      if (mins < 1) return 'now';
+      if (mins < 60) return `${mins}m`;
+      if (hrs < 24) return `${hrs}h`;
+      return `${Math.floor(hrs / 24)}d`;
+    }
+    
+    // Generate random engagement
+    function generateEngagement() {
+      const rand = Math.random();
+      let likes, dislikes;
+      if (rand < 0.05) {
+        // Viral post (5%)
+        likes = Math.floor(Math.random() * 150) + 50;
+        dislikes = Math.floor(Math.random() * 15);
+      } else if (rand < 0.3) {
+        // Popular post (25%)
+        likes = Math.floor(Math.random() * 40) + 10;
+        dislikes = Math.floor(Math.random() * 8);
+      } else {
+        // Normal post (70%)
+        likes = Math.floor(Math.random() * 15) + 1;
+        dislikes = Math.floor(Math.random() * 4);
+      }
+      return { likes, dislikes };
+    }
+    
+    // Generate bot post
+    function generateBotPost() {
+      const bot = getRandomBot();
+      const content = getRandomPostContent();
+      const engagement = generateEngagement();
       
       return {
-        user: member,
-        text: text,
-        time: timeOptions[Math.floor(Math.random() * timeOptions.length)],
-        likes: Math.floor(Math.random() * 50),
-        dislikes: Math.floor(Math.random() * 10),
+        id: nextPostId++,
+        user: {
+          name: bot.displayName,
+          handle: bot.handle,
+          avatar: bot.avatarUrl,
+          avatarType: 'image',
+          type: 'normal',
+          isBot: true
+        },
+        text: content,
+        time: 'now',
+        timestamp: Date.now(),
+        likes: engagement.likes,
+        dislikes: engagement.dislikes,
         liked: false,
         disliked: false,
         replies: []
       };
+    }
+    
+    // Generate reply to a post
+    function generateBotReply(parentPost) {
+      const bot = getRandomBot();
+      const replyContent = POST_TEMPLATES.replies[Math.floor(Math.random() * POST_TEMPLATES.replies.length)];
+      
+      return {
+        user: {
+          name: bot.displayName,
+          handle: bot.handle,
+          avatar: bot.avatarUrl,
+          avatarType: 'image',
+          type: 'normal',
+          isBot: true
+        },
+        text: Math.random() < 0.4 ? replyContent.toLowerCase() : replyContent,
+        time: 'now',
+        timestamp: Date.now()
+      };
+    }
+    
+    // Calculate next post interval based on time of day
+    function getNextPostInterval() {
+      const hour = new Date().getHours();
+      let baseMin, baseMax;
+      
+      if (hour >= 9 && hour < 16) {
+        // Market hours - faster
+        baseMin = 5 * 60 * 1000;  // 5 min
+        baseMax = 8 * 60 * 1000;  // 8 min
+      } else if (hour >= 0 && hour < 6) {
+        // Night - slower
+        baseMin = 15 * 60 * 1000; // 15 min
+        baseMax = 20 * 60 * 1000; // 20 min
+      } else {
+        // Normal hours
+        baseMin = 8 * 60 * 1000;  // 8 min
+        baseMax = 12 * 60 * 1000; // 12 min
+      }
+      
+      // Add randomness (+/- 2 min)
+      const jitter = (Math.random() - 0.5) * 4 * 60 * 1000;
+      return Math.floor(Math.random() * (baseMax - baseMin) + baseMin + jitter);
+    }
+    
+    // Schedule next bot post
+    function scheduleBotPost() {
+      const interval = getNextPostInterval();
+      console.log(`Next bot post in ${Math.round(interval / 60000)} minutes`);
+      
+      setTimeout(() => {
+        const newPost = generateBotPost();
+        posts.unshift(newPost);
+        
+        // Insert into DOM
+        const feed = document.getElementById('feed');
+        const newPostHTML = renderPostHTML(newPost);
+        feed.insertAdjacentHTML('afterbegin', newPostHTML);
+        document.getElementById(`post-${newPost.id}`).classList.add('new-post');
+        
+        // Maybe add replies later
+        maybeScheduleReplies(newPost);
+        
+        savePosts();
+        scheduleBotPost(); // Schedule next
+      }, interval);
+    }
+    
+    // Maybe schedule replies to a post
+    function maybeScheduleReplies(post) {
+      const rand = Math.random();
+      let replyCount = 0;
+      
+      if (rand < 0.6) return; // 60% get no replies
+      if (rand < 0.9) replyCount = Math.floor(Math.random() * 3) + 1; // 30% get 1-3
+      else replyCount = Math.floor(Math.random() * 5) + 4; // 10% get 4-8
+      
+      for (let i = 0; i < replyCount; i++) {
+        const delay = (Math.random() * 29 + 1) * 60 * 1000; // 1-30 min delay
+        setTimeout(() => {
+          const reply = generateBotReply(post);
+          const postIndex = posts.findIndex(p => p.id === post.id);
+          if (postIndex !== -1) {
+            posts[postIndex].replies.push(reply);
+            
+            // Update DOM
+            const repliesContainer = document.getElementById(`replies-${post.id}`);
+            const replyCountEl = document.getElementById(`reply-count-${post.id}`);
+            if (repliesContainer) {
+              const replyHTML = renderReplyHTML(reply, post.id);
+              repliesContainer.insertAdjacentHTML('beforeend', replyHTML);
+            }
+            if (replyCountEl) {
+              replyCountEl.textContent = posts[postIndex].replies.length;
+            }
+            savePosts();
+          }
+        }, delay);
+      }
+    }
+    
+    // Render single reply HTML
+    function renderReplyHTML(reply, postId) {
+      let avatarContent = reply.user.avatar;
+      if (reply.user.avatarType === 'image') {
+        avatarContent = `<img src="${reply.user.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+      }
+      return `
+        <div class="reply-card">
+          <div class="reply-avatar">${avatarContent}</div>
+          <div class="reply-content">
+            <div class="reply-meta">
+              <span class="reply-username">${reply.user.name}</span>
+              <span class="reply-time">${reply.time}</span>
+            </div>
+            <div class="reply-text">${reply.text}</div>
+          </div>
+        </div>
+      `;
     }
 
     // Initial posts
@@ -1015,38 +1259,37 @@
     let nextPostId = 1;
 
     function initializePosts() {
-      const savedPosts = localStorage.getItem('apehub_posts_v3');
+      const savedPosts = localStorage.getItem('apehub_posts_v4');
       if (savedPosts) {
         posts = JSON.parse(savedPosts);
         nextPostId = posts.length > 0 ? Math.max(...posts.map(p => p.id)) + 1 : 1;
+        // Start bot simulation
+        scheduleBotPost();
         return;
       }
 
-      // Generate initial posts with varied personas
-      const initialCount = 15;
+      // Generate initial feed with bot posts
+      const initialCount = 20;
       for (let i = 0; i < initialCount; i++) {
-        const member = generateCommunityMember();
-        const post = generateAIPost(member);
-        post.id = nextPostId++;
-        post.timestamp = Date.now() - (i * 300000);
+        const post = generateBotPost();
+        post.id = i + 1;
+        post.timestamp = Date.now() - (i * 180000); // Space out by 3 min each
+        post.time = formatTimeAgo(post.timestamp);
+        
+        // Add some replies to older posts
+        if (i > 5 && Math.random() < 0.4) {
+          const replyCount = Math.floor(Math.random() * 3) + 1;
+          for (let j = 0; j < replyCount; j++) {
+            post.replies.push(generateBotReply(post));
+          }
+        }
+        
         posts.push(post);
       }
-
-      // Add the current user's first post
-      posts.unshift({
-        id: nextPostId++,
-        user: currentUser,
-        text: '$NVDA going crazy today! AI chip demand is insane 🚀 #nvidia #stocks',
-        time: '5m',
-        timestamp: Date.now() - 300000,
-        likes: 24,
-        dislikes: 2,
-        liked: false,
-        disliked: false,
-        replies: []
-      });
-
+      
+      nextPostId = initialCount + 1;
       savePosts();
+      scheduleBotPost();
     }
 
     // Render all posts (only called once on init)
@@ -1435,7 +1678,7 @@
 
     // Save posts to localStorage
     function savePosts() {
-      localStorage.setItem('apehub_posts_v3', JSON.stringify(posts));
+      localStorage.setItem('apehub_posts_v4', JSON.stringify(posts));
     }
 
     // Update online count (randomize between 150-222)
@@ -1448,15 +1691,16 @@
     console.log('ApeChat initializing...');
     loadCurrentUser();
     
-    // Clear old posts if corrupted
+    // Clear old posts versions and check for corruption
+    localStorage.removeItem('apehub_posts_v3'); // Old version
     try {
-      const savedPosts = localStorage.getItem('apehub_posts_v3');
+      const savedPosts = localStorage.getItem('apehub_posts_v4');
       if (savedPosts) {
         JSON.parse(savedPosts);
       }
     } catch(e) {
       console.log('Clearing corrupted posts data');
-      localStorage.removeItem('apehub_posts_v3');
+      localStorage.removeItem('apehub_posts_v4');
     }
     
     initializePosts();
