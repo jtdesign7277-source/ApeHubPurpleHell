@@ -866,9 +866,10 @@
             y: {
               beginAtZero: true,
               grid: {
-                color: 'rgba(255, 255, 255, 0.05)'
+                color: 'rgba(128, 128, 128, 0.15)'
               },
               ticks: {
+                color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim() || 'rgba(255,255,255,0.6)',
                 callback: function(value) {
                   return '$' + value.toLocaleString();
                 }
@@ -877,6 +878,9 @@
             x: {
               grid: {
                 display: false
+              },
+              ticks: {
+                color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim() || 'rgba(255,255,255,0.6)'
               }
             }
           }
@@ -1078,9 +1082,10 @@
           scales: {
             y: {
               grid: {
-                color: 'rgba(255, 255, 255, 0.05)'
+                color: 'rgba(128, 128, 128, 0.15)'
               },
               ticks: {
+                color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim() || 'rgba(255,255,255,0.6)',
                 callback: function(value) {
                   if (value >= 1000) {
                     return '$' + (value / 1000).toFixed(0) + 'K';
@@ -1094,6 +1099,7 @@
                 display: false
               },
               ticks: {
+                color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim() || 'rgba(255,255,255,0.6)',
                 maxTicksLimit: 6
               }
             }
