@@ -71,6 +71,8 @@
     .prediction-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
     .prediction-ticker { background: rgba(124, 58, 237, 0.2); padding: 4px 10px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: var(--purple-soft); }
     .prediction-category { font-size: 12px; color: var(--white-70); text-transform: uppercase; letter-spacing: 0.5px; }
+    .prediction-date { font-size: 11px; color: var(--white-50); margin-left: auto; }
+    .bet-slip-date { font-size: 13px; color: var(--purple-glow); margin-top: 6px; }
     .prediction-title { font-size: 18px; font-weight: 600; line-height: 1.4; margin-bottom: 16px; color: #fff; }
     .prediction-odds { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .odds-button { padding: 14px; border-radius: 12px; border: 2px solid transparent; font-family: inherit; cursor: pointer; transition: all 0.2s; text-align: center; }
@@ -310,6 +312,7 @@
         <div>
           <div class="bet-slip-title">Place your bet</div>
           <div class="bet-slip-question" id="betSlipQuestion">Will TSLA close green today?</div>
+          <div class="bet-slip-date" id="betSlipDate">📅 Friday, Jan 16</div>
         </div>
         <button class="bet-slip-close" onclick="closeBetSlip()">×</button>
       </div>
@@ -353,6 +356,8 @@
       <div class="success-details-row"><span style="color: var(--white-50)">Position</span><span id="successPosition">YES</span></div>
       <div class="success-details-row"><span style="color: var(--white-50)">Wagered</span><span id="successWagered">100 tokens</span></div>
       <div class="success-details-row"><span style="color: var(--white-50)">Potential</span><span style="color: var(--green)" id="successPotential">200 tokens</span></div>
+      <div class="success-details-row"><span style="color: var(--white-50)">Placed at</span><span id="successTime">10:30am ET</span></div>
+      <div class="success-details-row"><span style="color: var(--white-50)">Resolves</span><span id="successResolves">4:30pm ET</span></div>
     </div>
     <button class="success-btn" onclick="closeSuccessModal()">Continue Betting</button>
   </div>
@@ -537,12 +542,14 @@
       grid.innerHTML = predictions.map(p => {
         const isLocked = isDailyBettingLocked(p);
         const lockedClass = isLocked ? 'locked' : '';
+        const predictionDate = formatPredictionDate(p.resolves_at);
         return `
         <div class="prediction-card ${p.featured ? 'featured' : ''} ${lockedClass}" onclick="openBetSlip(${p.id})">
           ${isLocked ? '<div class="locked-badge">🔒 MARKET OPEN</div>' : ''}
           <div class="prediction-meta">
             ${p.ticker ? `<span class="prediction-ticker">${p.ticker}</span>` : ''}
             <span class="prediction-category">${getCategoryLabel(p.category)}</span>
+            <span class="prediction-date">📅 ${predictionDate}</span>
           </div>
           <div class="prediction-title">${p.title}</div>
           <div class="prediction-odds">
@@ -589,6 +596,16 @@
       return labels[category] || category.toUpperCase();
     }
 
+    function formatPredictionDate(dateStr) {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'America/New_York' });
+    }
+
+    function formatCurrentTime() {
+      const now = new Date();
+      return now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'America/New_York' }) + ' ET';
+    }
+
     function showLockedMessage() {
       alert('🔒 Betting Closed!\n\nDaily predictions lock at 9:30am ET when the market opens. Check back tonight at 8pm ET for tomorrow\'s predictions!');
     }
@@ -615,6 +632,7 @@
       }
       
       document.getElementById('betSlipQuestion').textContent = selectedPrediction.title;
+      document.getElementById('betSlipDate').textContent = `📅 ${formatPredictionDate(selectedPrediction.resolves_at)} • Resolves 4:30pm ET`;
       document.getElementById('yesMultiplier').textContent = `${parseFloat(selectedPrediction.yes_payout_multiplier).toFixed(2)}x payout`;
       document.getElementById('noMultiplier').textContent = `${parseFloat(selectedPrediction.no_payout_multiplier).toFixed(2)}x payout`;
       selectedPosition = position;
@@ -718,6 +736,8 @@
       document.getElementById('successPosition').style.color = bet.position === 'yes' ? 'var(--green)' : 'var(--red)';
       document.getElementById('successWagered').textContent = `${bet.tokens_wagered.toLocaleString()} tokens`;
       document.getElementById('successPotential').textContent = `${bet.potential_payout.toLocaleString()} tokens`;
+      document.getElementById('successTime').textContent = formatCurrentTime();
+      document.getElementById('successResolves').textContent = `${formatPredictionDate(selectedPrediction?.resolves_at)} 4:30pm ET`;
       document.getElementById('successModal').classList.add('show');
       launchConfetti();
     }
