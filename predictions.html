@@ -55,29 +55,29 @@
 
     /* Prediction Cards */
     .predictions-grid { display: flex; flex-direction: column; gap: 12px; }
-    .prediction-card { background: var(--bg-card); border: 1px solid var(--white-10); border-radius: 16px; padding: 20px; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
-    .prediction-card:hover { background: var(--bg-card-hover); border-color: var(--white-30); transform: translateY(-2px); }
-    .prediction-card.featured { border-color: var(--purple-core); background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(0,0,0,0)); }
+    .prediction-card { background: #12121a; border: 1px solid var(--white-20); border-radius: 16px; padding: 20px; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
+    .prediction-card:hover { background: #1a1a24; border-color: var(--white-40); transform: translateY(-2px); }
+    .prediction-card.featured { border-color: var(--purple-core); background: linear-gradient(135deg, rgba(124,58,237,0.15), #12121a); }
     .prediction-card.featured::before { content: '🔥 HOT'; position: absolute; top: 12px; right: 12px; background: linear-gradient(135deg, var(--purple-core), var(--purple-pink)); padding: 4px 10px; border-radius: 100px; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; }
     
     /* Locked prediction state */
-    .prediction-card.locked { border-color: var(--white-10); opacity: 0.85; }
-    .prediction-card.locked:hover { transform: none; border-color: var(--white-20); }
+    .prediction-card.locked { border-color: var(--white-20); opacity: 1; }
+    .prediction-card.locked:hover { transform: none; border-color: var(--white-30); }
     .prediction-card.locked.featured::before { display: none; }
-    .locked-badge { position: absolute; top: 12px; right: 12px; background: linear-gradient(135deg, #374151, #4b5563); padding: 4px 10px; border-radius: 100px; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; color: var(--white-70); }
-    .locked-text { color: var(--white-50); }
-    .odds-button.disabled { opacity: 0.5; cursor: not-allowed; }
-    .odds-button.disabled:hover { background: rgba(255,255,255,0.05); border-color: var(--white-10); }
+    .locked-badge { position: absolute; top: 12px; right: 12px; background: linear-gradient(135deg, #4b5563, #6b7280); padding: 4px 10px; border-radius: 100px; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; color: #fff; }
+    .locked-text { color: var(--white-70); }
+    .odds-button.disabled { opacity: 0.6; cursor: not-allowed; }
+    .odds-button.disabled:hover { background: rgba(255,255,255,0.08); border-color: var(--white-20); }
     .prediction-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-    .prediction-ticker { background: var(--white-10); padding: 4px 10px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: var(--purple-glow); }
-    .prediction-category { font-size: 12px; color: var(--white-50); text-transform: uppercase; letter-spacing: 0.5px; }
-    .prediction-title { font-size: 18px; font-weight: 600; line-height: 1.4; margin-bottom: 16px; color: var(--white-90); }
+    .prediction-ticker { background: rgba(124, 58, 237, 0.2); padding: 4px 10px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: var(--purple-soft); }
+    .prediction-category { font-size: 12px; color: var(--white-70); text-transform: uppercase; letter-spacing: 0.5px; }
+    .prediction-title { font-size: 18px; font-weight: 600; line-height: 1.4; margin-bottom: 16px; color: #fff; }
     .prediction-odds { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .odds-button { padding: 14px; border-radius: 12px; border: 2px solid transparent; font-family: inherit; cursor: pointer; transition: all 0.2s; text-align: center; }
-    .odds-button.yes { background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); }
-    .odds-button.yes:hover { background: rgba(16, 185, 129, 0.2); border-color: var(--green); }
-    .odds-button.no { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); }
-    .odds-button.no:hover { background: rgba(239, 68, 68, 0.2); border-color: var(--red); }
+    .odds-button.yes { background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.4); }
+    .odds-button.yes:hover { background: rgba(16, 185, 129, 0.25); border-color: var(--green); }
+    .odds-button.no { background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.4); }
+    .odds-button.no:hover { background: rgba(239, 68, 68, 0.25); border-color: var(--red); }
     .odds-label { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
     .odds-button.yes .odds-label { color: var(--green); }
     .odds-button.no .odds-label { color: var(--red); }
