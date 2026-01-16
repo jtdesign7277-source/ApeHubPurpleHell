@@ -126,6 +126,96 @@
       color: var(--text-muted);
     }
 
+    /* Live Price Ticker Bar */
+    .price-ticker-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      margin: 0 12px 8px 12px;
+      flex-shrink: 0;
+      font-size: 13px;
+    }
+
+    .ticker-symbol {
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--text-primary);
+      min-width: 50px;
+    }
+
+    .ticker-name {
+      color: var(--text-muted);
+      flex: 0 1 140px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ticker-ohlcv {
+      display: flex;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .ticker-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .ticker-item .label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .ticker-item .value {
+      font-family: 'Courier New', monospace;
+      font-weight: 600;
+      color: var(--text-primary);
+      min-width: 50px;
+      text-align: center;
+    }
+
+    .ticker-price-col {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      text-align: right;
+      min-width: 80px;
+    }
+
+    .ticker-price {
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--text-primary);
+    }
+
+    .ticker-change {
+      font-size: 13px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      width: fit-content;
+      margin-left: auto;
+    }
+
+    .ticker-change.up {
+      background: rgba(0, 215, 117, 0.15);
+      color: var(--color-up);
+    }
+
+    .ticker-change.down {
+      background: rgba(255, 71, 87, 0.15);
+      color: var(--color-down);
+    }
+
     /* Quick Symbols */
     .quick-symbols {
       padding: 0 12px 4px;
@@ -280,6 +370,23 @@
       </div>
     </div>
 
+    <!-- Live Price Ticker Bar -->
+    <div class="price-ticker-bar">
+      <div class="ticker-symbol" id="ticker-symbol">AAPL</div>
+      <div class="ticker-name" id="ticker-name">Apple Inc</div>
+      <div class="ticker-ohlcv">
+        <span class="ticker-item"><span class="label">O</span><span class="value" id="ticker-open">-</span></span>
+        <span class="ticker-item"><span class="label">H</span><span class="value" id="ticker-high">-</span></span>
+        <span class="ticker-item"><span class="label">L</span><span class="value" id="ticker-low">-</span></span>
+        <span class="ticker-item"><span class="label">C</span><span class="value" id="ticker-close">-</span></span>
+        <span class="ticker-item"><span class="label">Vol</span><span class="value" id="ticker-volume">-</span></span>
+      </div>
+      <div class="ticker-price-col">
+        <div class="ticker-price" id="ticker-price">$0.00</div>
+        <div class="ticker-change" id="ticker-change">+0.00%</div>
+      </div>
+    </div>
+
     <!-- Quick Symbol Chips -->
     <div class="quick-symbols">
       <div class="symbol-chip active" data-symbol="AAPL">AAPL</div>
@@ -394,8 +501,52 @@
       // Update input
       document.getElementById('symbolInput').value = symbol;
       
+      // Fetch live price data from Alpaca
+      updateTickerPrice(symbol);
+      
       // Recreate widget with new symbol
       createWidget(symbol);
+    }
+
+    // Fetch and update live price ticker from Alpaca API
+    async function updateTickerPrice(symbol) {
+      try {
+        const response = await fetch(`/api/market/snapshot/${encodeURIComponent(symbol)}`);
+        const data = await response.json();
+        
+        if (data.success) {
+          const snapshot = data;
+          const price = snapshot.price || 0;
+          const change = parseFloat(snapshot.change) || 0;
+          const changePercent = parseFloat(snapshot.changePercent) || 0;
+          const open = snapshot.dailyBar?.o || 0;
+          const high = snapshot.dailyBar?.h || 0;
+          const low = snapshot.dailyBar?.l || 0;
+          const close = snapshot.dailyBar?.c || 0;
+          const volume = snapshot.dailyBar?.v || 0;
+          
+          // Update ticker display
+          document.getElementById('ticker-symbol').textContent = symbol;
+          document.getElementById('ticker-name').textContent = symbol;
+          document.getElementById('ticker-price').textContent = '$' + price.toFixed(2);
+          document.getElementById('ticker-open').textContent = '$' + open.toFixed(2);
+          document.getElementById('ticker-high').textContent = '$' + high.toFixed(2);
+          document.getElementById('ticker-low').textContent = '$' + low.toFixed(2);
+          document.getElementById('ticker-close').textContent = '$' + close.toFixed(2);
+          
+          // Format volume (M for millions)
+          const volFormatted = volume >= 1000000 ? (volume / 1000000).toFixed(1) + 'M' : (volume / 1000).toFixed(1) + 'K';
+          document.getElementById('ticker-volume').textContent = volFormatted;
+          
+          // Update change indicator
+          const changeEl = document.getElementById('ticker-change');
+          changeEl.textContent = (changePercent >= 0 ? '+' : '') + changePercent.toFixed(2) + '%';
+          changeEl.classList.remove('up', 'down');
+          changeEl.classList.add(changePercent >= 0 ? 'up' : 'down');
+        }
+      } catch (error) {
+        console.error('Error fetching ticker price:', error);
+      }
     }
 
     // Symbol chip click handlers
@@ -433,6 +584,7 @@
     // Initialize widget
     document.addEventListener('DOMContentLoaded', function() {
       createWidget(currentSymbol);
+      updateTickerPrice(currentSymbol);
     });
 
     // Load saved theme from localStorage
