@@ -1000,6 +1000,47 @@ router.get('/admin/stats', verifyAdmin, async (req, res) => {
   }
 });
 
+// Issue Tokens (Admin)
+router.post('/admin/issue-tokens', verifyAdmin, async (req, res) => {
+  try {
+    const pool = req.app.locals.pool;
+    const { email, amount, reason } = req.body;
+    
+    if (!email || !amount) {
+      return res.status(400).json({ error: 'Email and amount required' });
+    }
+    
+    // Get or create user account
+    let user = await pool.query('SELECT * FROM user_tokens WHERE user_email = $1', [email]);
+    
+    if (user.rows.length === 0) {
+      await pool.query(
+        'INSERT INTO user_tokens (user_email, balance) VALUES ($1, $2)',
+        [email, amount]
+      );
+    } else {
+      await pool.query(
+        'UPDATE user_tokens SET balance = balance + $1 WHERE user_email = $2',
+        [amount, email]
+      );
+    }
+    
+    const updated = await pool.query('SELECT balance FROM user_tokens WHERE user_email = $1', [email]);
+    
+    console.log(`Admin issued ${amount} tokens to ${email}. Reason: ${reason || 'None'}`);
+    
+    res.json({
+      success: true,
+      email,
+      tokensIssued: amount,
+      newBalance: updated.rows[0].balance
+    });
+  } catch (error) {
+    console.error('Error issuing tokens:', error);
+    res.status(500).json({ error: 'Failed to issue tokens' });
+  }
+});
+
 // Recent Bets
 router.get('/admin/recent-bets', verifyAdmin, async (req, res) => {
   try {
