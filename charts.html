@@ -224,6 +224,35 @@
       height: 24px;
     }
 
+    /* Predictions Tab Styles */
+    .nav-item.predictions .nav-icon-wrapper {
+      position: relative;
+    }
+    .nav-item.predictions .nav-icon {
+      font-size: 20px;
+    }
+    .nav-live-dot {
+      position: absolute;
+      top: -2px;
+      right: -6px;
+      width: 8px;
+      height: 8px;
+      background: #10b981;
+      border-radius: 50%;
+      border: 2px solid #0a0a0f;
+      animation: live-pulse 2s ease-in-out infinite;
+    }
+    @keyframes live-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(1.2); }
+    }
+    .nav-item.predictions.active {
+      color: #a855f7;
+    }
+    .nav-item.predictions.active .nav-icon {
+      filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.6));
+    }
+
     .nav-item.active {
       color: rgba(168, 85, 247, 0.55);
     }
@@ -300,8 +329,11 @@
       </svg>
       <span>Charts</span>
     </a>
-    <a href="predictions.html" class="nav-item">
-      <span style="font-size: 20px;">🔮</span>
+    <a href="predictions.html" class="nav-item predictions">
+      <div class="nav-icon-wrapper">
+        <span class="nav-icon">🔮</span>
+        <span class="nav-live-dot"></span>
+      </div>
       <span>Predict</span>
     </a>
     <a href="chat.html" class="nav-item">
