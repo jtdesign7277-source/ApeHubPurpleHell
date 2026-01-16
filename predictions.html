@@ -111,7 +111,13 @@
     .prediction-category { font-size: 12px; color: var(--white-70); text-transform: uppercase; letter-spacing: 0.5px; }
     .prediction-date { font-size: 11px; color: var(--white-50); margin-left: auto; }
     .bet-slip-date { font-size: 13px; color: var(--purple-glow); margin-top: 6px; }
-    .prediction-title { font-size: 18px; font-weight: 600; line-height: 1.4; margin-bottom: 16px; color: #fff; }
+    .prediction-title { font-size: 18px; font-weight: 600; line-height: 1.4; margin-bottom: 8px; color: #fff; }
+    .prediction-reference { font-size: 11px; color: var(--white-50); margin-bottom: 12px; font-family: 'JetBrains Mono', monospace; display: flex; gap: 12px; flex-wrap: wrap; }
+    .prediction-reference .ref-item { background: var(--white-05); padding: 4px 8px; border-radius: 6px; }
+    .prediction-reference .ref-label { color: var(--white-50); }
+    .prediction-reference .ref-value { color: var(--gold); font-weight: 600; }
+    .prediction-reference .ref-value.positive { color: var(--green); }
+    .prediction-reference .ref-value.negative { color: var(--red); }
     .prediction-odds { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .odds-button { padding: 14px; border-radius: 12px; border: 2px solid transparent; font-family: inherit; cursor: pointer; transition: all 0.2s; text-align: center; }
     .odds-button.yes { background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.4); }
@@ -622,6 +628,82 @@
     }
 
     // Helper to render a single prediction card with optional market data
+    // All-time high prices for reference (updated periodically)
+    const ALL_TIME_HIGHS = {
+      'META': { price: 638.40, date: 'Jan 2025' },
+      'NVDA': { price: 153.13, date: 'Jan 2025' },
+      'TSLA': { price: 488.54, date: 'Jan 2025' },
+      'AAPL': { price: 260.10, date: 'Dec 2024' },
+      'MSFT': { price: 468.35, date: 'Dec 2024' },
+      'GOOGL': { price: 201.42, date: 'Dec 2024' },
+      'AMZN': { price: 233.00, date: 'Jan 2025' },
+      'SPY': { price: 609.07, date: 'Dec 2024' },
+      'QQQ': { price: 538.28, date: 'Dec 2024' },
+      'AMD': { price: 227.30, date: 'Mar 2024' },
+    };
+    
+    // Week start prices (would ideally fetch from API, store Monday open)
+    let weekStartPrices = {};
+    
+    function getWeekStartPrice(ticker) {
+      return weekStartPrices[ticker] || null;
+    }
+    
+    function generateReferenceInfo(p, snapshot) {
+      const title = p.title.toLowerCase();
+      const ticker = p.ticker;
+      let refHtml = '';
+      
+      // All-time high questions
+      if (title.includes('all-time high') || title.includes('all time high') || title.includes('ath')) {
+        const ath = ALL_TIME_HIGHS[ticker];
+        if (ath && snapshot) {
+          const currentPrice = parseFloat(snapshot.price);
+          const diff = ((currentPrice - ath.price) / ath.price * 100).toFixed(2);
+          const diffClass = currentPrice >= ath.price ? 'positive' : 'negative';
+          refHtml = `
+            <div class="prediction-reference">
+              <span class="ref-item"><span class="ref-label">ATH: </span><span class="ref-value">$${ath.price.toFixed(2)}</span></span>
+              <span class="ref-item"><span class="ref-label">Now: </span><span class="ref-value ${diffClass}">$${currentPrice.toFixed(2)} (${diff > 0 ? '+' : ''}${diff}%)</span></span>
+            </div>
+          `;
+        }
+      }
+      // Weekly range questions
+      else if (p.category === 'weekly' && snapshot) {
+        const weekStart = getWeekStartPrice(ticker);
+        if (weekStart) {
+          const currentPrice = parseFloat(snapshot.price);
+          const diff = ((currentPrice - weekStart) / weekStart * 100).toFixed(2);
+          const diffClass = diff >= 0 ? 'positive' : 'negative';
+          refHtml = `
+            <div class="prediction-reference">
+              <span class="ref-item"><span class="ref-label">Week Start: </span><span class="ref-value">$${weekStart.toFixed(2)}</span></span>
+              <span class="ref-item"><span class="ref-label">Now: </span><span class="ref-value ${diffClass}">${diff > 0 ? '+' : ''}${diff}%</span></span>
+            </div>
+          `;
+        }
+      }
+      // Daily close green - show day's open price if available
+      else if (p.category === 'daily' && title.includes('close green') && snapshot) {
+        const openPrice = snapshot.dailyBar?.o || snapshot.open;
+        if (openPrice) {
+          const currentPrice = parseFloat(snapshot.price);
+          const diff = ((currentPrice - openPrice) / openPrice * 100).toFixed(2);
+          const diffClass = currentPrice >= openPrice ? 'positive' : 'negative';
+          const statusText = currentPrice >= openPrice ? '📈 Winning' : '📉 Losing';
+          refHtml = `
+            <div class="prediction-reference">
+              <span class="ref-item"><span class="ref-label">Open: </span><span class="ref-value">$${parseFloat(openPrice).toFixed(2)}</span></span>
+              <span class="ref-item"><span class="ref-value ${diffClass}">${statusText} (${diff > 0 ? '+' : ''}${diff}%)</span></span>
+            </div>
+          `;
+        }
+      }
+      
+      return refHtml;
+    }
+
     function renderPredictionCard(p, snapshot) {
       const isLocked = isDailyBettingLocked(p);
       const lockedClass = isLocked ? 'locked' : '';
@@ -634,6 +716,10 @@
         const color = snapshot.change > 0 ? 'var(--green)' : (snapshot.change < 0 ? 'var(--red)' : 'var(--white-70)');
         priceHtml = `<span class="prediction-price" style="color:${color}">${price} <span style="font-size:12px;">${change} (${changePercent})</span></span>`;
       }
+      
+      // Generate reference info based on question type
+      const referenceHtml = generateReferenceInfo(p, snapshot);
+      
       return `
         <div class="prediction-card ${p.featured ? 'featured' : ''} ${lockedClass}" onclick="openBetSlip(${p.id})">
           ${isLocked ? '<div class="locked-badge">🔒 LOCKED</div>' : ''}
@@ -643,6 +729,7 @@
             ${isLocked ? '' : `<span class="prediction-date">📅 ${predictionDate}</span>`}
           </div>
           <div class="prediction-title">${p.title}</div>
+          ${referenceHtml}
           <div class="prediction-odds">
             <button class="odds-button yes ${isLocked ? 'disabled' : ''}" onclick="event.stopPropagation(); ${isLocked ? 'showLockedMessage()' : `openBetSlip(${p.id}, 'yes')`}">
               <div class="odds-label">YES</div>
