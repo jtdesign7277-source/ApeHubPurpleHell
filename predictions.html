@@ -37,11 +37,15 @@
     .header { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 16px 20px; background: rgba(0,0,0,0.8); backdrop-filter: blur(20px); border-bottom: 1px solid var(--white-10); display: flex; justify-content: space-between; align-items: center; }
     .logo { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
     .logo span { color: var(--purple-glow); }
-    .token-balance { display: flex; align-items: center; gap: 8px; background: var(--white-05); padding: 8px 16px; border-radius: 100px; border: 1px solid var(--white-10); cursor: pointer; transition: all 0.2s; }
-    .token-balance:hover { border-color: var(--purple-glow); background: rgba(124, 58, 237, 0.1); }
-    .token-icon { width: 20px; height: 20px; background: linear-gradient(135deg, var(--gold), #f59e0b); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; }
-    .token-amount { font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 14px; }
-    .add-tokens { color: var(--purple-glow); font-size: 18px; font-weight: 600; }
+    .token-balance { display: flex; align-items: center; gap: 10px; background: linear-gradient(135deg, rgba(251,191,36,0.08), rgba(245,158,11,0.03)); padding: 8px 16px 8px 10px; border-radius: 100px; border: 1px solid rgba(251,191,36,0.3); cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden; box-shadow: 0 0 20px rgba(251,191,36,0.1), inset 0 1px 0 rgba(255,255,255,0.1); }
+    .token-balance::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(251,191,36,0.2), transparent); transition: left 0.5s; }
+    .token-balance:hover::before { left: 100%; }
+    .token-balance:hover { border-color: var(--gold); background: linear-gradient(135deg, rgba(251,191,36,0.15), rgba(245,158,11,0.08)); box-shadow: 0 0 30px rgba(251,191,36,0.25), inset 0 1px 0 rgba(255,255,255,0.15); transform: translateY(-1px); }
+    .token-icon { width: 28px; height: 28px; background: linear-gradient(145deg, #fcd34d, #f59e0b, #d97706); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; box-shadow: 0 2px 8px rgba(251,191,36,0.4), inset 0 2px 4px rgba(255,255,255,0.4), inset 0 -2px 4px rgba(0,0,0,0.2); position: relative; }
+    .token-icon::after { content: ''; position: absolute; top: 3px; left: 5px; width: 8px; height: 8px; background: linear-gradient(135deg, rgba(255,255,255,0.6), transparent); border-radius: 50%; }
+    .token-amount { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 15px; color: var(--gold); text-shadow: 0 0 10px rgba(251,191,36,0.3); }
+    .add-tokens { color: var(--gold); font-size: 16px; font-weight: 700; opacity: 0.8; transition: all 0.2s; }
+    .token-balance:hover .add-tokens { opacity: 1; transform: scale(1.1); }
     .header-actions { display: flex; align-items: center; gap: 10px; }
     .my-bets-btn { display: flex; align-items: center; gap: 6px; background: transparent; border: 2px solid var(--white-20); padding: 8px 14px; border-radius: 12px; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--white-70); cursor: pointer; transition: all 0.2s; }
     .my-bets-btn:hover { border-color: var(--purple-core); color: var(--purple-glow); background: rgba(124, 58, 237, 0.1); }
@@ -319,7 +323,7 @@
     <div class="header-actions">
       <button class="my-bets-btn" onclick="openMyBets()">My Bets</button>
       <div class="token-balance" onclick="openTokenModal()">
-        <div class="token-icon">🪙</div>
+        <div class="token-icon">$</div>
         <span class="token-amount" id="userBalance">0</span>
         <span class="add-tokens">+</span>
       </div>
