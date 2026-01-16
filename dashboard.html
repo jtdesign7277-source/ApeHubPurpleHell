@@ -240,6 +240,12 @@
       font-size: 15px;
       font-weight: 600;
       color: var(--text-primary);
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .apehub-logo:hover {
+      opacity: 0.7;
     }
 
     .apehub-logo span {
@@ -2117,7 +2123,7 @@
     
     <!-- Top Bar -->
     <div class="top-bar">
-      <div class="apehub-logo" id="apehubLogo">Ape<span>Hub</span></div>
+      <a href="/landing.html" class="apehub-logo" id="apehubLogo" style="text-decoration: none;">Ape<span>Hub</span></a>
       <div class="welcome" onclick="openProfile()">Welcome, <span id="userName">User</span> <svg class="welcome-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
     </div>
 
@@ -4426,16 +4432,30 @@
     // INITIALIZE
     // ============================================
     
-    // Secret admin access - tap logo 5 times quickly
+    // Logo click - single click goes home, 5 rapid taps goes to admin
     let logoTapCount = 0;
     let logoTapTimer = null;
-    document.getElementById('apehubLogo')?.addEventListener('click', () => {
+    let logoClickTimer = null;
+    document.getElementById('apehubLogo')?.addEventListener('click', (e) => {
+      e.preventDefault();
       logoTapCount++;
       clearTimeout(logoTapTimer);
+      clearTimeout(logoClickTimer);
+      
       if (logoTapCount >= 5) {
         logoTapCount = 0;
         window.location.href = '/admin/admin.html';
+        return;
       }
+      
+      // Wait a moment to see if more taps are coming
+      logoClickTimer = setTimeout(() => {
+        if (logoTapCount < 5) {
+          window.location.href = '/landing.html';
+        }
+        logoTapCount = 0;
+      }, 300);
+      
       logoTapTimer = setTimeout(() => { logoTapCount = 0; }, 1500);
     });
     
