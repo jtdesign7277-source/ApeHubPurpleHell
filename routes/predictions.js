@@ -873,8 +873,8 @@ router.post('/admin/process-payout', async (req, res) => {
 // ============================================
 
 const crypto = require('crypto');
-const ADMIN_EMAILS = ['jeff@dailyedgefinance.com', 'admin@apehub.com']; // Add your admin emails
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'apehub2026!'; // Set in Railway env vars
+const ADMIN_EMAILS = ['jtdesign72@yahoo.com']; // Admin emails
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'amanda7281'; // Set in Railway env vars
 const adminTokens = new Map(); // Simple in-memory token store
 
 // Admin Login
