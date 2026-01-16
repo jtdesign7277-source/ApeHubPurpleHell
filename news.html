@@ -1503,153 +1503,6 @@
       color: var(--text-muted);
     }
 
-    /* Tech Section */
-    .tech-section {
-      display: none;
-      padding: 0 24px;
-    }
-
-    .tech-section.active {
-      display: block;
-    }
-
-    .tech-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .tech-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-
-    .tech-badge {
-      font-size: 11px;
-      font-weight: 600;
-      color: #8b5cf6;
-      text-transform: uppercase;
-    }
-
-    .tech-movers {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 24px;
-      overflow-x: auto;
-      padding-bottom: 4px;
-    }
-
-    .tech-movers::-webkit-scrollbar {
-      display: none;
-    }
-
-    .tech-mover {
-      flex-shrink: 0;
-      background: rgba(139, 92, 246, 0.08);
-      padding: 12px 16px;
-      border-radius: 12px;
-      text-align: center;
-      min-width: 90px;
-    }
-
-    .tech-mover-symbol {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 4px;
-    }
-
-    .tech-mover-change {
-      font-size: 13px;
-      font-weight: 600;
-    }
-
-    .tech-mover-change.up {
-      color: var(--color-up);
-    }
-
-    .tech-mover-change.down {
-      color: var(--color-down);
-    }
-
-    .tech-article {
-      padding: 16px 0;
-      border-bottom: 1px solid var(--border-light);
-    }
-
-    .tech-article:last-child {
-      border-bottom: none;
-    }
-
-    .tech-article-meta {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 8px;
-    }
-
-    .tech-article-time {
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-
-    .tech-category {
-      font-size: 10px;
-      font-weight: 600;
-      color: #8b5cf6;
-      background: rgba(139, 92, 246, 0.12);
-      padding: 3px 8px;
-      border-radius: 4px;
-    }
-
-    .tech-article-title {
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--text-primary);
-      line-height: 1.4;
-      margin-bottom: 8px;
-    }
-
-    .tech-article-summary {
-      font-size: 13px;
-      color: var(--text-muted);
-      line-height: 1.5;
-      margin-bottom: 12px;
-    }
-
-    .tech-article-stocks {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .tech-stock {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .tech-stock-symbol {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-
-    .tech-stock-change {
-      font-size: 12px;
-      font-weight: 600;
-    }
-
-    .tech-stock-change.up {
-      color: var(--color-up);
-    }
-
-    .tech-stock-change.down {
-      color: var(--color-down);
-    }
-
     /* Featured Article */
     .featured-card {
       background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(99, 102, 241, 0.1));
@@ -1845,7 +1698,6 @@
       <div class="category-tab active" data-category="breaking">Breaking</div>
       <div class="category-tab" data-category="earnings">Earnings</div>
       <div class="category-tab" data-category="fed">📅 Calendar</div>
-      <div class="category-tab" data-category="tech">Tech</div>
       <div class="category-tab" data-category="crypto">Crypto</div>
     </div>
 
@@ -1866,27 +1718,6 @@
         <div style="text-align: center; padding: 40px; color: var(--text-muted);">
           <div class="loading-spinner" style="width: 30px; height: 30px; border: 3px solid rgba(168, 85, 247, 0.2); border-top-color: #a855f7; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 12px;"></div>
           Loading breaking news...
-        </div>
-      </div>
-    </div>
-
-    <!-- Tech Section -->
-    <div class="tech-section" id="tech-container">
-      <div class="tech-header">
-        <h2 class="tech-title">💻 Tech & Innovation</h2>
-        <span class="tech-badge">Trending</span>
-      </div>
-
-      <!-- Tech Movers - Dynamic -->
-      <div class="tech-movers" id="tech-movers-container">
-        <div style="text-align: center; padding: 10px; color: var(--text-muted);">Loading...</div>
-      </div>
-      
-      <!-- Dynamic Tech Articles Container -->
-      <div id="tech-articles-container">
-        <div style="text-align: center; padding: 40px; color: var(--text-muted);">
-          <div class="loading-spinner" style="width: 30px; height: 30px; border: 3px solid rgba(168, 85, 247, 0.2); border-top-color: #a855f7; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 12px;"></div>
-          Loading tech news...
         </div>
       </div>
     </div>
@@ -2019,7 +1850,6 @@
     const cryptoContainer = document.getElementById('crypto-container');
     const breakingContainer = document.getElementById('breaking-container');
     const fedContainer = document.getElementById('fed-container');
-    const techContainer = document.getElementById('tech-container');
 
     document.querySelectorAll('.category-tab').forEach(tab => {
       tab.addEventListener('click', function() {
@@ -2034,7 +1864,6 @@
         cryptoContainer.classList.remove('active');
         breakingContainer.classList.remove('active');
         fedContainer.classList.remove('active');
-        techContainer.classList.remove('active');
         
         // Show appropriate section
         if (category === 'earnings') {
@@ -2045,8 +1874,6 @@
           breakingContainer.classList.add('active');
         } else if (category === 'fed') {
           fedContainer.classList.add('active');
-        } else if (category === 'tech') {
-          techContainer.classList.add('active');
         } else {
           newsContainer.style.display = 'block';
         }
