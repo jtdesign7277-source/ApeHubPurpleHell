@@ -189,6 +189,84 @@
       .prediction-title { font-size: 16px; }
       .odds-multiplier { font-size: 18px; }
     }
+
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--bg-card);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 0 28px;
+      max-width: 600px;
+      margin: 0 auto;
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--white-50);
+      text-decoration: none;
+      font-size: 11px;
+      transition: color 0.2s;
+    }
+
+    .nav-item:hover {
+      color: var(--white);
+    }
+
+    .nav-item.active {
+      color: var(--purple-glow);
+    }
+
+    .nav-item svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* Predictions Tab Styles */
+    .nav-item.predictions .nav-icon-wrapper {
+      position: relative;
+    }
+    .nav-item.predictions .nav-icon {
+      font-size: 20px;
+    }
+    .nav-live-dot {
+      position: absolute;
+      top: -2px;
+      right: -6px;
+      width: 8px;
+      height: 8px;
+      background: #10b981;
+      border-radius: 50%;
+      border: 2px solid var(--bg-card);
+      animation: live-pulse 2s ease-in-out infinite;
+    }
+    @keyframes live-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(1.2); }
+    }
+    .nav-item.predictions.active {
+      color: #a855f7;
+    }
+    .nav-item.predictions.active .nav-icon {
+      filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.6));
+    }
+
+    @supports (padding-bottom: env(safe-area-inset-bottom)) {
+      .main {
+        padding-bottom: calc(120px + env(safe-area-inset-bottom));
+      }
+      .bottom-nav {
+        padding-bottom: calc(12px + env(safe-area-inset-bottom));
+      }
+    }
   </style>
 </head>
 <body>
@@ -296,6 +374,46 @@
       <button class="buy-tokens-btn" onclick="purchaseTokens()">Purchase Tokens</button>
     </div>
   </div>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/>
+      </svg>
+      <span>Home</span>
+    </a>
+    <a href="news.html" class="nav-item">
+      <svg viewBox="0 0 16 16" fill="currentColor">
+        <path d="M8 0C8 4.418 4.418 8 0 8C4.418 8 8 11.582 8 16C8 11.582 11.582 8 16 8C11.582 8 8 4.418 8 0Z"/>
+      </svg>
+      <span>News</span>
+    </a>
+    <a href="charts.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 5v4"/>
+        <rect x="7" y="9" width="4" height="6" rx="0.5" fill="currentColor"/>
+        <path d="M9 15v4"/>
+        <path d="M15 3v2"/>
+        <rect x="13" y="5" width="4" height="8" rx="0.5"/>
+        <path d="M15 13v6"/>
+      </svg>
+      <span>Charts</span>
+    </a>
+    <a href="predictions.html" class="nav-item predictions active">
+      <div class="nav-icon-wrapper">
+        <span class="nav-icon">🔮</span>
+        <span class="nav-live-dot"></span>
+      </div>
+      <span>Predict</span>
+    </a>
+    <a href="chat.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.36 5.08L2 22l4.92-1.36C8.42 21.5 10.15 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2z"/>
+      </svg>
+      <span>Chat</span>
+    </a>
+  </nav>
 
   <div class="confetti-container" id="confettiContainer"></div>
 
