@@ -1302,7 +1302,7 @@
 
     <!-- Footer -->
     <footer>
-      <span>© 2025 ApeHub</span>
+      <span id="adminTrigger" style="cursor: default;">© 2025 ApeHub</span>
       <div class="social-links">
         <!-- X (Twitter) -->
         <a href="#" aria-label="X">
@@ -1718,6 +1718,19 @@
     // ==================== STRANGER THINGS INTRO AUDIO ====================
     const introAudio = new Audio('intro-music.mp3');
     introAudio.volume = 0.5;
+    
+    // Secret admin access - tap footer 5 times quickly
+    let adminTapCount = 0;
+    let adminTapTimer = null;
+    document.getElementById('adminTrigger')?.addEventListener('click', () => {
+      adminTapCount++;
+      clearTimeout(adminTapTimer);
+      if (adminTapCount >= 5) {
+        adminTapCount = 0;
+        window.location.href = '/admin/admin.html';
+      }
+      adminTapTimer = setTimeout(() => { adminTapCount = 0; }, 1500);
+    });
     
     // Try to play audio on page load (may require user interaction on some browsers)
     document.addEventListener('DOMContentLoaded', () => {
