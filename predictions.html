@@ -42,6 +42,38 @@
     .token-icon { width: 20px; height: 20px; background: linear-gradient(135deg, var(--gold), #f59e0b); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; }
     .token-amount { font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 14px; }
     .add-tokens { color: var(--purple-glow); font-size: 18px; font-weight: 600; }
+    .header-actions { display: flex; align-items: center; gap: 10px; }
+    .my-bets-btn { display: flex; align-items: center; gap: 6px; background: transparent; border: 2px solid var(--white-20); padding: 8px 14px; border-radius: 12px; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--white-70); cursor: pointer; transition: all 0.2s; }
+    .my-bets-btn:hover { border-color: var(--purple-core); color: var(--purple-glow); background: rgba(124, 58, 237, 0.1); }
+
+    /* My Bets Modal */
+    .my-bets-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); z-index: 300; opacity: 0; visibility: hidden; transition: all 0.3s; overflow-y: auto; }
+    .my-bets-modal.show { opacity: 1; visibility: visible; }
+    .my-bets-content { max-width: 500px; margin: 0 auto; padding: 20px 16px 100px; }
+    .my-bets-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-top: 10px; }
+    .my-bets-title { font-size: 24px; font-weight: 700; }
+    .my-bets-close { width: 40px; height: 40px; background: var(--white-10); border: none; border-radius: 50%; color: var(--white); font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .my-bets-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+    .my-bets-tab { flex: 1; padding: 12px; background: var(--white-05); border: 2px solid var(--white-10); border-radius: 12px; font-family: inherit; font-size: 14px; font-weight: 600; color: var(--white-50); cursor: pointer; transition: all 0.2s; text-align: center; }
+    .my-bets-tab.active { border-color: var(--purple-core); color: var(--purple-glow); background: rgba(124, 58, 237, 0.1); }
+    .bet-history-card { background: #12121a; border: 1px solid var(--white-20); border-radius: 14px; padding: 16px; margin-bottom: 12px; }
+    .bet-history-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+    .bet-history-ticker { background: rgba(124, 58, 237, 0.2); padding: 4px 10px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: var(--purple-soft); }
+    .bet-history-status { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .bet-history-status.active { background: rgba(124, 58, 237, 0.2); color: var(--purple-glow); }
+    .bet-history-status.won { background: rgba(16, 185, 129, 0.2); color: var(--green); }
+    .bet-history-status.lost { background: rgba(239, 68, 68, 0.2); color: var(--red); }
+    .bet-history-title { font-size: 15px; font-weight: 600; color: var(--white-90); margin-bottom: 12px; line-height: 1.4; }
+    .bet-history-details { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .bet-detail { background: var(--white-05); padding: 10px 12px; border-radius: 8px; }
+    .bet-detail-label { font-size: 11px; color: var(--white-50); margin-bottom: 2px; }
+    .bet-detail-value { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 600; }
+    .bet-detail-value.yes { color: var(--green); }
+    .bet-detail-value.no { color: var(--red); }
+    .bet-history-footer { display: flex; justify-content: space-between; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--white-10); font-size: 12px; color: var(--white-50); }
+    .no-bets { text-align: center; padding: 60px 20px; }
+    .no-bets-icon { font-size: 48px; margin-bottom: 16px; }
+    .no-bets-title { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
 
     /* Main */
     .main { padding: 80px 16px 120px; max-width: 600px; margin: 0 auto; }
@@ -284,10 +316,13 @@
 
   <header class="header">
     <div class="logo" id="apehubLogo">Ape<span>Hub</span></div>
-    <div class="token-balance" onclick="openTokenModal()">
-      <div class="token-icon">🪙</div>
-      <span class="token-amount" id="userBalance">0</span>
-      <span class="add-tokens">+</span>
+    <div class="header-actions">
+      <button class="my-bets-btn" onclick="openMyBets()">📋 My Bets</button>
+      <div class="token-balance" onclick="openTokenModal()">
+        <div class="token-icon">🪙</div>
+        <span class="token-amount" id="userBalance">0</span>
+        <span class="add-tokens">+</span>
+      </div>
     </div>
   </header>
 
@@ -429,6 +464,23 @@
   </nav>
 
   <div class="confetti-container" id="confettiContainer"></div>
+
+  <!-- My Bets Modal -->
+  <div class="my-bets-modal" id="myBetsModal">
+    <div class="my-bets-content">
+      <div class="my-bets-header">
+        <div class="my-bets-title">📋 My Bets</div>
+        <button class="my-bets-close" onclick="closeMyBets()">×</button>
+      </div>
+      <div class="my-bets-tabs">
+        <button class="my-bets-tab active" data-filter="active" onclick="filterMyBets('active')">Active</button>
+        <button class="my-bets-tab" data-filter="won" onclick="filterMyBets('won')">Won 🎉</button>
+        <button class="my-bets-tab" data-filter="lost" onclick="filterMyBets('lost')">Lost</button>
+        <button class="my-bets-tab" data-filter="all" onclick="filterMyBets('all')">All</button>
+      </div>
+      <div id="myBetsList"></div>
+    </div>
+  </div>
 
   <script>
     let userEmail = localStorage.getItem('userEmail') || '';
@@ -795,9 +847,112 @@
       });
     }
 
+    // ===== MY BETS FUNCTIONS =====
+    let myBets = [];
+    let currentBetFilter = 'active';
+
+    function openMyBets() {
+      document.getElementById('myBetsModal').classList.add('show');
+      document.body.style.overflow = 'hidden';
+      loadMyBets();
+    }
+
+    function closeMyBets() {
+      document.getElementById('myBetsModal').classList.remove('show');
+      document.body.style.overflow = '';
+    }
+
+    async function loadMyBets() {
+      if (!userEmail) return;
+      const list = document.getElementById('myBetsList');
+      list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--white-50);">Loading bets...</div>';
+      
+      try {
+        const res = await fetch(`/api/predictions/bets/my?email=${encodeURIComponent(userEmail)}`);
+        const data = await res.json();
+        if (data.success) {
+          myBets = data.bets;
+          renderMyBets();
+        }
+      } catch (err) {
+        console.error('Error loading bets:', err);
+        list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--red);">Failed to load bets</div>';
+      }
+    }
+
+    function filterMyBets(filter) {
+      currentBetFilter = filter;
+      document.querySelectorAll('.my-bets-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.filter === filter);
+      });
+      renderMyBets();
+    }
+
+    function renderMyBets() {
+      const list = document.getElementById('myBetsList');
+      let filteredBets = myBets;
+      
+      if (currentBetFilter !== 'all') {
+        filteredBets = myBets.filter(b => b.status === currentBetFilter);
+      }
+      
+      if (filteredBets.length === 0) {
+        list.innerHTML = `
+          <div class="no-bets">
+            <div class="no-bets-icon">${currentBetFilter === 'won' ? '🏆' : currentBetFilter === 'lost' ? '😢' : '📋'}</div>
+            <div class="no-bets-title">No ${currentBetFilter === 'all' ? '' : currentBetFilter} bets yet</div>
+            <p style="color: var(--white-50);">${currentBetFilter === 'active' ? 'Place a bet to get started!' : 'Keep betting to see results here!'}</p>
+          </div>
+        `;
+        return;
+      }
+      
+      list.innerHTML = filteredBets.map(bet => {
+        const placedDate = new Date(bet.placed_at);
+        const placedStr = placedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'America/New_York' });
+        const resolvesDate = bet.resolves_at ? new Date(bet.resolves_at) : null;
+        const resolvesStr = resolvesDate ? resolvesDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'America/New_York' }) : '';
+        
+        return `
+          <div class="bet-history-card">
+            <div class="bet-history-header">
+              <span class="bet-history-ticker">${bet.ticker || bet.category?.toUpperCase() || 'BET'}</span>
+              <span class="bet-history-status ${bet.status}">${bet.status === 'active' ? '⏳ Active' : bet.status === 'won' ? '✅ Won' : '❌ Lost'}</span>
+            </div>
+            <div class="bet-history-title">${bet.prediction_title}</div>
+            <div class="bet-history-details">
+              <div class="bet-detail">
+                <div class="bet-detail-label">Position</div>
+                <div class="bet-detail-value ${bet.position}">${bet.position.toUpperCase()}</div>
+              </div>
+              <div class="bet-detail">
+                <div class="bet-detail-label">Wagered</div>
+                <div class="bet-detail-value">${bet.tokens_wagered.toLocaleString()} 🪙</div>
+              </div>
+              <div class="bet-detail">
+                <div class="bet-detail-label">${bet.status === 'won' ? 'Won' : 'Potential'}</div>
+                <div class="bet-detail-value" style="color: ${bet.status === 'won' ? 'var(--green)' : bet.status === 'lost' ? 'var(--red)' : 'var(--gold)'}">
+                  ${bet.status === 'won' ? '+' : ''}${(bet.status === 'won' ? bet.tokens_won : bet.potential_payout).toLocaleString()} 🪙
+                </div>
+              </div>
+              <div class="bet-detail">
+                <div class="bet-detail-label">Multiplier</div>
+                <div class="bet-detail-value">${parseFloat(bet.payout_multiplier).toFixed(2)}x</div>
+              </div>
+            </div>
+            <div class="bet-history-footer">
+              <span>📅 Placed: ${placedStr} ET</span>
+              <span>${bet.status === 'active' ? `Resolves: ${resolvesStr}` : ''}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
     document.getElementById('betSlipOverlay').addEventListener('click', (e) => { if (e.target.id === 'betSlipOverlay') closeBetSlip(); });
     document.getElementById('tokenModal').addEventListener('click', (e) => { if (e.target.id === 'tokenModal') closeTokenModal(); });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeBetSlip(); closeTokenModal(); closeSuccessModal(); } });
+    document.getElementById('myBetsModal').addEventListener('click', (e) => { if (e.target.id === 'myBetsModal') closeMyBets(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeBetSlip(); closeTokenModal(); closeSuccessModal(); closeMyBets(); } });
   </script>
 </body>
 </html>
