@@ -96,7 +96,7 @@
     .prediction-card.locked { border-color: var(--white-20); opacity: 1; }
     .prediction-card.locked:hover { transform: none; border-color: var(--white-30); }
     .prediction-card.locked.featured::before { display: none; }
-    .locked-badge { position: absolute; top: 12px; right: 12px; background: linear-gradient(135deg, #4b5563, #6b7280); padding: 4px 10px; border-radius: 100px; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; color: #fff; }
+    .locked-badge { position: absolute; top: 12px; right: 12px; background: linear-gradient(135deg, #4b5563, #6b7280); padding: 6px 14px; border-radius: 100px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; color: #fff; z-index: 10; }
     .locked-text { color: var(--white-70); }
     .odds-button.disabled { opacity: 0.6; cursor: not-allowed; }
     .odds-button.disabled:hover { background: rgba(255,255,255,0.08); border-color: var(--white-20); }
@@ -596,7 +596,7 @@
         const predictionDate = formatPredictionDate(p.resolves_at);
         return `
         <div class="prediction-card ${p.featured ? 'featured' : ''} ${lockedClass}" onclick="openBetSlip(${p.id})">
-          ${isLocked ? '<div class="locked-badge">🔒 MARKET OPEN</div>' : ''}
+          ${isLocked ? '<div class="locked-badge">🔒 LOCKED</div>' : ''}
           <div class="prediction-meta">
             ${p.ticker ? `<span class="prediction-ticker">${p.ticker}</span>` : ''}
             <span class="prediction-category">${getCategoryLabel(p.category)}</span>
