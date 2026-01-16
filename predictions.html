@@ -178,9 +178,9 @@
     .swipe-text { font-size: 14px; font-weight: 600; color: var(--white-30); display: flex; align-items: center; gap: 8px; }
     .swipe-arrows { animation: swipeHint 1.5s ease-in-out infinite; }
     @keyframes swipeHint { 0%, 100% { transform: translateY(0); opacity: 0.5; } 50% { transform: translateY(-4px); opacity: 1; } }
-    .swipe-thumb { position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%); width: 52px; height: 52px; background: linear-gradient(135deg, var(--purple-core), var(--purple-pink)); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: grab; transition: all 0.3s; z-index: 2; user-select: none; }
-    .swipe-thumb:active { cursor: grabbing; box-shadow: 0 0 30px var(--purple-glow); }
-    .swipe-thumb.swiped { background: linear-gradient(135deg, var(--green), var(--green-glow)); }
+    .swipe-thumb { position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%); width: 52px; height: 52px; background: rgba(16, 185, 129, 0.15); border: 2px solid rgba(16, 185, 129, 0.5); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: grab; transition: all 0.3s; z-index: 2; user-select: none; }
+    .swipe-thumb:active { cursor: grabbing; border-color: var(--green); box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); }
+    .swipe-thumb.swiped { background: rgba(16, 185, 129, 0.3); border-color: var(--green); }
     .swipe-progress { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(180deg, rgba(124,58,237,0.2), rgba(124,58,237,0.05)); height: 0; transition: height 0.1s; }
 
     /* Confetti */
@@ -384,7 +384,7 @@
       <div class="swipe-container" id="swipeContainer">
         <div class="swipe-progress" id="swipeProgress"></div>
         <div class="swipe-track"><span class="swipe-text"><span class="swipe-arrows">↑↑↑</span> Swipe up to confirm</span></div>
-        <div class="swipe-thumb" id="swipeThumb">🚀</div>
+        <div class="swipe-thumb" id="swipeThumb">↑</div>
       </div>
     </div>
   </div>

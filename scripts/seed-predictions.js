@@ -217,7 +217,7 @@ async function seedPredictions() {
       
       const result = await client.query(`
         INSERT INTO predictions (title, category, ticker, yes_payout_multiplier, no_payout_multiplier, opens_at, closes_at, resolves_at, featured, status, min_bet, max_bet)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'active', 10, 10000)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'open', 10, 10000)
         ON CONFLICT DO NOTHING
         RETURNING id
       `, [pred.title, pred.category, pred.ticker, pred.yes_payout, pred.no_payout, opensAt, closesAt, pred.resolves_at, pred.featured]);
