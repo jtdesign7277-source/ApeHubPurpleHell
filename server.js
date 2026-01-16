@@ -5,6 +5,7 @@ const path = require('path');
 const { Pool } = require('pg');
 const cron = require('node-cron');
 const predictionsRoutes = require('./routes/predictions');
+const alpacaRoutes = require('./routes/alpaca');
 const { runDailyGeneration, updatePredictionStatuses } = require('./scripts/generate-predictions');
 const { resolveReadyPredictions } = require('./scripts/resolve-predictions');
 
@@ -455,6 +456,7 @@ app.locals.pool = pool;
 app.locals.stripe = stripe;
 app.use('/api/predictions', predictionsRoutes);
 app.use('/api', predictionsRoutes); // Also mount at /api for admin routes
+app.use('/api/market', alpacaRoutes); // Alpaca market data
 
 // Serve admin panel
 app.use('/admin', express.static(path.join(__dirname, 'admin')));
