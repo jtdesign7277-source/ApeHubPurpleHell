@@ -454,6 +454,10 @@ app.use('/intro-music.mp3', express.static(path.join(__dirname, 'intro-music.mp3
 app.locals.pool = pool;
 app.locals.stripe = stripe;
 app.use('/api/predictions', predictionsRoutes);
+app.use('/api', predictionsRoutes); // Also mount at /api for admin routes
+
+// Serve admin panel
+app.use('/admin', express.static(path.join(__dirname, 'admin')));
 
 // ===== YAHOO FINANCE PROXY =====
 app.get('/api/futures/:symbol', async (req, res) => {

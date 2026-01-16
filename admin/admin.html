@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel | ApeHub Predictions</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #000000;
+      --bg-card: #0a0a0f;
+      --bg-elevated: #12121a;
+      --purple: #7c3aed;
+      --purple-glow: #a855f7;
+      --green: #10b981;
+      --red: #ef4444;
+      --yellow: #fbbf24;
+      --white: #ffffff;
+      --white-70: rgba(255,255,255,0.7);
+      --white-50: rgba(255,255,255,0.5);
+      --white-30: rgba(255,255,255,0.3);
+      --white-10: rgba(255,255,255,0.1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Space Grotesk', sans-serif; background: var(--bg); color: var(--white); min-height: 100vh; }
+
+    /* Login Screen */
+    .login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+    .login-box { background: var(--bg-card); border: 1px solid var(--white-10); border-radius: 20px; padding: 40px; max-width: 400px; width: 100%; }
+    .login-logo { font-size: 28px; font-weight: 700; text-align: center; margin-bottom: 8px; }
+    .login-logo span { color: var(--purple-glow); }
+    .login-subtitle { text-align: center; color: var(--white-50); margin-bottom: 32px; font-size: 14px; }
+    .login-error { background: rgba(239,68,68,0.1); border: 1px solid var(--red); color: var(--red); padding: 12px; border-radius: 10px; margin-bottom: 20px; font-size: 14px; display: none; }
+
+    /* Layout */
+    .admin-layout { display: none; min-height: 100vh; }
+    .admin-layout.show { display: flex; }
+    
+    /* Sidebar */
+    .sidebar { width: 240px; background: var(--bg-card); border-right: 1px solid var(--white-10); padding: 24px 16px; position: fixed; height: 100vh; overflow-y: auto; }
+    .sidebar-logo { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .sidebar-logo span { color: var(--purple-glow); }
+    .sidebar-subtitle { font-size: 12px; color: var(--white-50); margin-bottom: 32px; padding-bottom: 16px; border-bottom: 1px solid var(--white-10); }
+    .nav-section { margin-bottom: 24px; }
+    .nav-section-title { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--white-30); margin-bottom: 12px; padding-left: 12px; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; color: var(--white-70); text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.2s; cursor: pointer; margin-bottom: 4px; }
+    .nav-item:hover { background: var(--white-10); color: var(--white); }
+    .nav-item.active { background: var(--purple); color: var(--white); }
+    .nav-item-icon { font-size: 18px; }
+    .nav-item-badge { margin-left: auto; background: var(--red); padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+    .nav-logout { margin-top: auto; padding-top: 20px; border-top: 1px solid var(--white-10); }
+
+    /* Main Content */
+    .main-content { flex: 1; margin-left: 240px; padding: 24px; }
+    .page-header { margin-bottom: 32px; }
+    .page-title { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+    .page-subtitle { color: var(--white-50); font-size: 14px; }
+
+    /* Stats Grid */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px; }
+    .stat-card { background: var(--bg-card); border: 1px solid var(--white-10); border-radius: 16px; padding: 20px; }
+    .stat-label { font-size: 12px; color: var(--white-50); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-value { font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 700; }
+    .stat-value.green { color: var(--green); }
+    .stat-value.purple { color: var(--purple-glow); }
+    .stat-value.yellow { color: var(--yellow); }
+
+    /* Cards */
+    .card { background: var(--bg-card); border: 1px solid var(--white-10); border-radius: 16px; padding: 24px; margin-bottom: 24px; }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .card-title { font-size: 18px; font-weight: 600; }
+    .card-action { padding: 8px 16px; background: var(--purple); border: none; border-radius: 8px; color: var(--white); font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .card-action:hover { background: var(--purple-glow); }
+
+    /* Tables */
+    .table-container { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--white-10); }
+    th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--white-50); font-weight: 600; }
+    td { font-size: 14px; }
+    tr:hover { background: var(--white-10); }
+    .table-ticker { font-family: 'JetBrains Mono', monospace; color: var(--purple-glow); font-weight: 600; }
+    .table-status { padding: 4px 10px; border-radius: 100px; font-size: 11px; font-weight: 600; }
+    .table-status.open { background: rgba(16,185,129,0.2); color: var(--green); }
+    .table-status.closed { background: rgba(251,191,36,0.2); color: var(--yellow); }
+    .table-status.resolved { background: rgba(124,58,237,0.2); color: var(--purple-glow); }
+    .table-status.pending { background: rgba(251,191,36,0.2); color: var(--yellow); }
+    .table-status.completed { background: rgba(16,185,129,0.2); color: var(--green); }
+    .table-status.rejected { background: rgba(239,68,68,0.2); color: var(--red); }
+    .table-actions { display: flex; gap: 8px; }
+    .table-btn { padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+    .table-btn.resolve { background: var(--green); color: #000; }
+    .table-btn.view { background: var(--white-10); color: var(--white); }
+
+    /* Forms */
+    .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .form-group { margin-bottom: 20px; }
+    .form-group.full { grid-column: span 2; }
+    .form-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--white-70); }
+    .form-input, .form-select, .form-textarea { width: 100%; padding: 12px 16px; background: var(--bg); border: 1px solid var(--white-10); border-radius: 10px; font-family: inherit; font-size: 14px; color: var(--white); outline: none; transition: all 0.2s; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--purple); }
+    .form-textarea { min-height: 100px; resize: vertical; }
+    .form-hint { font-size: 12px; color: var(--white-30); margin-top: 6px; }
+    .form-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--white-10); }
+    .btn { padding: 12px 24px; border-radius: 10px; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; }
+    .btn-primary { background: var(--purple); color: var(--white); }
+    .btn-primary:hover { background: var(--purple-glow); }
+    .btn-secondary { background: var(--white-10); color: var(--white); }
+
+    /* Modal */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: var(--bg-card); border: 1px solid var(--white-10); border-radius: 20px; padding: 32px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .modal-title { font-size: 22px; font-weight: 700; }
+    .modal-close { width: 36px; height: 36px; background: var(--white-10); border: none; border-radius: 50%; color: var(--white); font-size: 20px; cursor: pointer; }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 4px; margin-bottom: 24px; background: var(--white-10); padding: 4px; border-radius: 10px; }
+    .tab { flex: 1; padding: 10px 16px; background: transparent; border: none; border-radius: 8px; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--white-50); cursor: pointer; transition: all 0.2s; }
+    .tab.active { background: var(--purple); color: var(--white); }
+
+    /* Page Sections */
+    .page-section { display: none; }
+    .page-section.active { display: block; }
+
+    /* Quick Actions */
+    .quick-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 32px; }
+    .quick-action { display: flex; align-items: center; gap: 10px; padding: 14px 20px; background: var(--bg-card); border: 1px solid var(--white-10); border-radius: 12px; cursor: pointer; transition: all 0.2s; }
+    .quick-action:hover { border-color: var(--purple); background: rgba(124,58,237,0.1); }
+    .quick-action-icon { font-size: 20px; }
+    .quick-action-label { font-size: 14px; font-weight: 600; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main-content { margin-left: 0; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-group.full { grid-column: span 1; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Login Screen -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-box">
+      <div class="login-logo">Ape<span>Hub</span></div>
+      <div class="login-subtitle">Admin Panel</div>
+      <div class="login-error" id="loginError">Invalid credentials</div>
+      <form onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" id="loginEmail" placeholder="admin@example.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" id="loginPassword" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Login</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Admin Layout -->
+  <div class="admin-layout" id="adminLayout">
+    <aside class="sidebar">
+      <div class="sidebar-logo">Ape<span>Hub</span></div>
+      <div class="sidebar-subtitle">Admin Panel</div>
+      
+      <div class="nav-section">
+        <div class="nav-section-title">Overview</div>
+        <div class="nav-item active" onclick="showPage('dashboard')">
+          <span class="nav-item-icon">📊</span>Dashboard
+        </div>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Predictions</div>
+        <div class="nav-item" onclick="showPage('predictions')">
+          <span class="nav-item-icon">🔮</span>All Predictions
+        </div>
+        <div class="nav-item" onclick="showPage('create')">
+          <span class="nav-item-icon">➕</span>Create New
+        </div>
+        <div class="nav-item" onclick="showPage('resolve')">
+          <span class="nav-item-icon">⚖️</span>Pending Resolution
+          <span class="nav-item-badge" id="pendingResolveBadge">0</span>
+        </div>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Finances</div>
+        <div class="nav-item" onclick="showPage('payouts')">
+          <span class="nav-item-icon">💸</span>Payout Requests
+          <span class="nav-item-badge" id="pendingPayoutBadge">0</span>
+        </div>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Users</div>
+        <div class="nav-item" onclick="showPage('leaderboard')">
+          <span class="nav-item-icon">🏆</span>Leaderboard
+        </div>
+      </div>
+
+      <div class="nav-section nav-logout">
+        <div class="nav-item" onclick="handleLogout()">
+          <span class="nav-item-icon">🚪</span>Logout
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <!-- Dashboard -->
+      <div class="page-section active" id="page-dashboard">
+        <div class="page-header">
+          <h1 class="page-title">Dashboard</h1>
+          <p class="page-subtitle">Overview of your predictions market</p>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Total Revenue</div>
+            <div class="stat-value green" id="statRevenue">$0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Active Predictions</div>
+            <div class="stat-value purple" id="statActivePredictions">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Bets Today</div>
+            <div class="stat-value" id="statBetsToday">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Tokens in Circulation</div>
+            <div class="stat-value yellow" id="statTokensCirculation">0</div>
+          </div>
+        </div>
+
+        <div class="quick-actions">
+          <div class="quick-action" onclick="showPage('create')">
+            <span class="quick-action-icon">➕</span>
+            <span class="quick-action-label">Create Prediction</span>
+          </div>
+          <div class="quick-action" onclick="showPage('resolve')">
+            <span class="quick-action-icon">⚖️</span>
+            <span class="quick-action-label">Resolve Pending</span>
+          </div>
+          <div class="quick-action" onclick="showPage('payouts')">
+            <span class="quick-action-icon">💸</span>
+            <span class="quick-action-label">Process Payouts</span>
+          </div>
+          <div class="quick-action" onclick="runDailyGeneration()">
+            <span class="quick-action-icon">🔄</span>
+            <span class="quick-action-label">Generate Daily Bets</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Recent Bets</h3>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead><tr><th>User</th><th>Prediction</th><th>Position</th><th>Amount</th><th>Time</th></tr></thead>
+              <tbody id="recentBetsTable"><tr><td colspan="5" style="text-align:center;color:var(--white-50)">Loading...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Predictions -->
+      <div class="page-section" id="page-predictions">
+        <div class="page-header">
+          <h1 class="page-title">All Predictions</h1>
+        </div>
+        <div class="tabs">
+          <button class="tab active" onclick="filterPredictions('all', this)">All</button>
+          <button class="tab" onclick="filterPredictions('open', this)">Open</button>
+          <button class="tab" onclick="filterPredictions('closed', this)">Closed</button>
+          <button class="tab" onclick="filterPredictions('resolved', this)">Resolved</button>
+        </div>
+        <div class="card">
+          <div class="table-container">
+            <table>
+              <thead><tr><th>ID</th><th>Ticker</th><th>Title</th><th>Status</th><th>Volume</th><th>Closes</th><th>Actions</th></tr></thead>
+              <tbody id="predictionsTable"><tr><td colspan="7" style="text-align:center">Loading...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Create -->
+      <div class="page-section" id="page-create">
+        <div class="page-header">
+          <h1 class="page-title">Create Prediction</h1>
+        </div>
+        <div class="card">
+          <form id="createPredictionForm" onsubmit="createPrediction(event)">
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Category</label>
+                <select class="form-select" id="createCategory" required>
+                  <option value="">Select...</option>
+                  <option value="daily">📈 Daily</option>
+                  <option value="weekly">📊 Weekly</option>
+                  <option value="crypto">₿ Crypto</option>
+                  <option value="earnings">💰 Earnings</option>
+                  <option value="fed">🏛️ Fed</option>
+                  <option value="politics">🗳️ Politics</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Ticker (optional)</label>
+                <input type="text" class="form-input" id="createTicker" placeholder="TSLA, BTC">
+              </div>
+              <div class="form-group full">
+                <label class="form-label">Question/Title</label>
+                <input type="text" class="form-input" id="createTitle" placeholder="Will TSLA close green today?" required>
+              </div>
+              <div class="form-group full">
+                <label class="form-label">Description</label>
+                <textarea class="form-textarea" id="createDescription" placeholder="Details..."></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">YES Multiplier</label>
+                <input type="number" class="form-input" id="createYesMultiplier" value="1.90" step="0.01" min="1.01" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">NO Multiplier</label>
+                <input type="number" class="form-input" id="createNoMultiplier" value="1.90" step="0.01" min="1.01" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Opens At</label>
+                <input type="datetime-local" class="form-input" id="createOpensAt" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Closes At</label>
+                <input type="datetime-local" class="form-input" id="createClosesAt" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Resolves At</label>
+                <input type="datetime-local" class="form-input" id="createResolvesAt" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Featured?</label>
+                <select class="form-select" id="createFeatured">
+                  <option value="false">No</option>
+                  <option value="true">Yes</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" onclick="showPage('predictions')">Cancel</button>
+              <button type="submit" class="btn btn-primary">Create Prediction</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Resolve -->
+      <div class="page-section" id="page-resolve">
+        <div class="page-header">
+          <h1 class="page-title">Pending Resolution</h1>
+        </div>
+        <div class="card">
+          <div class="table-container">
+            <table>
+              <thead><tr><th>ID</th><th>Ticker</th><th>Title</th><th>Volume</th><th>Closed</th><th>Actions</th></tr></thead>
+              <tbody id="pendingResolveTable"><tr><td colspan="6" style="text-align:center">Loading...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payouts -->
+      <div class="page-section" id="page-payouts">
+        <div class="page-header">
+          <h1 class="page-title">Payout Requests</h1>
+        </div>
+        <div class="card">
+          <div class="table-container">
+            <table>
+              <thead><tr><th>User</th><th>Tokens</th><th>USD</th><th>Method</th><th>Destination</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="payoutsTable"><tr><td colspan="7" style="text-align:center">Loading...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Leaderboard -->
+      <div class="page-section" id="page-leaderboard">
+        <div class="page-header">
+          <h1 class="page-title">Leaderboard</h1>
+        </div>
+        <div class="card">
+          <div class="table-container">
+            <table>
+              <thead><tr><th>Rank</th><th>User</th><th>Net Profit</th><th>Win Rate</th><th>Bets</th></tr></thead>
+              <tbody id="leaderboardTable"><tr><td colspan="5" style="text-align:center">No data yet</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Resolve Modal -->
+  <div class="modal-overlay" id="resolveModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Resolve Prediction</h3>
+        <button class="modal-close" onclick="closeResolveModal()">×</button>
+      </div>
+      <p style="margin-bottom:20px;color:var(--white-70)" id="resolveQuestion"></p>
+      <div style="display:flex;gap:12px;margin-bottom:20px">
+        <button class="btn" style="flex:1;background:var(--green)" onclick="resolvePrediction('yes')">✓ YES Won</button>
+        <button class="btn" style="flex:1;background:var(--red)" onclick="resolvePrediction('no')">✗ NO Won</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Source (optional)</label>
+        <input type="text" class="form-input" id="resolveSource" placeholder="Yahoo Finance">
+      </div>
+    </div>
+  </div>
+
+  <!-- Payout Modal -->
+  <div class="modal-overlay" id="payoutModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Process Payout</h3>
+        <button class="modal-close" onclick="closePayoutModal()">×</button>
+      </div>
+      <div style="background:var(--white-10);padding:16px;border-radius:12px;margin-bottom:20px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--white-50)">User</span><span id="payoutUser">-</span></div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--white-50)">Amount</span><span id="payoutAmount">-</span></div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--white-50)">Method</span><span id="payoutMethod">-</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--white-50)">Destination</span><span id="payoutDestination">-</span></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Transaction Reference</label>
+        <input type="text" class="form-input" id="payoutReference" placeholder="Zelle confirmation #">
+      </div>
+      <div style="display:flex;gap:12px">
+        <button class="btn" style="flex:1;background:var(--green)" onclick="processPayout('completed')">✓ Completed</button>
+        <button class="btn" style="flex:1;background:var(--red)" onclick="processPayout('rejected')">✗ Reject</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let authToken = localStorage.getItem('adminToken');
+    let adminEmail = '';
+    let currentPredictionFilter = 'all';
+    let resolvingPredictionId = null;
+    let processingPayoutId = null;
+
+    // Check auth on load
+    document.addEventListener('DOMContentLoaded', () => {
+      if (authToken) {
+        verifyToken();
+      }
+    });
+
+    async function verifyToken() {
+      try {
+        const res = await fetch('/api/admin/verify', {
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        const data = await res.json();
+        if (data.success) {
+          adminEmail = data.email;
+          showAdminPanel();
+        } else {
+          localStorage.removeItem('adminToken');
+          authToken = null;
+        }
+      } catch (err) {
+        console.error('Token verification failed:', err);
+      }
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      
+      try {
+        const res = await fetch('/api/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          authToken = data.token;
+          adminEmail = email;
+          localStorage.setItem('adminToken', authToken);
+          showAdminPanel();
+        } else {
+          document.getElementById('loginError').style.display = 'block';
+          document.getElementById('loginError').textContent = data.error || 'Invalid credentials';
+        }
+      } catch (err) {
+        document.getElementById('loginError').style.display = 'block';
+        document.getElementById('loginError').textContent = 'Connection error';
+      }
+    }
+
+    function handleLogout() {
+      localStorage.removeItem('adminToken');
+      authToken = null;
+      document.getElementById('adminLayout').classList.remove('show');
+      document.getElementById('loginScreen').style.display = 'flex';
+    }
+
+    function showAdminPanel() {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('adminLayout').classList.add('show');
+      loadDashboard();
+    }
+
+    function authHeaders() {
+      return { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' };
+    }
+
+    // Page Navigation
+    function showPage(pageId) {
+      document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById(`page-${pageId}`).classList.add('active');
+      
+      switch(pageId) {
+        case 'dashboard': loadDashboard(); break;
+        case 'predictions': loadPredictions(); break;
+        case 'resolve': loadPendingResolutions(); break;
+        case 'payouts': loadPayouts(); break;
+        case 'leaderboard': loadLeaderboard(); break;
+      }
+    }
+
+    // Dashboard
+    async function loadDashboard() {
+      try {
+        const res = await fetch('/api/admin/stats', { headers: authHeaders() });
+        const data = await res.json();
+        
+        if (data.success) {
+          document.getElementById('statRevenue').textContent = `$${data.stats.totalRevenue}`;
+          document.getElementById('statActivePredictions').textContent = data.stats.activePredictions;
+          document.getElementById('statBetsToday').textContent = data.stats.betsToday;
+          document.getElementById('statTokensCirculation').textContent = data.stats.tokensInCirculation.toLocaleString();
+          document.getElementById('pendingResolveBadge').textContent = data.stats.pendingResolutions;
+          document.getElementById('pendingPayoutBadge').textContent = data.stats.pendingPayouts;
+        }
+
+        // Recent bets
+        const betsRes = await fetch('/api/admin/recent-bets?limit=10', { headers: authHeaders() });
+        const betsData = await betsRes.json();
+        
+        if (betsData.success && betsData.bets.length > 0) {
+          document.getElementById('recentBetsTable').innerHTML = betsData.bets.map(b => `
+            <tr>
+              <td>${b.user_email.split('@')[0]}***</td>
+              <td>${b.prediction_title?.substring(0,30)}...</td>
+              <td style="color:${b.position === 'yes' ? 'var(--green)' : 'var(--red)'}">${b.position.toUpperCase()}</td>
+              <td>${b.tokens_wagered.toLocaleString()}</td>
+              <td>${new Date(b.placed_at).toLocaleTimeString()}</td>
+            </tr>
+          `).join('');
+        } else {
+          document.getElementById('recentBetsTable').innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--white-50)">No recent bets</td></tr>';
+        }
+      } catch (err) {
+        console.error('Error loading dashboard:', err);
+      }
+    }
+
+    // Predictions
+    async function loadPredictions() {
+      try {
+        const status = currentPredictionFilter === 'all' ? '' : `&status=${currentPredictionFilter}`;
+        const res = await fetch(`/api/predictions?limit=100${status}`);
+        const data = await res.json();
+
+        if (data.success && data.predictions.length > 0) {
+          document.getElementById('predictionsTable').innerHTML = data.predictions.map(p => `
+            <tr>
+              <td>${p.id}</td>
+              <td class="table-ticker">${p.ticker || '-'}</td>
+              <td>${p.title.substring(0,40)}${p.title.length > 40 ? '...' : ''}</td>
+              <td><span class="table-status ${p.status}">${p.status}</span></td>
+              <td>${((p.yes_volume||0) + (p.no_volume||0)).toLocaleString()}</td>
+              <td>${new Date(p.closes_at).toLocaleDateString()}</td>
+              <td class="table-actions">
+                ${p.status === 'closed' && !p.outcome ? `<button class="table-btn resolve" onclick="openResolveModal(${p.id}, '${p.title.replace(/'/g, "\\'")}')">Resolve</button>` : ''}
+              </td>
+            </tr>
+          `).join('');
+        } else {
+          document.getElementById('predictionsTable').innerHTML = '<tr><td colspan="7" style="text-align:center">No predictions</td></tr>';
+        }
+      } catch (err) {
+        console.error('Error loading predictions:', err);
+      }
+    }
+
+    function filterPredictions(status, btn) {
+      currentPredictionFilter = status;
+      document.querySelectorAll('#page-predictions .tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      loadPredictions();
+    }
+
+    // Create Prediction
+    async function createPrediction(e) {
+      e.preventDefault();
+      
+      const prediction = {
+        adminEmail,
+        category: document.getElementById('createCategory').value,
+        ticker: document.getElementById('createTicker').value || null,
+        title: document.getElementById('createTitle').value,
+        description: document.getElementById('createDescription').value,
+        yesMultiplier: parseFloat(document.getElementById('createYesMultiplier').value),
+        noMultiplier: parseFloat(document.getElementById('createNoMultiplier').value),
+        opensAt: document.getElementById('createOpensAt').value,
+        closesAt: document.getElementById('createClosesAt').value,
+        resolvesAt: document.getElementById('createResolvesAt').value,
+        featured: document.getElementById('createFeatured').value === 'true'
+      };
+
+      try {
+        const res = await fetch('/api/predictions/admin/create', {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify(prediction)
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          alert('✅ Prediction created!');
+          document.getElementById('createPredictionForm').reset();
+          showPage('predictions');
+        } else {
+          alert('❌ Error: ' + (data.error || 'Failed'));
+        }
+      } catch (err) {
+        alert('❌ Failed to create prediction');
+      }
+    }
+
+    // Resolve
+    async function loadPendingResolutions() {
+      try {
+        const res = await fetch('/api/predictions?status=closed&limit=100');
+        const data = await res.json();
+        const pending = data.success ? data.predictions.filter(p => !p.outcome) : [];
+
+        if (pending.length > 0) {
+          document.getElementById('pendingResolveTable').innerHTML = pending.map(p => `
+            <tr>
+              <td>${p.id}</td>
+              <td class="table-ticker">${p.ticker || '-'}</td>
+              <td>${p.title.substring(0,40)}...</td>
+              <td>${((p.yes_volume||0) + (p.no_volume||0)).toLocaleString()}</td>
+              <td>${new Date(p.closes_at).toLocaleString()}</td>
+              <td><button class="table-btn resolve" onclick="openResolveModal(${p.id}, '${p.title.replace(/'/g, "\\'")}')">Resolve</button></td>
+            </tr>
+          `).join('');
+        } else {
+          document.getElementById('pendingResolveTable').innerHTML = '<tr><td colspan="6" style="text-align:center">🎉 Nothing to resolve!</td></tr>';
+        }
+      } catch (err) {
+        console.error('Error:', err);
+      }
+    }
+
+    function openResolveModal(id, title) {
+      resolvingPredictionId = id;
+      document.getElementById('resolveQuestion').textContent = title;
+      document.getElementById('resolveModal').classList.add('show');
+    }
+
+    function closeResolveModal() {
+      document.getElementById('resolveModal').classList.remove('show');
+      resolvingPredictionId = null;
+    }
+
+    async function resolvePrediction(outcome) {
+      if (!resolvingPredictionId) return;
+      const source = document.getElementById('resolveSource').value || 'Manual';
+
+      try {
+        const res = await fetch(`/api/predictions/${resolvingPredictionId}/resolve`, {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({ outcome, adminEmail, source })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          alert(`✅ Resolved as ${outcome.toUpperCase()}! ${data.betsProcessed} bets processed.`);
+          closeResolveModal();
+          loadPendingResolutions();
+          loadDashboard();
+        } else {
+          alert('❌ Error: ' + data.error);
+        }
+      } catch (err) {
+        alert('❌ Failed to resolve');
+      }
+    }
+
+    // Payouts
+    async function loadPayouts() {
+      try {
+        const res = await fetch('/api/predictions/admin/pending-payouts', { headers: authHeaders() });
+        const data = await res.json();
+
+        if (data.success && data.payouts.length > 0) {
+          document.getElementById('payoutsTable').innerHTML = data.payouts.map(p => `
+            <tr>
+              <td>${p.user_email}</td>
+              <td>${p.tokens_amount.toLocaleString()}</td>
+              <td>$${parseFloat(p.usd_amount).toFixed(2)}</td>
+              <td>${p.payout_method}</td>
+              <td>${p.payout_destination}</td>
+              <td><span class="table-status ${p.status}">${p.status}</span></td>
+              <td>${p.status === 'pending' ? `<button class="table-btn resolve" onclick="openPayoutModal(${p.id}, '${p.user_email}', '$${parseFloat(p.usd_amount).toFixed(2)}', '${p.payout_method}', '${p.payout_destination}')">Process</button>` : '-'}</td>
+            </tr>
+          `).join('');
+        } else {
+          document.getElementById('payoutsTable').innerHTML = '<tr><td colspan="7" style="text-align:center">No pending payouts</td></tr>';
+        }
+      } catch (err) {
+        console.error('Error:', err);
+      }
+    }
+
+    function openPayoutModal(id, user, amount, method, dest) {
+      processingPayoutId = id;
+      document.getElementById('payoutUser').textContent = user;
+      document.getElementById('payoutAmount').textContent = amount;
+      document.getElementById('payoutMethod').textContent = method;
+      document.getElementById('payoutDestination').textContent = dest;
+      document.getElementById('payoutModal').classList.add('show');
+    }
+
+    function closePayoutModal() {
+      document.getElementById('payoutModal').classList.remove('show');
+      processingPayoutId = null;
+    }
+
+    async function processPayout(status) {
+      if (!processingPayoutId) return;
+      const reference = document.getElementById('payoutReference').value;
+
+      try {
+        const res = await fetch('/api/predictions/admin/process-payout', {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({ payoutId: processingPayoutId, adminEmail, status, transactionReference: reference })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          alert(`✅ Payout ${status}!`);
+          closePayoutModal();
+          loadPayouts();
+        } else {
+          alert('❌ Error: ' + data.error);
+        }
+      } catch (err) {
+        alert('❌ Failed');
+      }
+    }
+
+    // Leaderboard
+    async function loadLeaderboard() {
+      try {
+        const res = await fetch('/api/predictions/leaderboard?limit=50');
+        const data = await res.json();
+
+        if (data.success && data.leaderboard.length > 0) {
+          document.getElementById('leaderboardTable').innerHTML = data.leaderboard.map((u, i) => `
+            <tr>
+              <td>${i + 1}</td>
+              <td>${u.display_name || u.user_email}</td>
+              <td style="color:${u.net_profit >= 0 ? 'var(--green)' : 'var(--red)'}">${u.net_profit >= 0 ? '+' : ''}${u.net_profit.toLocaleString()}</td>
+              <td>${u.win_rate}%</td>
+              <td>${u.total_bets}</td>
+            </tr>
+          `).join('');
+        } else {
+          document.getElementById('leaderboardTable').innerHTML = '<tr><td colspan="5" style="text-align:center">No data yet</td></tr>';
+        }
+      } catch (err) {
+        console.error('Error:', err);
+      }
+    }
+
+    // Generate Daily
+    async function runDailyGeneration() {
+      if (!confirm('Generate daily predictions now?')) return;
+      try {
+        const res = await fetch('/api/predictions/admin/generate', {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({ adminEmail })
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert(`✅ Generated! Created: ${data.created || 0}`);
+          loadPredictions();
+        } else {
+          alert('❌ Error: ' + data.error);
+        }
+      } catch (err) {
+        alert('❌ Failed');
+      }
+    }
+  </script>
+</body>
+</html>

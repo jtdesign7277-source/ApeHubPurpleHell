@@ -868,4 +868,256 @@ router.post('/admin/process-payout', async (req, res) => {
   }
 });
 
+// ============================================
+// ADMIN PANEL ROUTES
+// ============================================
+
+const crypto = require('crypto');
+const ADMIN_EMAILS = ['jeff@dailyedgefinance.com', 'admin@apehub.com']; // Add your admin emails
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'apehub2026!'; // Set in Railway env vars
+const adminTokens = new Map(); // Simple in-memory token store
+
+// Admin Login
+router.post('/admin/login', async (req, res) => {
+  const { email, password } = req.body;
+  
+  if (!ADMIN_EMAILS.includes(email)) {
+    return res.status(401).json({ error: 'Not authorized' });
+  }
+  
+  if (password !== ADMIN_PASSWORD) {
+    return res.status(401).json({ error: 'Invalid password' });
+  }
+  
+  const token = crypto.randomBytes(32).toString('hex');
+  adminTokens.set(token, { email, createdAt: Date.now() });
+  
+  // Clean old tokens (older than 24h)
+  for (const [t, data] of adminTokens.entries()) {
+    if (Date.now() - data.createdAt > 24 * 60 * 60 * 1000) {
+      adminTokens.delete(t);
+    }
+  }
+  
+  res.json({ success: true, token });
+});
+
+// Verify admin middleware
+function verifyAdmin(req, res, next) {
+  const auth = req.headers.authorization;
+  if (!auth || !auth.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'No token provided' });
+  }
+  
+  const token = auth.split(' ')[1];
+  const session = adminTokens.get(token);
+  
+  if (!session) {
+    return res.status(401).json({ error: 'Invalid token' });
+  }
+  
+  // Check if token is older than 24h
+  if (Date.now() - session.createdAt > 24 * 60 * 60 * 1000) {
+    adminTokens.delete(token);
+    return res.status(401).json({ error: 'Token expired' });
+  }
+  
+  req.adminEmail = session.email;
+  next();
+}
+
+// Verify Token
+router.get('/admin/verify', verifyAdmin, (req, res) => {
+  res.json({ success: true, email: req.adminEmail });
+});
+
+// Admin Stats
+router.get('/admin/stats', verifyAdmin, async (req, res) => {
+  try {
+    const pool = req.app.locals.pool;
+    
+    // Total revenue (from token purchases)
+    const revenueResult = await pool.query(
+      `SELECT COALESCE(SUM(usd_amount), 0) as total FROM token_purchases WHERE status = 'completed'`
+    );
+    
+    // Active predictions
+    const activePredictions = await pool.query(
+      `SELECT COUNT(*) FROM predictions WHERE status = 'open'`
+    );
+    
+    // Bets today
+    const betsToday = await pool.query(
+      `SELECT COUNT(*) FROM user_bets WHERE placed_at >= CURRENT_DATE`
+    );
+    
+    // Tokens in circulation
+    const tokensCirculation = await pool.query(
+      `SELECT COALESCE(SUM(balance), 0) as total FROM user_tokens`
+    );
+    
+    // Pending resolutions
+    const pendingResolutions = await pool.query(
+      `SELECT COUNT(*) FROM predictions WHERE status = 'closed' AND outcome IS NULL`
+    );
+    
+    // Pending payouts
+    const pendingPayouts = await pool.query(
+      `SELECT COUNT(*) FROM payout_requests WHERE status = 'pending'`
+    );
+    
+    res.json({
+      success: true,
+      stats: {
+        totalRevenue: parseFloat(revenueResult.rows[0].total).toFixed(2),
+        activePredictions: parseInt(activePredictions.rows[0].count),
+        betsToday: parseInt(betsToday.rows[0].count),
+        tokensInCirculation: parseInt(tokensCirculation.rows[0].total),
+        pendingResolutions: parseInt(pendingResolutions.rows[0].count),
+        pendingPayouts: parseInt(pendingPayouts.rows[0].count)
+      }
+    });
+  } catch (error) {
+    console.error('Error getting admin stats:', error);
+    res.status(500).json({ error: 'Failed to get stats' });
+  }
+});
+
+// Recent Bets
+router.get('/admin/recent-bets', verifyAdmin, async (req, res) => {
+  try {
+    const pool = req.app.locals.pool;
+    const limit = parseInt(req.query.limit) || 20;
+    
+    const result = await pool.query(
+      `SELECT ub.*, p.title as prediction_title 
+       FROM user_bets ub
+       JOIN predictions p ON ub.prediction_id = p.id
+       ORDER BY ub.placed_at DESC
+       LIMIT $1`,
+      [limit]
+    );
+    
+    res.json({ success: true, bets: result.rows });
+  } catch (error) {
+    console.error('Error getting recent bets:', error);
+    res.status(500).json({ error: 'Failed to get bets' });
+  }
+});
+
+// Admin Create Prediction
+router.post('/admin/create', verifyAdmin, async (req, res) => {
+  try {
+    const pool = req.app.locals.pool;
+    const {
+      category, ticker, title, description,
+      yesMultiplier, noMultiplier,
+      opensAt, closesAt, resolvesAt, featured
+    } = req.body;
+    
+    const result = await pool.query(
+      `INSERT INTO predictions (
+        category, ticker, title, description,
+        yes_payout_multiplier, no_payout_multiplier,
+        opens_at, closes_at, resolves_at, featured, status
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'open')
+      RETURNING *`,
+      [category, ticker, title, description,
+       yesMultiplier, noMultiplier,
+       opensAt, closesAt, resolvesAt, featured]
+    );
+    
+    res.json({ success: true, prediction: result.rows[0] });
+  } catch (error) {
+    console.error('Error creating prediction:', error);
+    res.status(500).json({ error: 'Failed to create prediction' });
+  }
+});
+
+// Admin Get Pending Payouts
+router.get('/admin/pending-payouts', verifyAdmin, async (req, res) => {
+  try {
+    const pool = req.app.locals.pool;
+    
+    const result = await pool.query(
+      `SELECT * FROM payout_requests 
+       ORDER BY 
+         CASE WHEN status = 'pending' THEN 0 ELSE 1 END,
+         created_at DESC
+       LIMIT 100`
+    );
+    
+    res.json({ success: true, payouts: result.rows });
+  } catch (error) {
+    console.error('Error getting payouts:', error);
+    res.status(500).json({ error: 'Failed to get payouts' });
+  }
+});
+
+// Admin Generate Predictions
+router.post('/admin/generate', verifyAdmin, async (req, res) => {
+  try {
+    const pool = req.app.locals.pool;
+    const tickers = ['TSLA', 'NVDA', 'AAPL', 'SPY', 'QQQ', 'AMZN', 'GOOGL', 'META', 'MSFT', 'AMD'];
+    
+    // Get next trading day
+    const now = new Date();
+    let targetDate = new Date(now);
+    targetDate.setDate(targetDate.getDate() + 1);
+    
+    // Skip weekends
+    while (targetDate.getDay() === 0 || targetDate.getDay() === 6) {
+      targetDate.setDate(targetDate.getDate() + 1);
+    }
+    
+    const opensAt = new Date(targetDate);
+    opensAt.setHours(9, 30, 0, 0);
+    
+    const closesAt = new Date(targetDate);
+    closesAt.setHours(15, 55, 0, 0);
+    
+    const resolvesAt = new Date(targetDate);
+    resolvesAt.setHours(16, 5, 0, 0);
+    
+    let created = 0;
+    
+    for (const ticker of tickers) {
+      // Check if already exists for this date
+      const existing = await pool.query(
+        `SELECT id FROM predictions 
+         WHERE ticker = $1 AND DATE(closes_at) = DATE($2)`,
+        [ticker, closesAt]
+      );
+      
+      if (existing.rows.length === 0) {
+        await pool.query(
+          `INSERT INTO predictions (
+            category, ticker, title, description,
+            yes_payout_multiplier, no_payout_multiplier,
+            opens_at, closes_at, resolves_at, status, featured
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'open', $10)`,
+          [
+            'daily',
+            ticker,
+            `Will ${ticker} close green today?`,
+            `Predict if ${ticker} will close higher than its opening price.`,
+            1.90,
+            1.90,
+            opensAt,
+            closesAt,
+            resolvesAt,
+            ticker === 'TSLA' || ticker === 'NVDA'
+          ]
+        );
+        created++;
+      }
+    }
+    
+    res.json({ success: true, created });
+  } catch (error) {
+    console.error('Error generating predictions:', error);
+    res.status(500).json({ error: 'Failed to generate predictions' });
+  }
+});
+
 module.exports = router;
