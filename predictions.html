@@ -691,7 +691,7 @@
           const currentPrice = parseFloat(snapshot.price);
           const diff = ((currentPrice - openPrice) / openPrice * 100).toFixed(2);
           const diffClass = currentPrice >= openPrice ? 'positive' : 'negative';
-          const statusText = currentPrice >= openPrice ? '📈 Winning' : '📉 Losing';
+          const statusText = currentPrice >= openPrice ? 'Winning' : 'Losing';
           refHtml = `
             <div class="prediction-reference">
               <span class="ref-item"><span class="ref-label">Open: </span><span class="ref-value">$${parseFloat(openPrice).toFixed(2)}</span></span>
