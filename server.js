@@ -466,6 +466,30 @@ app.get('/api/futures/:symbol', async (req, res) => {
   }
 });
 
+// ===== SPARKLINE DATA PROXY =====
+app.get('/api/sparkline/:symbol', async (req, res) => {
+  try {
+    const symbol = req.params.symbol.toUpperCase();
+    
+    // Fetch 1-day intraday data for sparkline
+    const response = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=5m&range=1d`);
+    const data = await response.json();
+    
+    const result = data?.chart?.result?.[0];
+    if (!result || !result.indicators?.quote?.[0]?.close) {
+      return res.json({ prices: [] });
+    }
+    
+    // Extract closing prices, filter out nulls
+    const closes = result.indicators.quote[0].close.filter(p => p !== null);
+    
+    res.json({ prices: closes });
+  } catch (error) {
+    console.error('Sparkline API error:', error);
+    res.status(500).json({ error: 'Failed to fetch sparkline data', prices: [] });
+  }
+});
+
 // ===== INTERNATIONAL INDICES PROXY =====
 app.get('/api/index/:symbol', async (req, res) => {
   try {
