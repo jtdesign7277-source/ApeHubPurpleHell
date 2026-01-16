@@ -49,9 +49,9 @@
     /* Category Tabs */
     .category-tabs { display: flex; gap: 8px; padding: 16px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
     .category-tabs::-webkit-scrollbar { display: none; }
-    .category-tab { padding: 10px 18px; background: var(--white-05); border: 1px solid var(--white-10); border-radius: 100px; font-family: inherit; font-size: 14px; font-weight: 500; color: var(--white-70); cursor: pointer; white-space: nowrap; transition: all 0.2s; }
-    .category-tab:hover { background: var(--white-10); color: var(--white); }
-    .category-tab.active { background: var(--purple-core); border-color: var(--purple-core); color: var(--white); }
+    .category-tab { padding: 10px 18px; background: transparent; border: 2px solid var(--white-20); border-radius: 12px; font-family: inherit; font-size: 14px; font-weight: 500; color: var(--white-70); cursor: pointer; white-space: nowrap; transition: all 0.2s; }
+    .category-tab:hover { background: rgba(124, 58, 237, 0.1); border-color: var(--purple-core); color: var(--purple-glow); }
+    .category-tab.active { background: rgba(124, 58, 237, 0.15); border-color: var(--purple-core); color: var(--purple-glow); }
 
     /* Prediction Cards */
     .predictions-grid { display: flex; flex-direction: column; gap: 12px; }
