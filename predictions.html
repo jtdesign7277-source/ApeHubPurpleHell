@@ -291,8 +291,7 @@
 
   <main class="main">
     <div class="category-tabs">
-      <button class="category-tab active" data-category="all">🔥 All</button>
-      <button class="category-tab" data-category="daily">📈 Daily</button>
+      <button class="category-tab active" data-category="daily">📈 Daily</button>
       <button class="category-tab" data-category="weekly">📊 Weekly</button>
       <button class="category-tab" data-category="crypto">₿ Crypto</button>
       <button class="category-tab" data-category="earnings">💰 Earnings</button>
@@ -430,7 +429,7 @@
     let userEmail = localStorage.getItem('userEmail') || '';
     let userBalance = 0;
     let predictions = [];
-    let currentCategory = 'all';
+    let currentCategory = 'daily';
     let selectedPrediction = null;
     let selectedPosition = null;
     let selectedPackage = 'popular';
