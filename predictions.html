@@ -59,6 +59,15 @@
     .prediction-card:hover { background: var(--bg-card-hover); border-color: var(--white-30); transform: translateY(-2px); }
     .prediction-card.featured { border-color: var(--purple-core); background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(0,0,0,0)); }
     .prediction-card.featured::before { content: '🔥 HOT'; position: absolute; top: 12px; right: 12px; background: linear-gradient(135deg, var(--purple-core), var(--purple-pink)); padding: 4px 10px; border-radius: 100px; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; }
+    
+    /* Locked prediction state */
+    .prediction-card.locked { border-color: var(--white-10); opacity: 0.85; }
+    .prediction-card.locked:hover { transform: none; border-color: var(--white-20); }
+    .prediction-card.locked.featured::before { display: none; }
+    .locked-badge { position: absolute; top: 12px; right: 12px; background: linear-gradient(135deg, #374151, #4b5563); padding: 4px 10px; border-radius: 100px; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; color: var(--white-70); }
+    .locked-text { color: var(--white-50); }
+    .odds-button.disabled { opacity: 0.5; cursor: not-allowed; }
+    .odds-button.disabled:hover { background: rgba(255,255,255,0.05); border-color: var(--white-10); }
     .prediction-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
     .prediction-ticker { background: var(--white-10); padding: 4px 10px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: var(--purple-glow); }
     .prediction-category { font-size: 12px; color: var(--white-50); text-transform: uppercase; letter-spacing: 0.5px; }
@@ -526,29 +535,63 @@
         grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🔮</div><div class="empty-state-title">No predictions available</div><p>Check back soon for new markets!</p></div>`;
         return;
       }
-      grid.innerHTML = predictions.map(p => `
-        <div class="prediction-card ${p.featured ? 'featured' : ''}" onclick="openBetSlip(${p.id})">
+      grid.innerHTML = predictions.map(p => {
+        const isLocked = isDailyBettingLocked(p);
+        const lockedClass = isLocked ? 'locked' : '';
+        return `
+        <div class="prediction-card ${p.featured ? 'featured' : ''} ${lockedClass}" onclick="openBetSlip(${p.id})">
+          ${isLocked ? '<div class="locked-badge">🔒 MARKET OPEN</div>' : ''}
           <div class="prediction-meta">
             ${p.ticker ? `<span class="prediction-ticker">${p.ticker}</span>` : ''}
-            <span class="prediction-category">${p.category}</span>
+            <span class="prediction-category">${getCategoryLabel(p.category)}</span>
           </div>
           <div class="prediction-title">${p.title}</div>
           <div class="prediction-odds">
-            <button class="odds-button yes" onclick="event.stopPropagation(); openBetSlip(${p.id}, 'yes')">
+            <button class="odds-button yes ${isLocked ? 'disabled' : ''}" onclick="event.stopPropagation(); ${isLocked ? 'showLockedMessage()' : `openBetSlip(${p.id}, 'yes')`}">
               <div class="odds-label">YES</div>
               <div class="odds-multiplier">${parseFloat(p.yes_payout_multiplier).toFixed(2)}x</div>
             </button>
-            <button class="odds-button no" onclick="event.stopPropagation(); openBetSlip(${p.id}, 'no')">
+            <button class="odds-button no ${isLocked ? 'disabled' : ''}" onclick="event.stopPropagation(); ${isLocked ? 'showLockedMessage()' : `openBetSlip(${p.id}, 'no')`}">
               <div class="odds-label">NO</div>
               <div class="odds-multiplier">${parseFloat(p.no_payout_multiplier).toFixed(2)}x</div>
             </button>
           </div>
           <div class="prediction-footer">
             <div class="prediction-volume"><strong>${(p.yes_volume + p.no_volume).toLocaleString()}</strong> tokens bet</div>
-            <div class="prediction-closes">Closes <span class="time">${formatTimeLeft(p.closes_at)}</span></div>
+            <div class="prediction-closes">${isLocked ? '<span class="locked-text">Resolves at 4:30pm ET</span>' : `Closes <span class="time">${formatTimeLeft(p.closes_at)}</span>`}</div>
           </div>
         </div>
-      `).join('');
+      `}).join('');
+    }
+
+    // Check if daily betting is locked (after 9:30am ET)
+    function isDailyBettingLocked(prediction) {
+      if (prediction.category !== 'daily') return false;
+      const now = new Date();
+      // Convert to ET
+      const etTimeStr = now.toLocaleString('en-US', { timeZone: 'America/New_York' });
+      const etNow = new Date(etTimeStr);
+      const etHour = etNow.getHours();
+      const etMinute = etNow.getMinutes();
+      const currentETMinutes = etHour * 60 + etMinute;
+      const cutoffETMinutes = 9 * 60 + 30; // 9:30am = 570 minutes
+      return currentETMinutes >= cutoffETMinutes;
+    }
+
+    function getCategoryLabel(category) {
+      const labels = {
+        'daily': '📈 DAILY',
+        'weekly': '📊 WEEKLY',
+        'crypto': '₿ CRYPTO',
+        'earnings': '💰 EARNINGS',
+        'fed': '🏛️ FED',
+        'politics': '🗳️ POLITICS'
+      };
+      return labels[category] || category.toUpperCase();
+    }
+
+    function showLockedMessage() {
+      alert('🔒 Betting Closed!\n\nDaily predictions lock at 9:30am ET when the market opens. Check back tonight at 8pm ET for tomorrow\'s predictions!');
     }
 
     function formatTimeLeft(dateStr) {
@@ -565,6 +608,13 @@
     function openBetSlip(predictionId, position = null) {
       selectedPrediction = predictions.find(p => p.id === predictionId);
       if (!selectedPrediction) return;
+      
+      // Check if betting is locked for this prediction
+      if (isDailyBettingLocked(selectedPrediction)) {
+        showLockedMessage();
+        return;
+      }
+      
       document.getElementById('betSlipQuestion').textContent = selectedPrediction.title;
       document.getElementById('yesMultiplier').textContent = `${parseFloat(selectedPrediction.yes_payout_multiplier).toFixed(2)}x payout`;
       document.getElementById('noMultiplier').textContent = `${parseFloat(selectedPrediction.no_payout_multiplier).toFixed(2)}x payout`;

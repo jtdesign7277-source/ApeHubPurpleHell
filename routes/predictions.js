@@ -351,8 +351,25 @@ router.post('/bet', async (req, res) => {
       throw new Error('Betting is closed for this prediction');
     }
     
-    if (new Date() > new Date(prediction.closes_at)) {
+    // Check closes_at timestamp
+    const now = new Date();
+    const closesAt = new Date(prediction.closes_at);
+    if (now > closesAt) {
       throw new Error('Betting period has ended');
+    }
+    
+    // Additional check for daily predictions: must bet before 9:30am ET on trading day
+    if (prediction.category === 'daily') {
+      // Get current time in ET
+      const etNow = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+      const etHour = etNow.getHours();
+      const etMinute = etNow.getMinutes();
+      const currentETMinutes = etHour * 60 + etMinute;
+      const cutoffETMinutes = 9 * 60 + 30; // 9:30am = 570 minutes
+      
+      if (currentETMinutes >= cutoffETMinutes) {
+        throw new Error('Daily betting closes at 9:30am ET (market open). Check back tonight for tomorrow\'s predictions!');
+      }
     }
     
     if (tokensWagered < prediction.min_bet) {
