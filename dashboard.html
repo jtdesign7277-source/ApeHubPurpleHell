@@ -4534,15 +4534,17 @@
       // Fetch real-time data immediately (force update)
       updateIndices();
       updateWatchlistPrices(true); // Force update on page load
+      fetchFuturesData();
       
       // Update popular stocks in search database
       const popularStocks = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'META', 'NVDA', 'SPY', 'QQQ', 'AMD'];
       updateSearchResultPrices(popularStocks);
       
-      // Refresh prices every 60 seconds
+      // Auto-refresh every 5 seconds
       setInterval(() => {
         updateIndices();
         updateWatchlistPrices(true);
+        fetchFuturesData();
       }, 60000);
     });
   </script>

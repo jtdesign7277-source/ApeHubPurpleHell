@@ -526,6 +526,12 @@
         showPurchaseSuccess(tokens);
         window.history.replaceState({}, '', '/predictions.html');
       }
+
+      // Auto-refresh every 5 seconds
+      setInterval(() => {
+        loadBalance();
+        loadPredictions();
+      }, 5000);
     });
 
     async function loadBalance() {

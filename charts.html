@@ -585,6 +585,11 @@
     document.addEventListener('DOMContentLoaded', function() {
       createWidget(currentSymbol);
       updateTickerPrice(currentSymbol);
+      
+      // Auto-refresh ticker every 5 seconds
+      setInterval(() => {
+        updateTickerPrice(currentSymbol);
+      }, 5000);
     });
 
     // Load saved theme from localStorage
