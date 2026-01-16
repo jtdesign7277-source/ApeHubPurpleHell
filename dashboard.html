@@ -3366,9 +3366,9 @@
     let futuresData = {};
 
     async function fetchFuturesData() {
-      const marketOpen = isMarketOpen();
-      const symbols = marketOpen ? etfSymbols : futuresSymbols;
-      const names = marketOpen ? etfNames : futuresNames;
+      // Always use ETF symbols and fetch from Alpaca API for live data
+      const symbols = etfSymbols;
+      const names = etfNames;
       
       // Update the card names
       for (const key of Object.keys(names)) {
@@ -3376,36 +3376,42 @@
         if (nameEl) nameEl.textContent = names[key];
       }
       
-      for (const [key, symbol] of Object.entries(symbols)) {
-        try {
-          // Use our server proxy for both futures and ETFs
-          const endpoint = marketOpen ? `/api/index/${encodeURIComponent(symbol)}` : `/api/futures/${encodeURIComponent(symbol)}`;
-          const response = await fetch(endpoint);
-          const data = await response.json();
-          
-          if (data.chart && data.chart.result && data.chart.result[0]) {
-            const result = data.chart.result[0];
-            const meta = result.meta;
-            const quotes = result.indicators.quote[0];
-            const closes = quotes.close.filter(c => c !== null);
-            
-            const currentPrice = meta.regularMarketPrice || closes[closes.length - 1];
-            const previousClose = meta.chartPreviousClose || meta.previousClose;
-            const change = currentPrice - previousClose;
-            const changePercent = (change / previousClose) * 100;
-            
-            futuresData[key] = {
-              price: currentPrice,
-              change: change,
-              changePercent: changePercent,
-              chartData: closes.slice(-20) // Last 20 data points for mini chart
-            };
-            
-            updateFuturesCard(key);
+      // Fetch all ETF snapshots from Alpaca in one call
+      const etfList = Object.values(symbols).join(',');
+      try {
+        const response = await fetch(`/api/market/snapshots?symbols=${etfList}`);
+        const data = await response.json();
+        
+        if (data.success && data.snapshots) {
+          for (const [key, etfSymbol] of Object.entries(symbols)) {
+            const snapshot = data.snapshots[etfSymbol];
+            if (snapshot) {
+              const price = snapshot.price;
+              const changePercent = parseFloat(snapshot.changePercent);
+              const change = parseFloat(snapshot.change);
+              
+              futuresData[key] = {
+                price: price,
+                change: change,
+                changePercent: changePercent,
+                chartData: generateRandomChartData(changePercent >= 0)
+              };
+              
+              updateFuturesCard(key);
+            } else {
+              setFallbackFuturesData(key);
+            }
           }
-        } catch (error) {
-          console.log(`Error fetching ${symbol}:`, error);
-          // Use fallback data
+        } else {
+          // Fallback if API fails
+          for (const key of Object.keys(symbols)) {
+            setFallbackFuturesData(key);
+          }
+        }
+      } catch (error) {
+        console.log('Error fetching futures data from Alpaca:', error);
+        // Use fallback data for all
+        for (const key of Object.keys(symbols)) {
           setFallbackFuturesData(key);
         }
       }
