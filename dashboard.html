@@ -3807,42 +3807,96 @@
         return;
       }
       
-      container.innerHTML = watchlist.map(stock => {
-        const isUp = stock.changePercent >= 0;
-        const position = positions[stock.symbol];
-        const hasPosition = position && position.shares > 0;
-        const shares = hasPosition ? position.shares : 0;
-        const sharesDisplay = valuesHidden ? '<span class="hidden-stars">★★★</span>' : (shares + ' shares');
-        
-        return `
-          <div class="wl-stock-row" onclick="openModal('${stock.symbol}')">
-            <div class="wl-stock-info">
-              <span class="wl-stock-symbol">${stock.symbol}</span>
-              <span class="wl-stock-name">${hasPosition ? sharesDisplay : stock.name}</span>
-            </div>
-            <div class="wl-stock-sparkline" data-symbol="${stock.symbol}">
-              ${generateFallbackSparkline(stock.trend, 80, 32)}
-            </div>
-            <div class="wl-stock-price-col">
-              <div class="wl-stock-change ${isUp ? 'up' : 'down'}">
-                ${isUp ? '+' : ''}${stock.changePercent.toFixed(2)}%
+      // Gather all symbols for Alpaca snapshots
+      const symbols = watchlist.map(s => s.symbol);
+      if (symbols.length === 0) {
+        container.innerHTML = '';
+        updatePortfolioTotal();
+        return;
+      }
+      
+      // Fetch Alpaca snapshots for all symbols
+      fetch(`/api/market/snapshots?symbols=${symbols.join(',')}`)
+        .then(res => res.json())
+        .then(marketData => {
+          container.innerHTML = watchlist.map(stock => {
+            const snapshot = marketData.snapshots?.[stock.symbol] || null;
+            const livePrice = snapshot?.price || stock.price;
+            const liveChange = snapshot?.change || (stock.price - (stock.price / (1 + stock.changePercent / 100)));
+            const liveChangePercent = snapshot?.changePercent || stock.changePercent;
+            const isUp = liveChangePercent >= 0;
+            const position = positions[stock.symbol];
+            const hasPosition = position && position.shares > 0;
+            const shares = hasPosition ? position.shares : 0;
+            const sharesDisplay = valuesHidden ? '<span class="hidden-stars">★★★</span>' : (shares + ' shares');
+            
+            return `
+              <div class="wl-stock-row" onclick="openModal('${stock.symbol}')">
+                <div class="wl-stock-info">
+                  <span class="wl-stock-symbol">${stock.symbol}</span>
+                  <span class="wl-stock-name">${hasPosition ? sharesDisplay : stock.name}</span>
+                </div>
+                <div class="wl-stock-sparkline" data-symbol="${stock.symbol}">
+                  ${generateFallbackSparkline(stock.trend, 80, 32)}
+                </div>
+                <div class="wl-stock-price-col">
+                  <div class="wl-stock-price">$${parseFloat(livePrice).toFixed(2)}</div>
+                  <div class="wl-stock-change ${isUp ? 'up' : 'down'}">
+                    ${isUp ? '+' : ''}${parseFloat(liveChangePercent).toFixed(2)}%
+                  </div>
+                </div>
+                <button class="wl-remove-btn" onclick="event.stopPropagation(); removeFromWatchlist('${stock.symbol}')" title="Remove">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                </button>
               </div>
-              <div class="wl-stock-price">$${stock.price.toFixed(2)}</div>
-            </div>
-            <button class="wl-remove-btn" onclick="event.stopPropagation(); removeFromWatchlist('${stock.symbol}')" title="Remove">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="18" y1="6" x2="6" y2="18"/>
-                <line x1="6" y1="6" x2="18" y2="18"/>
-              </svg>
-            </button>
-          </div>
-        `;
-      }).join('');
-      
-      // Load real sparklines asynchronously
-      loadWatchlistSparklines();
-      
-      updatePortfolioTotal();
+            `;
+          }).join('');
+          
+          // Load real sparklines asynchronously
+          loadWatchlistSparklines();
+          
+          updatePortfolioTotal();
+        })
+        .catch(() => {
+          // Fallback: render with cached data if API fails
+          container.innerHTML = watchlist.map(stock => {
+            const isUp = stock.changePercent >= 0;
+            const position = positions[stock.symbol];
+            const hasPosition = position && position.shares > 0;
+            const shares = hasPosition ? position.shares : 0;
+            const sharesDisplay = valuesHidden ? '<span class="hidden-stars">★★★</span>' : (shares + ' shares');
+            
+            return `
+              <div class="wl-stock-row" onclick="openModal('${stock.symbol}')">
+                <div class="wl-stock-info">
+                  <span class="wl-stock-symbol">${stock.symbol}</span>
+                  <span class="wl-stock-name">${hasPosition ? sharesDisplay : stock.name}</span>
+                </div>
+                <div class="wl-stock-sparkline" data-symbol="${stock.symbol}">
+                  ${generateFallbackSparkline(stock.trend, 80, 32)}
+                </div>
+                <div class="wl-stock-price-col">
+                  <div class="wl-stock-price">$${stock.price.toFixed(2)}</div>
+                  <div class="wl-stock-change ${isUp ? 'up' : 'down'}">
+                    ${isUp ? '+' : ''}${stock.changePercent.toFixed(2)}%
+                  </div>
+                </div>
+                <button class="wl-remove-btn" onclick="event.stopPropagation(); removeFromWatchlist('${stock.symbol}')" title="Remove">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                </button>
+              </div>
+            `;
+          }).join('');
+          
+          loadWatchlistSparklines();
+          updatePortfolioTotal();
+        });
     }
     
     async function loadWatchlistSparklines() {

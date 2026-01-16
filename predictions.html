@@ -109,6 +109,7 @@
     .prediction-ticker { background: rgba(124, 58, 237, 0.2); padding: 4px 10px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: var(--purple-soft); }
     .prediction-category { font-size: 12px; color: var(--white-70); text-transform: uppercase; letter-spacing: 0.5px; }
     .prediction-date { font-size: 11px; color: var(--white-50); margin-left: auto; }
+      .prediction-price { font-size: 13px; font-family: 'JetBrains Mono', monospace; margin-left: 10px; font-weight: 600; vertical-align: middle; }
     .bet-slip-date { font-size: 13px; color: var(--purple-glow); margin-top: 6px; }
     .prediction-title { font-size: 18px; font-weight: 600; line-height: 1.4; margin-bottom: 16px; color: #fff; }
     .prediction-odds { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -594,17 +595,47 @@
         grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🔮</div><div class="empty-state-title">No predictions available</div><p>Check back soon for new markets!</p></div>`;
         return;
       }
-      grid.innerHTML = predictions.map(p => {
-        const isLocked = isDailyBettingLocked(p);
-        const lockedClass = isLocked ? 'locked' : '';
-        const predictionDate = formatPredictionDate(p.resolves_at);
-        return `
+      // Gather all tickers for open predictions
+      const tickers = predictions.filter(p => p.ticker).map(p => p.ticker);
+      if (tickers.length === 0) {
+        grid.innerHTML = predictions.map(p => renderPredictionCard(p, null)).join('');
+        return;
+      }
+      // Fetch Alpaca snapshots for all tickers
+      fetch(`/api/market/snapshots?symbols=${tickers.join(',')}`)
+        .then(res => res.json())
+        .then(marketData => {
+          grid.innerHTML = predictions.map(p => {
+            const snapshot = marketData.snapshots?.[p.ticker] || null;
+            return renderPredictionCard(p, snapshot);
+          }).join('');
+        })
+        .catch(() => {
+          grid.innerHTML = predictions.map(p => renderPredictionCard(p, null)).join('');
+        });
+    }
+
+    // Helper to render a single prediction card with optional market data
+    function renderPredictionCard(p, snapshot) {
+      const isLocked = isDailyBettingLocked(p);
+      const lockedClass = isLocked ? 'locked' : '';
+      const predictionDate = formatPredictionDate(p.resolves_at);
+      let priceHtml = '';
+      if (p.ticker && snapshot) {
+        const price = snapshot.price ? `$${parseFloat(snapshot.price).toFixed(2)}` : '';
+        const change = snapshot.change ? (snapshot.change > 0 ? '+' : '') + snapshot.change : '';
+        const changePercent = snapshot.changePercent ? (snapshot.changePercent > 0 ? '+' : '') + snapshot.changePercent + '%' : '';
+        const color = snapshot.change > 0 ? 'var(--green)' : (snapshot.change < 0 ? 'var(--red)' : 'var(--white-70)');
+        priceHtml = `<span class="prediction-price" style="color:${color}">${price} <span style="font-size:12px;">${change} (${changePercent})</span></span>`;
+      }
+      return `
         <div class="prediction-card ${p.featured ? 'featured' : ''} ${lockedClass}" onclick="openBetSlip(${p.id})">
           ${isLocked ? '<div class="locked-badge">🔒 LOCKED</div>' : ''}
           <div class="prediction-meta">
             ${p.ticker ? `<span class="prediction-ticker">${p.ticker}</span>` : ''}
             <span class="prediction-category">${getCategoryLabel(p.category)}</span>
             <span class="prediction-date">📅 ${predictionDate}</span>
+            ${priceHtml}
           </div>
           <div class="prediction-title">${p.title}</div>
           <div class="prediction-odds">
@@ -622,7 +653,8 @@
             <div class="prediction-closes">${isLocked ? '<span class="locked-text">Resolves at 4:30pm ET</span>' : `Closes <span class="time">${formatTimeLeft(p.closes_at)}</span>`}</div>
           </div>
         </div>
-      `}).join('');
+      `;
+    }
     }
 
     // Check if daily betting is locked (after 9:30am ET)
