@@ -272,7 +272,7 @@
 <body>
 
   <header class="header">
-    <div class="logo">Ape<span>Hub</span></div>
+    <div class="logo" id="apehubLogo">Ape<span>Hub</span></div>
     <div class="token-balance" onclick="openTokenModal()">
       <div class="token-icon">🪙</div>
       <span class="token-amount" id="userBalance">0</span>
@@ -425,6 +425,19 @@
     let selectedPrediction = null;
     let selectedPosition = null;
     let selectedPackage = 'popular';
+
+    // Secret admin access - tap logo 5 times quickly
+    let logoTapCount = 0;
+    let logoTapTimer = null;
+    document.getElementById('apehubLogo')?.addEventListener('click', () => {
+      logoTapCount++;
+      clearTimeout(logoTapTimer);
+      if (logoTapCount >= 5) {
+        logoTapCount = 0;
+        window.location.href = '/admin/admin.html';
+      }
+      logoTapTimer = setTimeout(() => { logoTapCount = 0; }, 1500);
+    });
 
     document.addEventListener('DOMContentLoaded', () => {
       if (!userEmail) {

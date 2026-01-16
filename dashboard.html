@@ -2117,7 +2117,7 @@
     
     <!-- Top Bar -->
     <div class="top-bar">
-      <div class="apehub-logo">Ape<span>Hub</span></div>
+      <div class="apehub-logo" id="apehubLogo">Ape<span>Hub</span></div>
       <div class="welcome" onclick="openProfile()">Welcome, <span id="userName">User</span> <svg class="welcome-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
     </div>
 
@@ -4425,6 +4425,20 @@
     // ============================================
     // INITIALIZE
     // ============================================
+    
+    // Secret admin access - tap logo 5 times quickly
+    let logoTapCount = 0;
+    let logoTapTimer = null;
+    document.getElementById('apehubLogo')?.addEventListener('click', () => {
+      logoTapCount++;
+      clearTimeout(logoTapTimer);
+      if (logoTapCount >= 5) {
+        logoTapCount = 0;
+        window.location.href = '/admin/admin.html';
+      }
+      logoTapTimer = setTimeout(() => { logoTapCount = 0; }, 1500);
+    });
+    
     document.addEventListener('DOMContentLoaded', async function() {
       renderMarketSparklines();
       
