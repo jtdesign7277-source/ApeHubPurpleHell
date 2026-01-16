@@ -3,6 +3,10 @@ const express = require('express');
 const Stripe = require('stripe');
 const path = require('path');
 const { Pool } = require('pg');
+const cron = require('node-cron');
+const predictionsRoutes = require('./routes/predictions');
+const { runDailyGeneration, updatePredictionStatuses } = require('./scripts/generate-predictions');
+const { resolveReadyPredictions } = require('./scripts/resolve-predictions');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -446,6 +450,11 @@ app.get('/login', (req, res) => {
 app.use('/LandingPurpleFiles', express.static(path.join(__dirname, 'LandingPurpleFiles')));
 app.use('/intro-music.mp3', express.static(path.join(__dirname, 'intro-music.mp3')));
 
+// ===== PREDICTIONS MARKET API =====
+app.locals.pool = pool;
+app.locals.stripe = stripe;
+app.use('/api/predictions', predictionsRoutes);
+
 // ===== YAHOO FINANCE PROXY =====
 app.get('/api/futures/:symbol', async (req, res) => {
   try {
@@ -524,11 +533,30 @@ app.use((req, res) => {
   res.status(404).send('Not found');
 });
 
+// ===== CRON JOBS FOR PREDICTIONS =====
+// Generate daily predictions at 8pm ET
+cron.schedule('0 20 * * *', () => {
+  console.log('🌙 Running daily predictions generator...');
+  runDailyGeneration();
+}, { timezone: 'America/New_York' });
+
+// Resolve predictions at 4:35pm ET (after market close)
+cron.schedule('35 16 * * 1-5', () => {
+  console.log('⚖️ Running auto-resolution engine...');
+  resolveReadyPredictions();
+}, { timezone: 'America/New_York' });
+
+// Update prediction statuses every 5 minutes
+cron.schedule('*/5 * * * *', () => {
+  updatePredictionStatuses();
+});
+
 app.listen(PORT, () => {
   console.log(`\n=====================================`);
   console.log(`✓ Server running on http://localhost:${PORT}`);
   console.log(`✓ Started at: ${new Date().toISOString()}`);
   console.log(`✓ Using PostgreSQL database`);
+  console.log(`✓ Predictions cron jobs scheduled`);
   console.log(`=====================================\n`);
 });
 

@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Predictions | ApeHub</title>
+  <link rel="icon" href="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/694f4eec318421fe521395b3/d35e25880_D4D1B7AE-C152-443F-8566-E9E376230D42.JPG" type="image/jpeg">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #000000;
+      --bg-card: #0a0a0f;
+      --bg-card-hover: #12121a;
+      --bg-elevated: #16161f;
+      --purple-core: #7c3aed;
+      --purple-glow: #a855f7;
+      --purple-soft: #c4b5fd;
+      --purple-pink: #e879f9;
+      --green: #10b981;
+      --green-glow: #34d399;
+      --red: #ef4444;
+      --red-glow: #f87171;
+      --gold: #fbbf24;
+      --white: #ffffff;
+      --white-90: rgba(255,255,255,0.9);
+      --white-70: rgba(255,255,255,0.7);
+      --white-50: rgba(255,255,255,0.5);
+      --white-30: rgba(255,255,255,0.3);
+      --white-10: rgba(255,255,255,0.1);
+      --white-05: rgba(255,255,255,0.05);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { font-family: 'Space Grotesk', -apple-system, sans-serif; background: var(--bg-deep); color: var(--white); min-height: 100vh; overflow-x: hidden; }
+
+    /* Header */
+    .header { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 16px 20px; background: rgba(0,0,0,0.8); backdrop-filter: blur(20px); border-bottom: 1px solid var(--white-10); display: flex; justify-content: space-between; align-items: center; }
+    .logo { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+    .logo span { color: var(--purple-glow); }
+    .token-balance { display: flex; align-items: center; gap: 8px; background: var(--white-05); padding: 8px 16px; border-radius: 100px; border: 1px solid var(--white-10); cursor: pointer; transition: all 0.2s; }
+    .token-balance:hover { border-color: var(--purple-glow); background: rgba(124, 58, 237, 0.1); }
+    .token-icon { width: 20px; height: 20px; background: linear-gradient(135deg, var(--gold), #f59e0b); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+    .token-amount { font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 14px; }
+    .add-tokens { color: var(--purple-glow); font-size: 18px; font-weight: 600; }
+
+    /* Main */
+    .main { padding: 80px 16px 120px; max-width: 600px; margin: 0 auto; }
+
+    /* Category Tabs */
+    .category-tabs { display: flex; gap: 8px; padding: 16px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+    .category-tabs::-webkit-scrollbar { display: none; }
+    .category-tab { padding: 10px 18px; background: var(--white-05); border: 1px solid var(--white-10); border-radius: 100px; font-family: inherit; font-size: 14px; font-weight: 500; color: var(--white-70); cursor: pointer; white-space: nowrap; transition: all 0.2s; }
+    .category-tab:hover { background: var(--white-10); color: var(--white); }
+    .category-tab.active { background: var(--purple-core); border-color: var(--purple-core); color: var(--white); }
+
+    /* Prediction Cards */
+    .predictions-grid { display: flex; flex-direction: column; gap: 12px; }
+    .prediction-card { background: var(--bg-card); border: 1px solid var(--white-10); border-radius: 16px; padding: 20px; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
+    .prediction-card:hover { background: var(--bg-card-hover); border-color: var(--white-30); transform: translateY(-2px); }
+    .prediction-card.featured { border-color: var(--purple-core); background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(0,0,0,0)); }
+    .prediction-card.featured::before { content: '🔥 HOT'; position: absolute; top: 12px; right: 12px; background: linear-gradient(135deg, var(--purple-core), var(--purple-pink)); padding: 4px 10px; border-radius: 100px; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; }
+    .prediction-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .prediction-ticker { background: var(--white-10); padding: 4px 10px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: var(--purple-glow); }
+    .prediction-category { font-size: 12px; color: var(--white-50); text-transform: uppercase; letter-spacing: 0.5px; }
+    .prediction-title { font-size: 18px; font-weight: 600; line-height: 1.4; margin-bottom: 16px; color: var(--white-90); }
+    .prediction-odds { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .odds-button { padding: 14px; border-radius: 12px; border: 2px solid transparent; font-family: inherit; cursor: pointer; transition: all 0.2s; text-align: center; }
+    .odds-button.yes { background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); }
+    .odds-button.yes:hover { background: rgba(16, 185, 129, 0.2); border-color: var(--green); }
+    .odds-button.no { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); }
+    .odds-button.no:hover { background: rgba(239, 68, 68, 0.2); border-color: var(--red); }
+    .odds-label { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .odds-button.yes .odds-label { color: var(--green); }
+    .odds-button.no .odds-label { color: var(--red); }
+    .odds-multiplier { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; color: var(--white); }
+    .prediction-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--white-10); }
+    .prediction-volume { font-size: 12px; color: var(--white-50); }
+    .prediction-volume strong { color: var(--white-70); font-family: 'JetBrains Mono', monospace; }
+    .prediction-closes { font-size: 12px; color: var(--white-50); }
+    .prediction-closes .time { color: var(--purple-glow); font-weight: 600; }
+
+    /* Bet Slip */
+    .bet-slip-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); z-index: 200; opacity: 0; visibility: hidden; transition: all 0.3s; }
+    .bet-slip-overlay.show { opacity: 1; visibility: visible; }
+    .bet-slip { position: fixed; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, #1a1a24, #0d0d12); border-top-left-radius: 24px; border-top-right-radius: 24px; padding: 20px 20px 40px; z-index: 201; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); max-height: 85vh; overflow-y: auto; }
+    .bet-slip-overlay.show .bet-slip { transform: translateY(0); }
+    .bet-slip-handle { width: 40px; height: 4px; background: var(--white-30); border-radius: 2px; margin: 0 auto 20px; }
+    .bet-slip-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+    .bet-slip-title { font-size: 14px; color: var(--white-50); margin-bottom: 4px; }
+    .bet-slip-question { font-size: 20px; font-weight: 600; max-width: 280px; }
+    .bet-slip-close { width: 36px; height: 36px; background: var(--white-10); border: none; border-radius: 50%; color: var(--white-70); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+    .bet-slip-close:hover { background: var(--white-20); color: var(--white); }
+
+    /* Position Selector */
+    .position-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+    .position-btn { padding: 20px; border-radius: 16px; border: 2px solid var(--white-10); background: var(--white-05); cursor: pointer; transition: all 0.2s; text-align: center; }
+    .position-btn.yes.selected { border-color: var(--green); background: rgba(16, 185, 129, 0.15); }
+    .position-btn.no.selected { border-color: var(--red); background: rgba(239, 68, 68, 0.15); }
+    .position-btn-label { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .position-btn.yes .position-btn-label { color: var(--green); }
+    .position-btn.no .position-btn-label { color: var(--red); }
+    .position-btn-multiplier { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--white-50); }
+
+    /* Token Quick Select */
+    .token-quick-select { display: flex; gap: 10px; margin-bottom: 16px; }
+    .token-quick-btn { flex: 1; padding: 14px 8px; background: var(--white-05); border: 2px solid var(--white-10); border-radius: 12px; font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 600; color: var(--white-70); cursor: pointer; transition: all 0.2s; }
+    .token-quick-btn:hover { background: var(--white-10); border-color: var(--white-30); color: var(--white); }
+    .token-quick-btn.selected { background: linear-gradient(135deg, var(--purple-core), var(--purple-glow)); border-color: var(--purple-glow); color: var(--white); }
+
+    /* Custom Amount */
+    .custom-amount-row { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+    .custom-amount-input { flex: 1; padding: 16px; background: var(--white-05); border: 2px solid var(--white-10); border-radius: 12px; font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 600; color: var(--white); outline: none; transition: all 0.2s; }
+    .custom-amount-input:focus { border-color: var(--purple-glow); background: rgba(124, 58, 237, 0.1); }
+    .custom-amount-input::placeholder { color: var(--white-30); }
+    .max-btn { padding: 16px 20px; background: var(--white-10); border: none; border-radius: 12px; font-family: inherit; font-size: 14px; font-weight: 600; color: var(--purple-glow); cursor: pointer; transition: all 0.2s; }
+    .max-btn:hover { background: rgba(124, 58, 237, 0.2); }
+
+    /* Payout Preview */
+    .payout-preview { background: var(--white-05); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+    .payout-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .payout-row:last-child { margin-bottom: 0; padding-top: 12px; border-top: 1px solid var(--white-10); }
+    .payout-label { font-size: 14px; color: var(--white-50); }
+    .payout-value { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 600; color: var(--white); }
+    .payout-value.profit { color: var(--green); }
+
+    /* Swipe to Confirm */
+    .swipe-container { position: relative; height: 80px; background: var(--white-05); border-radius: 16px; overflow: hidden; touch-action: none; }
+    .swipe-track { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; }
+    .swipe-text { font-size: 14px; font-weight: 600; color: var(--white-30); display: flex; align-items: center; gap: 8px; }
+    .swipe-arrows { animation: swipeHint 1.5s ease-in-out infinite; }
+    @keyframes swipeHint { 0%, 100% { transform: translateY(0); opacity: 0.5; } 50% { transform: translateY(-4px); opacity: 1; } }
+    .swipe-thumb { position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%); width: 52px; height: 52px; background: linear-gradient(135deg, var(--purple-core), var(--purple-pink)); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: grab; transition: all 0.3s; z-index: 2; user-select: none; }
+    .swipe-thumb:active { cursor: grabbing; box-shadow: 0 0 30px var(--purple-glow); }
+    .swipe-thumb.swiped { background: linear-gradient(135deg, var(--green), var(--green-glow)); }
+    .swipe-progress { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(180deg, rgba(124,58,237,0.2), rgba(124,58,237,0.05)); height: 0; transition: height 0.1s; }
+
+    /* Confetti */
+    .confetti-container { position: fixed; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 9999; overflow: hidden; }
+    .confetti { position: absolute; width: 10px; height: 10px; opacity: 0; }
+    @keyframes confetti-fall { 0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+
+    /* Success Modal */
+    .success-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8); background: linear-gradient(135deg, #1a1a24, #0d0d12); border: 1px solid var(--purple-core); border-radius: 24px; padding: 40px; text-align: center; z-index: 300; opacity: 0; visibility: hidden; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    .success-modal.show { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
+    .success-icon { width: 80px; height: 80px; background: linear-gradient(135deg, var(--green), var(--green-glow)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; margin: 0 auto 20px; animation: successPop 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+    @keyframes successPop { 0% { transform: scale(0); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+    .success-title { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+    .success-message { font-size: 16px; color: var(--white-70); margin-bottom: 24px; }
+    .success-details { background: var(--white-05); border-radius: 12px; padding: 16px; margin-bottom: 24px; }
+    .success-details-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+    .success-details-row:last-child { margin-bottom: 0; }
+    .success-btn { width: 100%; padding: 16px; background: var(--purple-core); border: none; border-radius: 12px; font-family: inherit; font-size: 16px; font-weight: 600; color: var(--white); cursor: pointer; transition: all 0.2s; }
+    .success-btn:hover { background: var(--purple-glow); }
+
+    /* Token Purchase Modal */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 400; opacity: 0; visibility: hidden; transition: all 0.3s; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .modal-overlay.show { opacity: 1; visibility: visible; }
+    .modal { background: linear-gradient(135deg, #1a1a24, #0d0d12); border: 1px solid var(--white-10); border-radius: 24px; padding: 32px; max-width: 400px; width: 100%; transform: scale(0.9); transition: transform 0.3s; }
+    .modal-overlay.show .modal { transform: scale(1); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .modal-title { font-size: 24px; font-weight: 700; }
+    .modal-close { width: 36px; height: 36px; background: var(--white-10); border: none; border-radius: 50%; color: var(--white-70); font-size: 20px; cursor: pointer; }
+    .token-packages { display: flex; flex-direction: column; gap: 12px; }
+    .token-package { padding: 20px; background: var(--white-05); border: 2px solid var(--white-10); border-radius: 16px; cursor: pointer; transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; position: relative; }
+    .token-package:hover { background: var(--white-10); border-color: var(--white-30); }
+    .token-package.selected { border-color: var(--purple-glow); background: rgba(124, 58, 237, 0.15); }
+    .token-package-badge { position: absolute; top: -10px; right: 16px; background: linear-gradient(135deg, var(--gold), #f59e0b); padding: 4px 10px; border-radius: 100px; font-size: 10px; font-weight: 700; color: #000; }
+    .token-package-info { display: flex; align-items: center; gap: 12px; }
+    .token-package-icon { width: 48px; height: 48px; background: linear-gradient(135deg, var(--gold), #f59e0b); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+    .token-package-amount { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; }
+    .token-package-label { font-size: 12px; color: var(--white-50); }
+    .token-package-price { font-size: 20px; font-weight: 700; color: var(--purple-glow); }
+    .buy-tokens-btn { width: 100%; padding: 18px; background: linear-gradient(135deg, var(--purple-core), var(--purple-pink)); border: none; border-radius: 14px; font-family: inherit; font-size: 18px; font-weight: 700; color: var(--white); cursor: pointer; margin-top: 20px; transition: all 0.2s; }
+    .buy-tokens-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(124, 58, 237, 0.4); }
+
+    /* Empty/Loading States */
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--white-50); }
+    .empty-state-icon { font-size: 48px; margin-bottom: 16px; }
+    .empty-state-title { font-size: 20px; font-weight: 600; color: var(--white-70); margin-bottom: 8px; }
+    .loading { display: flex; align-items: center; justify-content: center; padding: 40px; }
+    .spinner { width: 40px; height: 40px; border: 3px solid var(--white-10); border-top-color: var(--purple-glow); border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 480px) {
+      .header { padding: 12px 16px; }
+      .logo { font-size: 18px; }
+      .main { padding: 70px 12px 100px; }
+      .prediction-card { padding: 16px; }
+      .prediction-title { font-size: 16px; }
+      .odds-multiplier { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="logo">Ape<span>Hub</span></div>
+    <div class="token-balance" onclick="openTokenModal()">
+      <div class="token-icon">🪙</div>
+      <span class="token-amount" id="userBalance">0</span>
+      <span class="add-tokens">+</span>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="category-tabs">
+      <button class="category-tab active" data-category="all">🔥 All</button>
+      <button class="category-tab" data-category="daily">📈 Daily</button>
+      <button class="category-tab" data-category="weekly">📊 Weekly</button>
+      <button class="category-tab" data-category="crypto">₿ Crypto</button>
+      <button class="category-tab" data-category="earnings">💰 Earnings</button>
+      <button class="category-tab" data-category="fed">🏛️ Fed</button>
+      <button class="category-tab" data-category="politics">🗳️ Politics</button>
+    </div>
+    <div class="predictions-grid" id="predictionsGrid">
+      <div class="loading"><div class="spinner"></div></div>
+    </div>
+  </main>
+
+  <div class="bet-slip-overlay" id="betSlipOverlay">
+    <div class="bet-slip" id="betSlip">
+      <div class="bet-slip-handle"></div>
+      <div class="bet-slip-header">
+        <div>
+          <div class="bet-slip-title">Place your bet</div>
+          <div class="bet-slip-question" id="betSlipQuestion">Will TSLA close green today?</div>
+        </div>
+        <button class="bet-slip-close" onclick="closeBetSlip()">×</button>
+      </div>
+      <div class="position-selector">
+        <button class="position-btn yes" id="positionYes" onclick="selectPosition('yes')">
+          <div class="position-btn-label">YES ✓</div>
+          <div class="position-btn-multiplier" id="yesMultiplier">2.0x payout</div>
+        </button>
+        <button class="position-btn no" id="positionNo" onclick="selectPosition('no')">
+          <div class="position-btn-label">NO ✗</div>
+          <div class="position-btn-multiplier" id="noMultiplier">2.0x payout</div>
+        </button>
+      </div>
+      <div class="token-quick-select">
+        <button class="token-quick-btn" data-amount="50">50</button>
+        <button class="token-quick-btn" data-amount="100">100</button>
+        <button class="token-quick-btn" data-amount="250">250</button>
+      </div>
+      <div class="custom-amount-row">
+        <input type="number" class="custom-amount-input" id="betAmount" placeholder="Enter amount..." min="10" max="10000">
+        <button class="max-btn" onclick="setMaxBet()">MAX</button>
+      </div>
+      <div class="payout-preview">
+        <div class="payout-row"><span class="payout-label">Your bet</span><span class="payout-value" id="previewBet">0 tokens</span></div>
+        <div class="payout-row"><span class="payout-label">Multiplier</span><span class="payout-value" id="previewMultiplier">2.0x</span></div>
+        <div class="payout-row"><span class="payout-label">Potential payout</span><span class="payout-value profit" id="previewPayout">0 tokens</span></div>
+      </div>
+      <div class="swipe-container" id="swipeContainer">
+        <div class="swipe-progress" id="swipeProgress"></div>
+        <div class="swipe-track"><span class="swipe-text"><span class="swipe-arrows">↑↑↑</span> Swipe up to confirm</span></div>
+        <div class="swipe-thumb" id="swipeThumb">🚀</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="success-modal" id="successModal">
+    <div class="success-icon">✓</div>
+    <div class="success-title">Bet Placed!</div>
+    <div class="success-message" id="successMessage">Your prediction is locked in</div>
+    <div class="success-details">
+      <div class="success-details-row"><span style="color: var(--white-50)">Position</span><span id="successPosition">YES</span></div>
+      <div class="success-details-row"><span style="color: var(--white-50)">Wagered</span><span id="successWagered">100 tokens</span></div>
+      <div class="success-details-row"><span style="color: var(--white-50)">Potential</span><span style="color: var(--green)" id="successPotential">200 tokens</span></div>
+    </div>
+    <button class="success-btn" onclick="closeSuccessModal()">Continue Betting</button>
+  </div>
+
+  <div class="modal-overlay" id="tokenModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Get Tokens 🪙</div>
+        <button class="modal-close" onclick="closeTokenModal()">×</button>
+      </div>
+      <div class="token-packages">
+        <div class="token-package" data-package="starter" onclick="selectPackage('starter')">
+          <div class="token-package-info"><div class="token-package-icon">🪙</div><div><div class="token-package-amount">250</div><div class="token-package-label">tokens</div></div></div>
+          <div class="token-package-price">$4.99</div>
+        </div>
+        <div class="token-package selected" data-package="popular" onclick="selectPackage('popular')">
+          <div class="token-package-badge">BEST VALUE</div>
+          <div class="token-package-info"><div class="token-package-icon">💰</div><div><div class="token-package-amount">1,000</div><div class="token-package-label">tokens</div></div></div>
+          <div class="token-package-price">$9.99</div>
+        </div>
+        <div class="token-package" data-package="whale" onclick="selectPackage('whale')">
+          <div class="token-package-badge" style="background: linear-gradient(135deg, var(--purple-glow), var(--purple-pink));">WHALE</div>
+          <div class="token-package-info"><div class="token-package-icon">🐋</div><div><div class="token-package-amount">2,500</div><div class="token-package-label">tokens</div></div></div>
+          <div class="token-package-price">$14.99</div>
+        </div>
+      </div>
+      <button class="buy-tokens-btn" onclick="purchaseTokens()">Purchase Tokens</button>
+    </div>
+  </div>
+
+  <div class="confetti-container" id="confettiContainer"></div>
+
+  <script>
+    let userEmail = localStorage.getItem('userEmail') || '';
+    let userBalance = 0;
+    let predictions = [];
+    let currentCategory = 'all';
+    let selectedPrediction = null;
+    let selectedPosition = null;
+    let selectedPackage = 'popular';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!userEmail) {
+        userEmail = prompt('Enter your email to start betting:');
+        if (userEmail) localStorage.setItem('userEmail', userEmail);
+      }
+      loadBalance();
+      loadPredictions();
+      setupCategoryTabs();
+      setupTokenQuickSelect();
+      setupBetAmountInput();
+      setupSwipeGesture();
+      
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('purchase') === 'success') {
+        const tokens = urlParams.get('tokens');
+        showPurchaseSuccess(tokens);
+        window.history.replaceState({}, '', '/predictions.html');
+      }
+    });
+
+    async function loadBalance() {
+      if (!userEmail) return;
+      try {
+        const res = await fetch(`/api/predictions/tokens/balance?email=${encodeURIComponent(userEmail)}`);
+        const data = await res.json();
+        if (data.success) {
+          userBalance = data.balance;
+          document.getElementById('userBalance').textContent = userBalance.toLocaleString();
+        }
+      } catch (err) { console.error('Error loading balance:', err); }
+    }
+
+    async function loadPredictions() {
+      const grid = document.getElementById('predictionsGrid');
+      try {
+        let url = '/api/predictions?status=open';
+        if (currentCategory !== 'all') url += `&category=${currentCategory}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.success) { predictions = data.predictions; renderPredictions(); }
+      } catch (err) {
+        console.error('Error loading predictions:', err);
+        grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⚠️</div><div class="empty-state-title">Failed to load predictions</div><p>Please try again later</p></div>`;
+      }
+    }
+
+    async function placeBet() {
+      if (!selectedPrediction || !selectedPosition) return;
+      const amount = parseInt(document.getElementById('betAmount').value);
+      if (!amount || amount < 10) { alert('Minimum bet is 10 tokens'); return; }
+      if (amount > userBalance) { alert('Insufficient tokens! Purchase more to continue.'); openTokenModal(); return; }
+      try {
+        const res = await fetch('/api/predictions/bet', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: userEmail, predictionId: selectedPrediction.id, position: selectedPosition, amount: amount })
+        });
+        const data = await res.json();
+        if (data.success) {
+          userBalance = data.newBalance;
+          document.getElementById('userBalance').textContent = userBalance.toLocaleString();
+          showBetSuccess(data.bet);
+          loadPredictions();
+        } else { alert(data.error || 'Failed to place bet'); }
+      } catch (err) { console.error('Error placing bet:', err); alert('Failed to place bet. Please try again.'); }
+    }
+
+    async function purchaseTokens() {
+      if (!userEmail) { userEmail = prompt('Enter your email:'); if (!userEmail) return; localStorage.setItem('userEmail', userEmail); }
+      try {
+        const res = await fetch('/api/predictions/tokens/purchase', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ packageId: selectedPackage, email: userEmail })
+        });
+        const data = await res.json();
+        if (data.success && data.url) { window.location.href = data.url; }
+        else { alert(data.error || 'Failed to start purchase'); }
+      } catch (err) { console.error('Error purchasing tokens:', err); alert('Failed to process purchase. Please try again.'); }
+    }
+
+    function renderPredictions() {
+      const grid = document.getElementById('predictionsGrid');
+      if (predictions.length === 0) {
+        grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🔮</div><div class="empty-state-title">No predictions available</div><p>Check back soon for new markets!</p></div>`;
+        return;
+      }
+      grid.innerHTML = predictions.map(p => `
+        <div class="prediction-card ${p.featured ? 'featured' : ''}" onclick="openBetSlip(${p.id})">
+          <div class="prediction-meta">
+            ${p.ticker ? `<span class="prediction-ticker">${p.ticker}</span>` : ''}
+            <span class="prediction-category">${p.category}</span>
+          </div>
+          <div class="prediction-title">${p.title}</div>
+          <div class="prediction-odds">
+            <button class="odds-button yes" onclick="event.stopPropagation(); openBetSlip(${p.id}, 'yes')">
+              <div class="odds-label">YES</div>
+              <div class="odds-multiplier">${parseFloat(p.yes_payout_multiplier).toFixed(2)}x</div>
+            </button>
+            <button class="odds-button no" onclick="event.stopPropagation(); openBetSlip(${p.id}, 'no')">
+              <div class="odds-label">NO</div>
+              <div class="odds-multiplier">${parseFloat(p.no_payout_multiplier).toFixed(2)}x</div>
+            </button>
+          </div>
+          <div class="prediction-footer">
+            <div class="prediction-volume"><strong>${(p.yes_volume + p.no_volume).toLocaleString()}</strong> tokens bet</div>
+            <div class="prediction-closes">Closes <span class="time">${formatTimeLeft(p.closes_at)}</span></div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function formatTimeLeft(dateStr) {
+      const now = new Date();
+      const closes = new Date(dateStr);
+      const diff = closes - now;
+      if (diff < 0) return 'Closed';
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      if (hours > 24) { const days = Math.floor(hours / 24); return `${days}d ${hours % 24}h`; }
+      return `${hours}h ${minutes}m`;
+    }
+
+    function openBetSlip(predictionId, position = null) {
+      selectedPrediction = predictions.find(p => p.id === predictionId);
+      if (!selectedPrediction) return;
+      document.getElementById('betSlipQuestion').textContent = selectedPrediction.title;
+      document.getElementById('yesMultiplier').textContent = `${parseFloat(selectedPrediction.yes_payout_multiplier).toFixed(2)}x payout`;
+      document.getElementById('noMultiplier').textContent = `${parseFloat(selectedPrediction.no_payout_multiplier).toFixed(2)}x payout`;
+      selectedPosition = position;
+      document.getElementById('betAmount').value = '';
+      document.querySelectorAll('.token-quick-btn').forEach(btn => btn.classList.remove('selected'));
+      updatePayoutPreview();
+      document.getElementById('positionYes').classList.toggle('selected', position === 'yes');
+      document.getElementById('positionNo').classList.toggle('selected', position === 'no');
+      document.getElementById('betSlipOverlay').classList.add('show');
+      document.body.style.overflow = 'hidden';
+      resetSwipe();
+    }
+
+    function closeBetSlip() {
+      document.getElementById('betSlipOverlay').classList.remove('show');
+      document.body.style.overflow = '';
+      selectedPrediction = null;
+      selectedPosition = null;
+    }
+
+    function selectPosition(pos) {
+      selectedPosition = pos;
+      document.getElementById('positionYes').classList.toggle('selected', pos === 'yes');
+      document.getElementById('positionNo').classList.toggle('selected', pos === 'no');
+      updatePayoutPreview();
+    }
+
+    function updatePayoutPreview() {
+      const amount = parseInt(document.getElementById('betAmount').value) || 0;
+      let multiplier = 2.0;
+      if (selectedPrediction && selectedPosition) {
+        multiplier = selectedPosition === 'yes' ? parseFloat(selectedPrediction.yes_payout_multiplier) : parseFloat(selectedPrediction.no_payout_multiplier);
+      }
+      const payout = Math.floor(amount * multiplier);
+      document.getElementById('previewBet').textContent = `${amount.toLocaleString()} tokens`;
+      document.getElementById('previewMultiplier').textContent = `${multiplier.toFixed(2)}x`;
+      document.getElementById('previewPayout').textContent = `${payout.toLocaleString()} tokens`;
+    }
+
+    function setMaxBet() {
+      const maxAllowed = Math.min(userBalance, selectedPrediction?.max_bet || 10000);
+      document.getElementById('betAmount').value = maxAllowed;
+      document.querySelectorAll('.token-quick-btn').forEach(btn => btn.classList.remove('selected'));
+      updatePayoutPreview();
+    }
+
+    function setupSwipeGesture() {
+      const container = document.getElementById('swipeContainer');
+      const thumb = document.getElementById('swipeThumb');
+      const progress = document.getElementById('swipeProgress');
+      let isDragging = false, startY = 0, currentY = 0;
+      const maxSwipe = 60;
+
+      const startDrag = (clientY) => { isDragging = true; startY = clientY; thumb.style.transition = 'none'; progress.style.transition = 'none'; };
+      const moveDrag = (clientY) => {
+        if (!isDragging) return;
+        const deltaY = startY - clientY;
+        currentY = Math.max(0, Math.min(deltaY, maxSwipe));
+        const percentage = (currentY / maxSwipe) * 100;
+        thumb.style.bottom = `${6 + currentY}px`;
+        progress.style.height = `${percentage}%`;
+        thumb.textContent = currentY >= maxSwipe * 0.9 ? '✓' : '🚀';
+      };
+      const endDrag = () => {
+        if (!isDragging) return;
+        isDragging = false;
+        thumb.style.transition = 'all 0.3s';
+        progress.style.transition = 'all 0.3s';
+        if (currentY >= maxSwipe * 0.9) { thumb.classList.add('swiped'); confirmBet(); }
+        else { resetSwipe(); }
+        currentY = 0;
+      };
+
+      thumb.addEventListener('touchstart', (e) => { e.preventDefault(); startDrag(e.touches[0].clientY); });
+      document.addEventListener('touchmove', (e) => { if (isDragging) { e.preventDefault(); moveDrag(e.touches[0].clientY); } }, { passive: false });
+      document.addEventListener('touchend', endDrag);
+      thumb.addEventListener('mousedown', (e) => { e.preventDefault(); startDrag(e.clientY); });
+      document.addEventListener('mousemove', (e) => { moveDrag(e.clientY); });
+      document.addEventListener('mouseup', endDrag);
+    }
+
+    function confirmBet() {
+      if (!selectedPosition) { alert('Please select YES or NO'); resetSwipe(); return; }
+      const amount = parseInt(document.getElementById('betAmount').value);
+      if (!amount || amount < 10) { alert('Please enter a bet amount (minimum 10 tokens)'); resetSwipe(); return; }
+      placeBet();
+    }
+
+    function resetSwipe() {
+      const thumb = document.getElementById('swipeThumb');
+      const progress = document.getElementById('swipeProgress');
+      thumb.classList.remove('swiped');
+      thumb.style.bottom = '6px';
+      thumb.textContent = '🚀';
+      progress.style.height = '0';
+    }
+
+    function showBetSuccess(bet) {
+      closeBetSlip();
+      document.getElementById('successPosition').textContent = bet.position.toUpperCase();
+      document.getElementById('successPosition').style.color = bet.position === 'yes' ? 'var(--green)' : 'var(--red)';
+      document.getElementById('successWagered').textContent = `${bet.tokens_wagered.toLocaleString()} tokens`;
+      document.getElementById('successPotential').textContent = `${bet.potential_payout.toLocaleString()} tokens`;
+      document.getElementById('successModal').classList.add('show');
+      launchConfetti();
+    }
+
+    function closeSuccessModal() { document.getElementById('successModal').classList.remove('show'); }
+    function showPurchaseSuccess(tokens) { loadBalance(); alert(`🎉 Success! ${tokens} tokens added to your account!`); launchConfetti(); }
+
+    function launchConfetti() {
+      const container = document.getElementById('confettiContainer');
+      const colors = ['#7c3aed', '#a855f7', '#e879f9', '#10b981', '#fbbf24', '#ef4444', '#ffffff'];
+      for (let i = 0; i < 150; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const left = Math.random() * 100;
+        const delay = Math.random() * 0.5;
+        const duration = 2 + Math.random() * 2;
+        const size = 6 + Math.random() * 8;
+        confetti.style.cssText = `left: ${left}%; width: ${size}px; height: ${size}px; background: ${color}; border-radius: ${Math.random() > 0.5 ? '50%' : '2px'}; animation: confetti-fall ${duration}s ease-out ${delay}s forwards;`;
+        container.appendChild(confetti);
+        setTimeout(() => confetti.remove(), (duration + delay) * 1000);
+      }
+    }
+
+    function openTokenModal() { document.getElementById('tokenModal').classList.add('show'); }
+    function closeTokenModal() { document.getElementById('tokenModal').classList.remove('show'); }
+    function selectPackage(pkg) { selectedPackage = pkg; document.querySelectorAll('.token-package').forEach(el => { el.classList.toggle('selected', el.dataset.package === pkg); }); }
+
+    function setupCategoryTabs() {
+      document.querySelectorAll('.category-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          currentCategory = tab.dataset.category;
+          loadPredictions();
+        });
+      });
+    }
+
+    function setupTokenQuickSelect() {
+      document.querySelectorAll('.token-quick-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.token-quick-btn').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          document.getElementById('betAmount').value = btn.dataset.amount;
+          updatePayoutPreview();
+        });
+      });
+    }
+
+    function setupBetAmountInput() {
+      document.getElementById('betAmount').addEventListener('input', () => {
+        document.querySelectorAll('.token-quick-btn').forEach(b => b.classList.remove('selected'));
+        updatePayoutPreview();
+      });
+    }
+
+    document.getElementById('betSlipOverlay').addEventListener('click', (e) => { if (e.target.id === 'betSlipOverlay') closeBetSlip(); });
+    document.getElementById('tokenModal').addEventListener('click', (e) => { if (e.target.id === 'tokenModal') closeTokenModal(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeBetSlip(); closeTokenModal(); closeSuccessModal(); } });
+  </script>
+</body>
+</html>
