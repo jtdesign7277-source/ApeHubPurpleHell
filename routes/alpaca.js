@@ -121,7 +121,9 @@ router.get('/snapshots', async (req, res) => {
         prevClose,
         change: change.toFixed(2),
         changePercent: changePercent.toFixed(2),
-        isGreen: change >= 0
+        isGreen: change >= 0,
+        dailyBar: snapshot.dailyBar,
+        prevDailyBar: snapshot.prevDailyBar
       };
     }
     
