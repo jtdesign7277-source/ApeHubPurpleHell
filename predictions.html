@@ -772,7 +772,6 @@
           ${isLocked ? '<div class="locked-badge">🔒 LOCKED</div>' : ''}
           <div class="prediction-meta">
             ${p.ticker ? `<div class="prediction-ticker-wrap"><span class="prediction-ticker">${p.ticker}</span>${priceHtml}</div>` : ''}
-            <span class="prediction-category">${getCategoryLabel(p.category)}</span>
             ${isLocked ? '' : `<span class="prediction-date">📅 ${predictionDate}</span>`}
           </div>
           <div class="prediction-title">${p.title}</div>
