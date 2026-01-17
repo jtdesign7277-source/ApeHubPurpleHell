@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="portfolio-effects.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="portfolio-effects.js"></script>
+  <script src="data-sync.js"></script>
   <style>
       :root {
         --bg-primary: #0a0a0f;
@@ -1420,22 +1421,14 @@
       '#14b8a6', // Teal
     ];
 
-    // Load watchlist from localStorage (same format as dashboard.html)
+    // Load watchlist from DataSync
     function loadWatchlist() {
-      try {
-        return JSON.parse(localStorage.getItem('watchlist')) || [];
-      } catch (e) {
-        return [];
-      }
+      return DataSync.getWatchlist();
     }
 
-    // Load positions (shares/avgCost) from localStorage
+    // Load positions (shares/avgCost) from DataSync
     function loadPositions() {
-      try {
-        return JSON.parse(localStorage.getItem('positions')) || {};
-      } catch (e) {
-        return {};
-      }
+      return DataSync.getPositions();
     }
 
     // Fetch live price from Finnhub
@@ -2224,6 +2217,17 @@
     // Apply saved theme
     const savedTheme = localStorage.getItem('apehub_theme') || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
+
+    // Set up listeners for data synchronization
+    DataSync.onWatchlistChange((newWatchlist) => {
+      watchlist = newWatchlist;
+      initializePortfolio();
+    });
+
+    DataSync.onPositionsChange((newPositions) => {
+      positions = newPositions;
+      initializePortfolio();
+    });
 
     // Initialize on page load
     initializePortfolio();

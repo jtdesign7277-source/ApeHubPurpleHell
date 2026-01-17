@@ -2117,6 +2117,7 @@
       color: var(--text-primary);
     }
   </style>
+  <script src="data-sync.js"></script>
 </head>
 <body>
   <div class="dashboard-container">
@@ -2823,8 +2824,7 @@
     async function saveUserData() {
       if (!currentUserEmail) {
         // No logged in user, just save to localStorage
-        localStorage.setItem('watchlist', JSON.stringify(watchlist));
-        localStorage.setItem('positions', JSON.stringify(positions));
+        DataSync.saveBoth(watchlist, positions);
         return;
       }
       
@@ -2844,8 +2844,7 @@
       }
       
       // Also save to localStorage as backup
-      localStorage.setItem('watchlist', JSON.stringify(watchlist));
-      localStorage.setItem('positions', JSON.stringify(positions));
+      DataSync.saveBoth(watchlist, positions);
     }
 
     // ============================================
