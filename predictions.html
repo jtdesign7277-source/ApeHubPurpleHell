@@ -1401,8 +1401,12 @@
 
         const awayML = h2h?.outcomes?.find(o => o.name === awayTeam)?.price || 0;
         const homeML = h2h?.outcomes?.find(o => o.name === homeTeam)?.price || 0;
-        const awaySpread = spreads?.outcomes?.find(o => o.name === awayTeam)?.point || 0;
-        const homeSpread = spreads?.outcomes?.find(o => o.name === homeTeam)?.point || 0;
+        const awaySpreadData = spreads?.outcomes?.find(o => o.name === awayTeam);
+        const homeSpreadData = spreads?.outcomes?.find(o => o.name === homeTeam);
+        const awaySpread = awaySpreadData?.point || 0;
+        const homeSpread = homeSpreadData?.point || 0;
+        const awaySpreadOdds = awaySpreadData?.price || -110;
+        const homeSpreadOdds = homeSpreadData?.price || -110;
         const overData = totals?.outcomes?.find(o => o.name === 'Over');
         const underData = totals?.outcomes?.find(o => o.name === 'Under');
         const total = overData?.point || 0;
@@ -1420,7 +1424,9 @@
           id: game.id,
           away: shortName(awayTeam),
           home: shortName(homeTeam),
-          awayML, homeML, awaySpread, homeSpread,
+          awayML, homeML, 
+          awaySpread, homeSpread,
+          awaySpreadOdds, homeSpreadOdds,
           total, overOdds, underOdds,
           live: isLive,
           time: isLive ? null : timeStr
@@ -1486,14 +1492,14 @@
           <div class="sport-team-row">
             <span class="sport-team-name">${g.away}</span>
             <div class="sport-odds-group">
-              <button class="sport-odds-btn ${g.awaySpread < 0 ? 'favorite' : ''}" onclick="addSportsBet('${g.away}', 'Spread ${g.awaySpread > 0 ? '+' : ''}${g.awaySpread}', ${g.awaySpread})">${g.awaySpread > 0 ? '+' : ''}${g.awaySpread}</button>
+              <button class="sport-odds-btn ${g.awaySpread < 0 ? 'favorite' : ''}" onclick="addSportsBet('${g.away}', 'Spread ${g.awaySpread > 0 ? '+' : ''}${g.awaySpread}', ${g.awaySpreadOdds})">${g.awaySpread > 0 ? '+' : ''}${g.awaySpread}</button>
               <button class="sport-odds-btn ${g.awayML < 0 ? 'favorite' : ''}" onclick="addSportsBet('${g.away}', 'ML', ${g.awayML})">${formatSportsOdds(g.awayML)}</button>
             </div>
           </div>
           <div class="sport-team-row">
             <span class="sport-team-name">${g.home}</span>
             <div class="sport-odds-group">
-              <button class="sport-odds-btn ${g.homeSpread < 0 ? 'favorite' : ''}" onclick="addSportsBet('${g.home}', 'Spread ${g.homeSpread > 0 ? '+' : ''}${g.homeSpread}', ${g.homeSpread})">${g.homeSpread > 0 ? '+' : ''}${g.homeSpread}</button>
+              <button class="sport-odds-btn ${g.homeSpread < 0 ? 'favorite' : ''}" onclick="addSportsBet('${g.home}', 'Spread ${g.homeSpread > 0 ? '+' : ''}${g.homeSpread}', ${g.homeSpreadOdds})">${g.homeSpread > 0 ? '+' : ''}${g.homeSpread}</button>
               <button class="sport-odds-btn ${g.homeML < 0 ? 'favorite' : ''}" onclick="addSportsBet('${g.home}', 'ML', ${g.homeML})">${formatSportsOdds(g.homeML)}</button>
             </div>
           </div>
