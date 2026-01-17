@@ -242,17 +242,20 @@
     }
 
     /* Success Modal */
-    .success-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8); background: linear-gradient(135deg, #1a1a24, #0d0d12); border: 1px solid var(--purple-core); border-radius: 24px; padding: 40px; text-align: center; z-index: 300; opacity: 0; visibility: hidden; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    .success-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8); background: linear-gradient(180deg, #2a1a2e 0%, #1a0d1e 100%); border-radius: 24px; padding: 40px 32px; text-align: center; z-index: 300; opacity: 0; visibility: hidden; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); min-width: 320px; }
     .success-modal.show { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
-    .success-icon { width: 80px; height: 80px; background: linear-gradient(135deg, var(--green), var(--green-glow)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; margin: 0 auto 20px; animation: successPop 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+    .success-icon { width: 60px; height: 60px; background: linear-gradient(135deg, var(--green), var(--green-glow)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 16px; animation: successPop 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
     @keyframes successPop { 0% { transform: scale(0); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
-    .success-title { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
-    .success-message { font-size: 16px; color: var(--white-70); margin-bottom: 24px; }
-    .success-details { background: var(--white-05); border-radius: 12px; padding: 16px; margin-bottom: 24px; }
-    .success-details-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
-    .success-details-row:last-child { margin-bottom: 0; }
-    .success-btn { width: 100%; padding: 16px; background: var(--purple-core); border: none; border-radius: 12px; font-family: inherit; font-size: 16px; font-weight: 600; color: var(--white); cursor: pointer; transition: all 0.2s; }
-    .success-btn:hover { background: var(--purple-glow); }
+    .success-title { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+    .success-message { font-size: 14px; color: var(--white-50); margin-bottom: 28px; }
+    .success-details { background: rgba(255,255,255,0.03); border-radius: 16px; padding: 20px; margin-bottom: 28px; border-top: 1px solid rgba(255,255,255,0.05); }
+    .success-details-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 15px; }
+    .success-details-row:last-child { border-bottom: none; }
+    .success-btn { width: 100%; padding: 16px; background: linear-gradient(180deg, #3a3a48 0%, #2a2a35 40%, #1a1a22 100%); border: 2px solid #a87d52; border-radius: 12px; font-family: inherit; font-size: 16px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: transparent; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 20px rgba(168, 125, 82, 0.3), 0 8px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1); position: relative; overflow: hidden; }
+    .success-btn span { background: linear-gradient(180deg, #d4a574 0%, #a87d52 50%, #8b6543 100%); -webkit-background-clip: text; background-clip: text; color: transparent; position: relative; z-index: 1; }
+    .success-btn::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); transition: left 0.5s ease; }
+    .success-btn:hover::before { left: 100%; }
+    .success-btn:hover { transform: translateY(-2px); }
 
     /* Token Purchase Modal */
     .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 400; opacity: 0; visibility: hidden; transition: all 0.3s; display: flex; align-items: center; justify-content: center; padding: 20px; }
@@ -448,15 +451,13 @@
   <div class="success-modal" id="successModal">
     <div class="success-icon">✓</div>
     <div class="success-title">Bet Placed!</div>
-    <div class="success-message" id="successMessage">Your prediction is locked in</div>
+    <div class="success-message" id="successMessage">Your position is locked in</div>
     <div class="success-details">
-      <div class="success-details-row"><span style="color: var(--white-50)">Position</span><span id="successPosition">YES</span></div>
       <div class="success-details-row"><span style="color: var(--white-50)">Wagered</span><span id="successWagered">100 tokens</span></div>
-      <div class="success-details-row"><span style="color: var(--white-50)">Potential</span><span style="color: var(--green)" id="successPotential">200 tokens</span></div>
-      <div class="success-details-row"><span style="color: var(--white-50)">Placed at</span><span id="successTime">10:30am ET</span></div>
-      <div class="success-details-row"><span style="color: var(--white-50)">Resolves</span><span id="successResolves">4:30pm ET</span></div>
+      <div class="success-details-row"><span style="color: var(--white-50)">Position</span><span id="successPosition">YES</span></div>
+      <div class="success-details-row"><span style="color: var(--white-50)">To Win</span><span style="color: var(--green)" id="successPotential">200 tokens</span></div>
     </div>
-    <button class="success-btn" onclick="closeSuccessModal()">Continue Betting</button>
+    <button class="success-btn" onclick="closeSuccessModal()"><span>Continue</span></button>
   </div>
 
   <div class="modal-overlay" id="tokenModal">
