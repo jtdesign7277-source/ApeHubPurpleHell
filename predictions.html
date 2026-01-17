@@ -388,6 +388,43 @@
       display: none;
     }
 
+    /* Quant Globe Button */
+    .quant-globe-btn {
+      position: fixed;
+      bottom: 100px;
+      right: 20px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(99, 102, 241, 0.2));
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      box-shadow: 0 4px 20px rgba(168, 85, 247, 0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+      cursor: pointer;
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      animation: globePulse 3s ease-in-out infinite;
+    }
+
+    .quant-globe-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 30px rgba(168, 85, 247, 0.5);
+    }
+
+    .quant-globe-btn svg {
+      width: 28px;
+      height: 28px;
+      stroke: rgba(255, 255, 255, 0.9);
+      fill: none;
+    }
+
+    @keyframes globePulse {
+      0%, 100% { box-shadow: 0 4px 20px rgba(168, 85, 247, 0.3), inset 0 1px 0 rgba(255,255,255,0.1); }
+      50% { box-shadow: 0 4px 30px rgba(168, 85, 247, 0.5), inset 0 1px 0 rgba(255,255,255,0.1); }
+    }
+
     @supports (padding-bottom: env(safe-area-inset-bottom)) {
       .main {
         padding-bottom: calc(120px + env(safe-area-inset-bottom));
@@ -395,10 +432,22 @@
       .bottom-nav {
         padding-bottom: calc(12px + env(safe-area-inset-bottom));
       }
+      .quant-globe-btn {
+        bottom: calc(100px + env(safe-area-inset-bottom));
+      }
     }
   </style>
 </head>
 <body>
+
+  <!-- Quant Globe Button -->
+  <a href="quant-globe.html" class="quant-globe-btn" title="Quant Globe">
+    <svg viewBox="0 0 24 24" stroke-width="1.5">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M2 12h20"/>
+      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+    </svg>
+  </a>
 
   <header class="header">
     <div class="header-actions">

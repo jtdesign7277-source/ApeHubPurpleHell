@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Quant Globe | ApeHub</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #0a0a0f;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+    }
+
+    #canvas-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      animation: fadeIn 2s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+
+    /* Stats Bar */
+    .stats-bar {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 32px;
+      padding: 12px 24px;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(20px);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      z-index: 100;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Back Button */
+    .back-btn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      padding: 10px 16px;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 14px;
+      cursor: pointer;
+      z-index: 100;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    /* Bet Cards - Left Side */
+    .bet-cards-left {
+      position: fixed;
+      left: 20px;
+      top: 100px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 100;
+      max-width: 220px;
+    }
+
+    /* Bet Cards - Right Side */
+    .bet-cards-right {
+      position: fixed;
+      right: 20px;
+      top: 100px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 100;
+      max-width: 220px;
+    }
+
+    .bet-card {
+      background: rgba(0, 0, 0, 0.25);
+      backdrop-filter: blur(10px);
+      border-radius: 10px;
+      padding: 10px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      animation: slideIn 0.4s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .bet-card.from-right {
+      animation-name: slideInRight;
+    }
+
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .bet-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .bet-user {
+      font-size: 12px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .bet-time {
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    .bet-market {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.85);
+      margin-bottom: 6px;
+    }
+
+    .bet-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .bet-position {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .bet-position.yes {
+      background: rgba(0, 215, 117, 0.2);
+      color: #00d775;
+    }
+
+    .bet-position.no {
+      background: rgba(255, 71, 87, 0.2);
+      color: #ff4757;
+    }
+
+    .bet-amount {
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* Hot Streak Banner */
+    .hot-streak {
+      position: fixed;
+      top: 80px;
+      left: 20px;
+      background: linear-gradient(135deg, rgba(255, 107, 0, 0.2), rgba(255, 71, 87, 0.15));
+      backdrop-filter: blur(10px);
+      border-radius: 10px;
+      padding: 10px 14px;
+      border: 1px solid rgba(255, 107, 0, 0.3);
+      z-index: 100;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .hot-streak.visible {
+      opacity: 1;
+    }
+
+    .hot-streak-label {
+      font-size: 9px;
+      color: #ff6b00;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+
+    .hot-streak-user {
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .hot-streak-stats {
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    /* Trending Markets */
+    .trending {
+      position: fixed;
+      bottom: 100px;
+      left: 20px;
+      z-index: 100;
+      max-width: 200px;
+    }
+
+    .trending-label {
+      font-size: 10px;
+      color: #00d4ff;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .trending-item {
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      border-radius: 8px;
+      padding: 8px 10px;
+      margin-bottom: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .trending-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .trending-name {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 2px;
+    }
+
+    .trending-odds {
+      font-size: 10px;
+      color: #00d4ff;
+    }
+
+    .view-all {
+      font-size: 11px;
+      color: #00d4ff;
+      text-decoration: none;
+      display: inline-block;
+      margin-top: 8px;
+      padding: 6px 12px;
+      border: 1px solid rgba(0, 212, 255, 0.3);
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+
+    .view-all:hover {
+      background: rgba(0, 212, 255, 0.1);
+    }
+
+    /* Place Bet Button */
+    .place-bet-btn {
+      position: fixed;
+      bottom: 100px;
+      right: 20px;
+      padding: 10px 20px;
+      background: transparent;
+      border: 1px solid rgba(0, 215, 117, 0.5);
+      border-radius: 10px;
+      color: #00d775;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      z-index: 100;
+      transition: all 0.2s;
+    }
+
+    .place-bet-btn:hover {
+      background: rgba(0, 215, 117, 0.15);
+      box-shadow: 0 0 20px rgba(0, 215, 117, 0.2);
+    }
+
+    /* Whale Alert */
+    .whale-alert {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.8);
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(20px);
+      border-radius: 16px;
+      padding: 24px 32px;
+      border: 2px solid #ffd700;
+      z-index: 200;
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s ease;
+    }
+
+    .whale-alert.visible {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .whale-emoji {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .whale-title {
+      font-size: 14px;
+      color: #ffd700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+
+    .whale-amount {
+      font-size: 28px;
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    }
+
+    .whale-market {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.7);
+      margin-top: 8px;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .bet-cards-left,
+      .bet-cards-right {
+        display: none;
+      }
+
+      .trending {
+        display: none;
+      }
+
+      .stats-bar {
+        gap: 16px;
+        padding: 10px 16px;
+      }
+
+      .stat-value {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="canvas-container"></div>
+
+  <!-- Back Button -->
+  <a href="predictions.html" class="back-btn">
+    ← Back
+  </a>
+
+  <!-- Stats Bar -->
+  <div class="stats-bar">
+    <div class="stat-item">
+      <div class="stat-value" id="volume">$18,420</div>
+      <div class="stat-label">24H Volume</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" id="total-bets">847</div>
+      <div class="stat-label">Total Bets</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" id="active-now">142</div>
+      <div class="stat-label">Active Now</div>
+    </div>
+  </div>
+
+  <!-- Hot Streak -->
+  <div class="hot-streak" id="hot-streak">
+    <div class="hot-streak-label">🔥 Hot Streak</div>
+    <div class="hot-streak-user">CryptoKing42</div>
+    <div class="hot-streak-stats">5 wins • +$1,247</div>
+  </div>
+
+  <!-- Bet Cards Left -->
+  <div class="bet-cards-left" id="bet-cards-left"></div>
+
+  <!-- Bet Cards Right -->
+  <div class="bet-cards-right" id="bet-cards-right"></div>
+
+  <!-- Trending Markets -->
+  <div class="trending">
+    <div class="trending-label">Trending</div>
+    <div class="trending-item">
+      <div class="trending-name">BTC above $50K by Feb?</div>
+      <div class="trending-odds">2.4x</div>
+    </div>
+    <div class="trending-item">
+      <div class="trending-name">Fed rate cut in Q1?</div>
+      <div class="trending-odds">1.8x</div>
+    </div>
+    <div class="trending-item">
+      <div class="trending-name">TSLA earnings beat?</div>
+      <div class="trending-odds">1.5x</div>
+    </div>
+    <a href="predictions.html" class="view-all">View all markets →</a>
+  </div>
+
+  <!-- Place Bet Button -->
+  <button class="place-bet-btn" onclick="window.location.href='predictions.html'">
+    ⚡ Place a Bet
+  </button>
+
+  <!-- Whale Alert -->
+  <div class="whale-alert" id="whale-alert">
+    <div class="whale-emoji">🐋</div>
+    <div class="whale-title">Whale Alert</div>
+    <div class="whale-amount" id="whale-amount">$5,000</div>
+    <div class="whale-market" id="whale-market">BTC above $50K</div>
+  </div>
+
+  <script>
+    // Three.js Globe Setup
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    // Camera position
+    camera.position.z = 4;
+
+    // Globe
+    const globeGeometry = new THREE.SphereGeometry(1, 64, 64);
+    const globeMaterial = new THREE.MeshPhongMaterial({
+      color: 0x1a0a2e,
+      emissive: 0x0d0618,
+      shininess: 100,
+      transparent: true,
+      opacity: 0.9
+    });
+    const globe = new THREE.Mesh(globeGeometry, globeMaterial);
+    scene.add(globe);
+
+    // Wireframe overlay
+    const wireframeGeometry = new THREE.SphereGeometry(1.01, 32, 32);
+    const wireframeMaterial = new THREE.MeshBasicMaterial({
+      color: 0x6b21a8,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.15
+    });
+    const wireframe = new THREE.Mesh(wireframeGeometry, wireframeMaterial);
+    scene.add(wireframe);
+
+    // Saturn rings (Milky Way style)
+    const ringGroup = new THREE.Group();
+    const ringParticleCount = 5000;
+    const ringGeometry = new THREE.BufferGeometry();
+    const ringPositions = new Float32Array(ringParticleCount * 3);
+    const ringColors = new Float32Array(ringParticleCount * 3);
+
+    for (let i = 0; i < ringParticleCount; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const radius = 1.4 + Math.random() * 0.8;
+      const wave = Math.sin(angle * 3) * 0.08;
+      
+      ringPositions[i * 3] = Math.cos(angle) * radius;
+      ringPositions[i * 3 + 1] = wave + (Math.random() - 0.5) * 0.1;
+      ringPositions[i * 3 + 2] = Math.sin(angle) * radius;
+
+      // Muted colors
+      const colorChoice = Math.random();
+      if (colorChoice < 0.4) {
+        ringColors[i * 3] = 0.2; ringColors[i * 3 + 1] = 0.3; ringColors[i * 3 + 2] = 0.5;
+      } else if (colorChoice < 0.7) {
+        ringColors[i * 3] = 0.3; ringColors[i * 3 + 1] = 0.2; ringColors[i * 3 + 2] = 0.4;
+      } else {
+        ringColors[i * 3] = 0.15; ringColors[i * 3 + 1] = 0.35; ringColors[i * 3 + 2] = 0.35;
+      }
+    }
+
+    ringGeometry.setAttribute('position', new THREE.BufferAttribute(ringPositions, 3));
+    ringGeometry.setAttribute('color', new THREE.BufferAttribute(ringColors, 3));
+
+    const ringMaterial = new THREE.PointsMaterial({
+      size: 0.015,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.4
+    });
+    const rings = new THREE.Points(ringGeometry, ringMaterial);
+    rings.rotation.x = Math.PI * 0.15;
+    ringGroup.add(rings);
+    scene.add(ringGroup);
+
+    // Stars
+    const starCount = 3000;
+    const starGeometry = new THREE.BufferGeometry();
+    const starPositions = new Float32Array(starCount * 3);
+
+    for (let i = 0; i < starCount; i++) {
+      starPositions[i * 3] = (Math.random() - 0.5) * 100;
+      starPositions[i * 3 + 1] = (Math.random() - 0.5) * 100;
+      starPositions[i * 3 + 2] = (Math.random() - 0.5) * 100;
+    }
+
+    starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+    const starMaterial = new THREE.PointsMaterial({
+      color: 0xffffff,
+      size: 0.08,
+      transparent: true,
+      opacity: 0.6
+    });
+    const stars = new THREE.Points(starGeometry, starMaterial);
+    scene.add(stars);
+
+    // Lights
+    const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+    scene.add(ambientLight);
+
+    const mainLight = new THREE.PointLight(0x6366f1, 2, 10);
+    mainLight.position.set(3, 2, 3);
+    scene.add(mainLight);
+
+    const accentLight = new THREE.PointLight(0x10b981, 1, 8);
+    accentLight.position.set(-3, -1, 2);
+    scene.add(accentLight);
+
+    // Bet pulse effects on globe
+    const pulses = [];
+    function createPulse(isYes) {
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      
+      const x = Math.sin(phi) * Math.cos(theta);
+      const y = Math.sin(phi) * Math.sin(theta);
+      const z = Math.cos(phi);
+
+      const pulseGeometry = new THREE.RingGeometry(0.02, 0.04, 16);
+      const pulseMaterial = new THREE.MeshBasicMaterial({
+        color: isYes ? 0x00d775 : 0xff4757,
+        transparent: true,
+        opacity: 0.8,
+        side: THREE.DoubleSide
+      });
+      const pulse = new THREE.Mesh(pulseGeometry, pulseMaterial);
+      
+      pulse.position.set(x * 1.02, y * 1.02, z * 1.02);
+      pulse.lookAt(0, 0, 0);
+      pulse.userData = { scale: 0.02, opacity: 0.8 };
+      
+      globe.add(pulse);
+      pulses.push(pulse);
+
+      // Remove after animation
+      setTimeout(() => {
+        globe.remove(pulse);
+        const idx = pulses.indexOf(pulse);
+        if (idx > -1) pulses.splice(idx, 1);
+      }, 2000);
+    }
+
+    // Animation loop
+    function animate() {
+      requestAnimationFrame(animate);
+
+      // Rotate globe
+      globe.rotation.y += 0.001;
+      wireframe.rotation.y += 0.001;
+
+      // Rotate rings clockwise
+      ringGroup.rotation.y -= 0.0003;
+
+      // Animate pulses
+      pulses.forEach(pulse => {
+        pulse.userData.scale += 0.02;
+        pulse.userData.opacity -= 0.015;
+        pulse.scale.setScalar(pulse.userData.scale);
+        pulse.material.opacity = Math.max(0, pulse.userData.opacity);
+      });
+
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // Handle resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // === Simulated Live Data ===
+    const users = ['CryptoKing42', 'DiamondHands', 'MoonBoy99', 'WallStBets', 'ApeMaster', 'Whale_Hunter', 'BullishAF', 'DegenerateTrader', 'YOLOKing', 'TendiesOnly'];
+    const markets = ['BTC above $50K by Feb?', 'Fed rate cut in Q1?', 'TSLA earnings beat?', 'ETH flips BTC?', 'SPY ATH by March?', 'NVDA to $200?'];
+    const locations = ['🇺🇸 Miami', '🇯🇵 Tokyo', '🇬🇧 London', '🇩🇪 Berlin', '🇸🇬 Singapore', '🇦🇺 Sydney'];
+
+    let volume = 18420;
+    let totalBets = 847;
+    let activeNow = 142;
+    let leftCards = [];
+    let rightCards = [];
+    let nextSide = 'left';
+
+    function createBetCard(side) {
+      const isYes = Math.random() > 0.5;
+      const amount = Math.floor(Math.random() * 400) + 25;
+      
+      const card = document.createElement('div');
+      card.className = `bet-card ${side === 'right' ? 'from-right' : ''}`;
+      card.innerHTML = `
+        <div class="bet-header">
+          <span class="bet-user">${users[Math.floor(Math.random() * users.length)]}</span>
+          <span class="bet-time">just now</span>
+        </div>
+        <div class="bet-market">${markets[Math.floor(Math.random() * markets.length)]}</div>
+        <div class="bet-footer">
+          <span class="bet-position ${isYes ? 'yes' : 'no'}">${isYes ? 'YES' : 'NO'}</span>
+          <span class="bet-amount">$${amount}</span>
+        </div>
+      `;
+
+      const container = document.getElementById(`bet-cards-${side}`);
+      const cards = side === 'left' ? leftCards : rightCards;
+
+      container.insertBefore(card, container.firstChild);
+      cards.unshift(card);
+
+      // Keep only 3 cards
+      if (cards.length > 3) {
+        const old = cards.pop();
+        old.remove();
+      }
+
+      // Update stats
+      volume += amount;
+      totalBets++;
+      document.getElementById('volume').textContent = `$${volume.toLocaleString()}`;
+      document.getElementById('total-bets').textContent = totalBets.toLocaleString();
+
+      // Pulse on globe
+      createPulse(isYes);
+
+      // Occasional whale
+      if (amount > 350 || Math.random() < 0.05) {
+        showWhaleAlert(amount * 8, markets[Math.floor(Math.random() * markets.length)]);
+      }
+    }
+
+    function showWhaleAlert(amount, market) {
+      const alert = document.getElementById('whale-alert');
+      document.getElementById('whale-amount').textContent = `$${amount.toLocaleString()}`;
+      document.getElementById('whale-market').textContent = market;
+      alert.classList.add('visible');
+      
+      setTimeout(() => {
+        alert.classList.remove('visible');
+      }, 3000);
+    }
+
+    // Generate bets every 8-15 seconds
+    function scheduleBet() {
+      createBetCard(nextSide);
+      nextSide = nextSide === 'left' ? 'right' : 'left';
+      
+      const delay = 8000 + Math.random() * 7000;
+      setTimeout(scheduleBet, delay);
+    }
+
+    // Hot streak visibility
+    function toggleHotStreak() {
+      const streak = document.getElementById('hot-streak');
+      streak.classList.add('visible');
+      
+      setTimeout(() => {
+        streak.classList.remove('visible');
+      }, 8000);
+    }
+
+    // Fluctuate active users
+    setInterval(() => {
+      activeNow += Math.floor(Math.random() * 5) - 2;
+      activeNow = Math.max(100, Math.min(250, activeNow));
+      document.getElementById('active-now').textContent = activeNow;
+    }, 5000);
+
+    // Start after delay
+    setTimeout(() => {
+      scheduleBet();
+    }, 2000);
+
+    // Hot streak every 2-3 minutes
+    setTimeout(toggleHotStreak, 2000);
+    setInterval(() => {
+      setTimeout(toggleHotStreak, Math.random() * 60000);
+    }, 120000);
+  </script>
+</body>
+</html>
