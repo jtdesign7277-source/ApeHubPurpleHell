@@ -443,6 +443,33 @@
       fill: none;
     }
 
+    .sports-header-btn {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(6, 182, 212, 0.15));
+      border: 1px solid rgba(0, 255, 136, 0.3);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      font-size: 18px;
+    }
+
+    .sports-header-btn:hover {
+      background: linear-gradient(135deg, rgba(0, 255, 136, 0.35), rgba(6, 182, 212, 0.25));
+      border-color: rgba(0, 255, 136, 0.6);
+      box-shadow: 0 0 16px rgba(0, 255, 136, 0.3);
+    }
+
+    .sports-header-btn.active {
+      background: linear-gradient(135deg, rgba(0, 255, 136, 0.4), rgba(6, 182, 212, 0.3));
+      border-color: #00ff88;
+      box-shadow: 0 0 12px rgba(0, 255, 136, 0.4);
+    }
+
     @supports (padding-bottom: env(safe-area-inset-bottom)) {
       .main {
         padding-bottom: calc(120px + env(safe-area-inset-bottom));
@@ -465,6 +492,9 @@
           <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
         </svg>
       </a>
+      <button class="sports-header-btn" id="sportsHeaderBtn" onclick="switchToSports()" title="Sports Betting">
+        🏀
+      </button>
       <div class="token-balance" onclick="openTokenModal()">
         <span class="token-amount" id="userBalance">0</span>
         <span class="token-label">tokens</span>
@@ -480,7 +510,6 @@
       <button class="category-tab" data-category="earnings">💰 Earnings</button>
       <button class="category-tab" data-category="fed">🏛️ Fed</button>
       <button class="category-tab" data-category="politics">🗳️ Politics</button>
-      <button class="category-tab" data-category="sports">🏀 Sports</button>
     </div>
     <div class="predictions-grid" id="predictionsGrid">
       <div class="loading"><div class="spinner"></div></div>
@@ -1102,6 +1131,8 @@
           document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
           tab.classList.add('active');
           currentCategory = tab.dataset.category;
+          // Deactivate sports header button when switching to other tabs
+          document.getElementById('sportsHeaderBtn').classList.remove('active');
           loadPredictions();
         });
       });
@@ -1330,7 +1361,21 @@
       return o > 0 ? '+' + o : o;
     }
 
+    function switchToSports() {
+      // Deactivate category tabs
+      document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+      // Set current category to sports
+      currentCategory = 'sports';
+      // Activate sports header button
+      document.getElementById('sportsHeaderBtn').classList.add('active');
+      // Load sports UI
+      renderSportsUI();
+    }
+
     function renderSportsUI() {
+      // Mark sports button as active
+      document.getElementById('sportsHeaderBtn').classList.add('active');
+      
       const grid = document.getElementById('predictionsGrid');
       grid.innerHTML = `
         <div class="sports-sub-tabs">
