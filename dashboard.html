@@ -3271,13 +3271,35 @@
     
     // Cache for sparkline data to avoid excessive API calls
     const sparklineCache = new Map();
-    const SPARKLINE_CACHE_TTL = 60000; // 1 minute cache
+    const SPARKLINE_CACHE_TTL_MARKET_OPEN = 60000; // 1 minute during trading hours
+    const SPARKLINE_CACHE_TTL_MARKET_CLOSED = 3600000; // 1 hour during weekends/after hours
+    
+    function isMarketOpen() {
+      const now = new Date();
+      const etString = now.toLocaleString('en-US', { timeZone: 'America/New_York' });
+      const etDate = new Date(etString);
+      const day = etDate.getDay(); // 0 = Sunday, 6 = Saturday
+      const hour = etDate.getHours();
+      const minute = etDate.getMinutes();
+      
+      // Weekend
+      if (day === 0 || day === 6) return false;
+      
+      // Before 9:30 AM ET
+      if (hour < 9 || (hour === 9 && minute < 30)) return false;
+      
+      // After 4:00 PM ET
+      if (hour >= 16) return false;
+      
+      return true;
+    }
     
     async function fetchSparklineData(symbol) {
       const cacheKey = symbol.toUpperCase();
       const cached = sparklineCache.get(cacheKey);
+      const cacheTTL = isMarketOpen() ? SPARKLINE_CACHE_TTL_MARKET_OPEN : SPARKLINE_CACHE_TTL_MARKET_CLOSED;
       
-      if (cached && Date.now() - cached.timestamp < SPARKLINE_CACHE_TTL) {
+      if (cached && Date.now() - cached.timestamp < cacheTTL) {
         return cached.prices;
       }
       
@@ -3286,7 +3308,12 @@
         const data = await response.json();
         
         if (data.success && data.prices && data.prices.length > 0) {
-          sparklineCache.set(cacheKey, { prices: data.prices, timestamp: Date.now() });
+          sparklineCache.set(cacheKey, { 
+            prices: data.prices, 
+            timestamp: Date.now(),
+            isMarketClosed: data.isMarketClosed,
+            tradingDay: data.tradingDay
+          });
           return data.prices;
         }
       } catch (error) {

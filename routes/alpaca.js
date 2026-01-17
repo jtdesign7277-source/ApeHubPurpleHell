@@ -170,39 +170,77 @@ router.get('/check-green/:symbol', async (req, res) => {
 });
 
 // GET /api/market/bars/:symbol - Get intraday bars for sparkline
+// During weekends/before market open, returns Friday's end-of-day data
 router.get('/bars/:symbol', async (req, res) => {
   try {
     const symbol = req.params.symbol.toUpperCase();
     const timeframe = req.query.timeframe || '5Min';
     const limit = parseInt(req.query.limit) || 78; // ~1 trading day at 5-min intervals
     
-    // Get bars from the last trading day
+    // Check if market is open (weekday 9:30 AM - 4:00 PM ET)
+    const now = new Date();
+    const etOptions = { timeZone: 'America/New_York' };
+    const etHour = parseInt(now.toLocaleString('en-US', { ...etOptions, hour: 'numeric', hour12: false }));
+    const etMinute = parseInt(now.toLocaleString('en-US', { ...etOptions, minute: 'numeric' }));
+    const etDay = now.toLocaleString('en-US', { ...etOptions, weekday: 'short' });
+    
+    const isWeekend = etDay === 'Sat' || etDay === 'Sun';
+    const isBeforeOpen = etHour < 9 || (etHour === 9 && etMinute < 30);
+    const isAfterClose = etHour >= 16;
+    const isMarketClosed = isWeekend || isBeforeOpen || isAfterClose;
+    
+    // Go back far enough to get Friday's data if needed
     const end = new Date();
     const start = new Date();
-    start.setDate(start.getDate() - 5); // Go back 5 days to ensure we get data (weekends)
+    start.setDate(start.getDate() - 7); // Go back 7 days to ensure we get Friday data
     
     const startISO = start.toISOString();
     const endISO = end.toISOString();
     
-    const data = await alpacaFetch(`/v2/stocks/${symbol}/bars?timeframe=${timeframe}&start=${startISO}&end=${endISO}&limit=${limit}&sort=desc`);
+    const data = await alpacaFetch(`/v2/stocks/${symbol}/bars?timeframe=${timeframe}&start=${startISO}&end=${endISO}&limit=500&sort=desc`);
     
     if (data.bars && data.bars.length > 0) {
-      // Reverse to get chronological order and extract close prices
-      const bars = data.bars.reverse();
-      const prices = bars.map(bar => bar.c);
+      // Reverse to get chronological order
+      const allBars = data.bars.reverse();
+      
+      // Group bars by trading day
+      const barsByDay = {};
+      allBars.forEach(bar => {
+        const date = bar.t.split('T')[0];
+        if (!barsByDay[date]) barsByDay[date] = [];
+        barsByDay[date].push(bar);
+      });
+      
+      // Get the trading days sorted
+      const tradingDays = Object.keys(barsByDay).sort();
+      
+      let barsToUse;
+      if (isMarketClosed && tradingDays.length > 0) {
+        // Use the last complete trading day (Friday if weekend, or previous day if before open)
+        const lastTradingDay = tradingDays[tradingDays.length - 1];
+        barsToUse = barsByDay[lastTradingDay];
+      } else {
+        // Use the most recent bars (today's data)
+        barsToUse = allBars.slice(-limit);
+      }
+      
+      const prices = barsToUse.map(bar => bar.c);
       
       res.json({
         success: true,
         symbol,
         prices,
-        bars: bars.slice(-limit) // Return last N bars
+        bars: barsToUse,
+        isMarketClosed,
+        tradingDay: barsToUse.length > 0 ? barsToUse[0].t.split('T')[0] : null
       });
     } else {
       res.json({
         success: false,
         symbol,
         prices: [],
-        bars: []
+        bars: [],
+        isMarketClosed
       });
     }
   } catch (error) {
