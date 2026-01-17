@@ -2440,7 +2440,7 @@
             <div class="form-display" id="modal-total-shares">0</div>
           </div>
           <div class="form-group">
-            <label class="form-label">Add Shares</label>
+            <label class="form-label">Remove Shares</label>
             <input type="number" class="form-input" id="modal-shares" placeholder="0" min="0" step="any" onchange="updateModalCalculations()">
           </div>
         </div>
@@ -2452,16 +2452,6 @@
           <div class="form-group">
             <label class="form-label">Purchase Date</label>
             <input type="date" class="form-input" id="modal-purchase-date">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Sell Shares</label>
-            <input type="number" class="form-input" id="modal-sell-shares" placeholder="0" min="0" step="any" onchange="updateModalCalculations()">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Sale Price</label>
-            <input type="number" class="form-input" id="modal-sell-price" placeholder="$0.00" min="0" step="0.01" onchange="updateModalCalculations()">
           </div>
         </div>
         <div class="form-row">
@@ -2490,8 +2480,7 @@
         </div>
         <div class="modal-buttons">
           <button class="modal-btn modal-btn-cancel" onclick="closeModal()">Cancel</button>
-          <button class="modal-btn modal-btn-remove" onclick="sellFromPosition()">Sell</button>
-          <button class="modal-btn modal-btn-add" onclick="addToPosition()">Add</button>
+          <button class="modal-btn modal-btn-remove" onclick="removeFromPosition()">Remove</button>
           <button class="modal-btn modal-btn-save" onclick="savePosition()">Save</button>
         </div>
       </div>
@@ -3096,25 +3085,22 @@
 
     function updateModalCalculations() {
       const existingShares = parseFloat(document.getElementById('modal-total-shares').textContent) || 0;
-      const addShares = parseFloat(document.getElementById('modal-shares').value) || 0;
-      const newCost = parseFloat(document.getElementById('modal-cost').value) || 0;
-      const sellShares = parseFloat(document.getElementById('modal-sell-shares').value) || 0;
+      const removeShares = parseFloat(document.getElementById('modal-shares').value) || 0;
+      const pricePaid = parseFloat(document.getElementById('modal-cost').value) || 0;
       const stock = watchlist.find(s => s.symbol === currentEditSymbol) || stockDatabase.find(s => s.symbol === currentEditSymbol);
       const existing = positions[currentEditSymbol] || { shares: 0, avgCost: 0 };
       
       if (!stock) return;
       
-      // Calculate net shares after adding and selling
-      const netAddShares = addShares - sellShares;
-      const totalShares = existingShares + netAddShares;
-      const totalCostValue = (existing.shares * existing.avgCost) + (addShares * newCost);
-      const newAvgCost = totalShares > 0 ? totalCostValue / totalShares : existing.avgCost;
-      const marketValue = Math.max(0, totalShares) * stock.price;
+      // Calculate remaining shares after removal
+      const remainingShares = existingShares - removeShares;
+      const totalCostValue = (existing.shares * existing.avgCost);
+      const marketValue = Math.max(0, remainingShares) * stock.price;
       const totalReturn = marketValue - totalCostValue;
       const isGain = totalReturn >= 0;
       
-      // Update avg cost display
-      document.getElementById('modal-avg-cost').textContent = '$' + newAvgCost.toFixed(2);
+      // Update avg cost display (stays the same when removing)
+      document.getElementById('modal-avg-cost').textContent = '$' + existing.avgCost.toFixed(2);
       
       document.getElementById('modal-market-value').textContent = '$' + marketValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       document.getElementById('modal-total-cost').textContent = '$' + totalCostValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -3204,78 +3190,44 @@
       }, 4500);
     }
 
-    // Add to existing position (averages cost)
-    function addToPosition() {
-      const newShares = parseFloat(document.getElementById('modal-shares').value) || 0;
-      const newCost = parseFloat(document.getElementById('modal-cost').value) || 0;
+    // Remove from existing position (sell shares)
+    function removeFromPosition() {
+      const removeShares = parseFloat(document.getElementById('modal-shares').value) || 0;
       
-      if (newShares <= 0) {
-        showToast('Enter shares to add', 'removed');
-        return;
-      }
-      
-      const existing = positions[currentEditSymbol] || { shares: 0, avgCost: 0 };
-      const totalShares = existing.shares + newShares;
-      const totalCost = (existing.shares * existing.avgCost) + (newShares * newCost);
-      const avgCost = totalShares > 0 ? totalCost / totalShares : 0;
-      
-      positions[currentEditSymbol] = { shares: totalShares, avgCost: avgCost };
-      
-      saveUserData();
-      
-      // Update the display and clear input for adding more
-      document.getElementById('modal-total-shares').textContent = totalShares;
-      document.getElementById('modal-shares').value = '';
-      document.getElementById('modal-cost').value = '';
-      document.getElementById('modal-avg-cost').textContent = '$' + avgCost.toFixed(2);
-      updateModalCalculations();
-      
-      // Trigger confetti celebration!
-      triggerConfetti();
-      
-      renderWatchlist();
-      showToast(`Added ${newShares} shares`, 'success');
-    }
-
-    // Sell from existing position
-    function sellFromPosition() {
-      const sellShares = parseFloat(document.getElementById('modal-sell-shares').value) || 0;
-      const sellPrice = parseFloat(document.getElementById('modal-sell-price').value) || 0;
-      
-      if (sellShares <= 0) {
-        showToast('Enter shares to sell', 'removed');
+      if (removeShares <= 0) {
+        showToast('Enter shares to remove', 'removed');
         return;
       }
       
       const existing = positions[currentEditSymbol] || { shares: 0, avgCost: 0 };
       
-      if (sellShares > existing.shares) {
-        showToast(`Can't sell ${sellShares} shares - only have ${existing.shares}`, 'removed');
+      if (removeShares > existing.shares) {
+        showToast(`Can't remove ${removeShares} shares - only have ${existing.shares}`, 'removed');
         return;
       }
       
-      const totalShares = existing.shares - sellShares;
+      const totalShares = existing.shares - removeShares;
       
       if (totalShares <= 0) {
         delete positions[currentEditSymbol];
-        showToast(`Sold all shares of ${currentEditSymbol}`, 'success');
+        showToast(`Removed all shares of ${currentEditSymbol}`, 'success');
       } else {
         // Keep the same average cost since we're not changing cost basis
         positions[currentEditSymbol] = { shares: totalShares, avgCost: existing.avgCost };
-        showToast(`Sold ${sellShares} shares of ${currentEditSymbol}`, 'success');
+        showToast(`Removed ${removeShares} shares of ${currentEditSymbol}`, 'success');
       }
       
       saveUserData();
       
-      // Update the display and clear sell inputs
+      // Update the display and clear inputs
       document.getElementById('modal-total-shares').textContent = totalShares;
-      document.getElementById('modal-sell-shares').value = '';
-      document.getElementById('modal-sell-price').value = '';
+      document.getElementById('modal-shares').value = '';
+      document.getElementById('modal-cost').value = '';
       updateModalCalculations();
       
       renderWatchlist();
       
-      // Close modal if all shares sold
+      // Close modal if all shares removed
       if (totalShares <= 0) {
         setTimeout(closeModal, 500);
       }
