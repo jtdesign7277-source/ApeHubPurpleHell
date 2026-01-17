@@ -1573,14 +1573,15 @@
     }
 
     .modal-buttons {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
       margin-top: 8px;
     }
 
     .modal-btn {
       flex: 1;
+      min-width: calc(50% - 4px);
       padding: 12px 16px;
       background: var(--bg-card);
       border: 2px solid transparent;
@@ -1640,16 +1641,7 @@
       box-shadow: 0 0 16px rgba(255, 71, 87, 0.5), inset 0 0 12px rgba(255, 71, 87, 0.15);
     }
 
-    .modal-buttons {
-      display: flex;
-      gap: 8px;
-      background: var(--input-bg);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 4px;
-    }
+    /* Modal buttons container - removed duplicate conflicting styles */
 
     /* ============================================
        CONFETTI CELEBRATION
