@@ -518,14 +518,8 @@
   <div class="my-bets-modal" id="myBetsModal">
     <div class="my-bets-content">
       <div class="my-bets-header">
-        <div class="my-bets-title">My Bets</div>
+        <div class="my-bets-title" id="myBetsModalTitle">Open Bets</div>
         <button class="my-bets-close" onclick="closeMyBets()">×</button>
-      </div>
-      <div class="my-bets-tabs">
-        <button class="my-bets-tab active" data-filter="active" onclick="filterMyBets('active')">Active</button>
-        <button class="my-bets-tab" data-filter="all" onclick="filterMyBets('all')">History</button>
-        <button class="my-bets-tab" data-filter="won" onclick="filterMyBets('won')">Won 🎉</button>
-        <button class="my-bets-tab" data-filter="lost" onclick="filterMyBets('lost')">Lost</button>
       </div>
       <div id="myBetsList"></div>
     </div>
@@ -1042,6 +1036,8 @@
     let currentBetFilter = 'active';
 
     function openMyBets() {
+      document.getElementById('myBetsModalTitle').textContent = 'Open Bets';
+      currentBetFilter = 'active';
       document.getElementById('myBetsModal').classList.add('show');
       document.body.style.overflow = 'hidden';
       loadMyBets();
@@ -1063,14 +1059,11 @@
     }
 
     function openHistory() {
-      // Open My Bets modal with history/settled bets filter
+      document.getElementById('myBetsModalTitle').textContent = 'Bet History';
+      currentBetFilter = 'settled';
       document.getElementById('myBetsModal').classList.add('show');
       document.body.style.overflow = 'hidden';
       loadMyBets();
-      // Switch to show all settled bets (won + lost)
-      setTimeout(() => {
-        filterMyBets('all');
-      }, 100);
     }
 
     async function loadMyBets() {
@@ -1103,18 +1096,14 @@
       const list = document.getElementById('myBetsList');
       let filteredBets = myBets;
       
-      if (currentBetFilter !== 'all') {
-        filteredBets = myBets.filter(b => b.status === currentBetFilter);
+      if (currentBetFilter === 'active') {
+        filteredBets = myBets.filter(b => b.status === 'active');
+      } else if (currentBetFilter === 'settled') {
+        filteredBets = myBets.filter(b => b.status === 'won' || b.status === 'lost');
       }
       
       if (filteredBets.length === 0) {
-        list.innerHTML = `
-          <div class="no-bets">
-            <div class="no-bets-icon">${currentBetFilter === 'won' ? '🏆' : currentBetFilter === 'lost' ? '😢' : '📋'}</div>
-            <div class="no-bets-title">No ${currentBetFilter === 'all' ? '' : currentBetFilter} bets yet</div>
-            <p style="color: var(--white-50);">${currentBetFilter === 'active' ? 'Place a bet to get started!' : 'Keep betting to see results here!'}</p>
-          </div>
-        `;
+        list.innerHTML = '';
         return;
       }
       
