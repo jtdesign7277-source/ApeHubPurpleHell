@@ -3076,7 +3076,7 @@
       const existingShares = parseFloat(document.getElementById('modal-total-shares').textContent) || 0;
       const addShares = parseFloat(document.getElementById('modal-shares').value) || 0;
       const newCost = parseFloat(document.getElementById('modal-cost').value) || 0;
-      const stock = stockDatabase.find(s => s.symbol === currentEditSymbol);
+      const stock = watchlist.find(s => s.symbol === currentEditSymbol) || stockDatabase.find(s => s.symbol === currentEditSymbol);
       const existing = positions[currentEditSymbol] || { shares: 0, avgCost: 0 };
       
       if (!stock) return;
