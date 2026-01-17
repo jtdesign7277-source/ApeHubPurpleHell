@@ -94,12 +94,10 @@
     .prediction-card { background: linear-gradient(180deg, #3a3a48 0%, #2a2a35 40%, #1a1a22 100%); border: 1px solid var(--white-20); border-radius: 16px; padding: 20px; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
     .prediction-card:hover { background: linear-gradient(180deg, #45454f 0%, #35353f 40%, #25252d 100%); border-color: var(--white-40); transform: translateY(-2px); }
     .prediction-card.featured { border-color: var(--purple-core); background: linear-gradient(180deg, #3a3a48 0%, #2a2a35 40%, #1a1a22 100%); }
-    .prediction-card.featured::before { content: '🔥 HOT'; position: absolute; top: 12px; right: 12px; background: linear-gradient(135deg, var(--purple-core), var(--purple-pink)); padding: 4px 10px; border-radius: 100px; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; }
     
     /* Locked prediction state */
     .prediction-card.locked { border-color: var(--white-20); opacity: 1; }
     .prediction-card.locked:hover { transform: none; border-color: var(--white-30); }
-    .prediction-card.locked.featured::before { display: none; }
     .locked-badge { position: absolute; top: 20px; right: 12px; background: #4b5563; padding: 8px 16px; border-radius: 100px; font-size: 14px; font-weight: 700; letter-spacing: 0.5px; color: #fff; z-index: 10; }
     .locked-text { color: var(--white-70); }
     .odds-button.disabled { opacity: 0.6; cursor: not-allowed; }
