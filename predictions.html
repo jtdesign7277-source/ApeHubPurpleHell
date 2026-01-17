@@ -143,18 +143,25 @@
     .prediction-reference .ref-value.positive { color: var(--green); }
     .prediction-reference .ref-value.negative { color: var(--red); }
     
-    /* Stacked Buy Buttons - WallStreetPredict Style */
+    /* Stacked Buy Buttons - Polymarket Style */
     .prediction-odds { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
-    .odds-button { padding: 16px 20px; border-radius: 14px; border: none; font-family: inherit; cursor: pointer; transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; }
-    .odds-button.yes { background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%); border: 1px solid rgba(16, 185, 129, 0.3); }
-    .odds-button.yes:hover { background: linear-gradient(135deg, rgba(16, 185, 129, 0.3) 0%, rgba(16, 185, 129, 0.15) 100%); border-color: var(--green); transform: translateX(2px); }
-    .odds-button.no { background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.1) 100%); border: 1px solid rgba(239, 68, 68, 0.3); }
-    .odds-button.no:hover { background: linear-gradient(135deg, rgba(239, 68, 68, 0.3) 0%, rgba(239, 68, 68, 0.15) 100%); border-color: var(--red); transform: translateX(2px); }
-    .odds-label { font-size: 15px; font-weight: 700; letter-spacing: 0.5px; }
-    .odds-button.yes .odds-label { color: var(--green); }
-    .odds-button.no .odds-label { color: var(--red); }
-    .odds-price { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 700; color: var(--white); }
+    .odds-button { padding: 18px 24px; border-radius: 12px; border: none; font-family: inherit; cursor: pointer; transition: all 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px; }
+    .odds-button.yes { background: #7CFC00; }
+    .odds-button.yes:hover { background: #8FFF1A; transform: scale(1.01); box-shadow: 0 4px 20px rgba(124, 252, 0, 0.3); }
+    .odds-button.no { background: #FF4136; }
+    .odds-button.no:hover { background: #FF5A50; transform: scale(1.01); box-shadow: 0 4px 20px rgba(255, 65, 54, 0.3); }
+    .odds-label { font-size: 17px; font-weight: 700; letter-spacing: 0.5px; color: rgba(0, 0, 0, 0.85); }
+    .odds-button.yes .odds-label { color: rgba(0, 0, 0, 0.85); }
+    .odds-button.no .odds-label { color: rgba(255, 255, 255, 0.95); }
+    .odds-price { font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 700; }
+    .odds-button.yes .odds-price { color: rgba(0, 0, 0, 0.7); }
+    .odds-button.no .odds-price { color: rgba(255, 255, 255, 0.85); }
+    .odds-separator { font-size: 17px; font-weight: 400; }
+    .odds-button.yes .odds-separator { color: rgba(0, 0, 0, 0.5); }
+    .odds-button.no .odds-separator { color: rgba(255, 255, 255, 0.6); }
     .odds-multiplier { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 700; color: var(--white); }
+    .odds-button.disabled { opacity: 0.6; cursor: not-allowed; }
+    .odds-button.disabled:hover { transform: none; box-shadow: none; }
     
     .prediction-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08); }
     .prediction-volume { font-size: 12px; color: var(--white-50); }
@@ -865,10 +872,12 @@
           <div class="prediction-odds">
             <button class="odds-button yes ${isLocked ? 'disabled' : ''}" onclick="event.stopPropagation(); ${isLocked ? 'showLockedMessage()' : `openBetSlip(${p.id}, 'yes')`}">
               <span class="odds-label">BUY YES</span>
+              <span class="odds-separator">|</span>
               <span class="odds-price">$${yesPrice}</span>
             </button>
             <button class="odds-button no ${isLocked ? 'disabled' : ''}" onclick="event.stopPropagation(); ${isLocked ? 'showLockedMessage()' : `openBetSlip(${p.id}, 'no')`}">
               <span class="odds-label">BUY NO</span>
+              <span class="odds-separator">|</span>
               <span class="odds-price">$${noPrice}</span>
             </button>
           </div>
