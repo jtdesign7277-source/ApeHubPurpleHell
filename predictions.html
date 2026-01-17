@@ -28,27 +28,29 @@
       --white-30: rgba(255,255,255,0.3);
       --white-10: rgba(255,255,255,0.1);
       --white-05: rgba(255,255,255,0.05);
+      --teal: #06b6d4;
+      --teal-dark: #0891b2;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    html, body { font-family: 'Space Grotesk', -apple-system, sans-serif; background: var(--bg-deep); color: var(--white); min-height: 100vh; overflow-x: hidden; }
+    html, body { font-family: 'Space Grotesk', -apple-system, sans-serif; background: linear-gradient(180deg, #050a0f 0%, #0a1520 50%, #0d1a28 100%); color: var(--white); min-height: 100vh; overflow-x: hidden; }
 
-    /* Header */
-    .header { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 16px 20px; background: rgba(0,0,0,0.8); backdrop-filter: blur(20px); border-bottom: 1px solid var(--white-10); display: flex; justify-content: space-between; align-items: center; }
-    .logo { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; color: var(--white-70); }
-    .logo span { color: var(--purple-glow); }
+    /* Header - WallStreetPredict Style */
+    .header { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 14px 20px; background: linear-gradient(180deg, rgba(10, 21, 32, 0.95) 0%, rgba(5, 10, 15, 0.95) 100%); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(6, 182, 212, 0.1); display: flex; justify-content: space-between; align-items: center; }
+    .logo { font-size: 17px; font-weight: 700; letter-spacing: -0.5px; color: var(--white); display: flex; align-items: center; gap: 6px; }
+    .logo-icon { font-size: 18px; }
+    .logo span { color: #06b6d4; }
     @keyframes shimmer { 0% { left: -100%; } 50% { left: 100%; } 100% { left: 100%; } }
-    @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 15px rgba(251,191,36,0.15), inset 0 1px 0 rgba(255,255,255,0.1); } 50% { box-shadow: 0 0 25px rgba(251,191,36,0.3), inset 0 1px 0 rgba(255,255,255,0.15); } }
-    .token-balance { display: flex; align-items: center; gap: 8px; background: linear-gradient(135deg, rgba(251,191,36,0.12), rgba(245,158,11,0.05)); padding: 5px 12px 5px 6px; border-radius: 100px; border: 1px solid rgba(251,191,36,0.4); cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden; animation: pulse-glow 3s ease-in-out infinite; }
-    .token-balance::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(251,191,36,0.3), transparent); animation: shimmer 4s ease-in-out infinite; }
-    .token-balance:hover { border-color: var(--gold); background: linear-gradient(135deg, rgba(251,191,36,0.2), rgba(245,158,11,0.1)); transform: translateY(-1px); }
-    .token-icon { width: 28px; height: 28px; background: linear-gradient(180deg, #d4a574 0%, #a87d52 50%, #8b6543 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; box-shadow: 0 2px 8px rgba(168, 125, 82, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2); }
-    .token-amount { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 14px; color: var(--gold); text-shadow: 0 0 10px rgba(251,191,36,0.3); }
-    .add-tokens { color: var(--gold); font-size: 14px; font-weight: 700; opacity: 0.9; }
-    .token-balance:hover .add-tokens { transform: scale(1.1); }
+    .token-balance { display: flex; align-items: center; gap: 6px; background: rgba(6, 182, 212, 0.08); padding: 8px 14px; border-radius: 12px; border: 1px solid rgba(6, 182, 212, 0.2); cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden; }
+    .token-balance::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.2), transparent); animation: shimmer 4s ease-in-out infinite; }
+    .token-balance:hover { border-color: #06b6d4; background: rgba(6, 182, 212, 0.15); }
+    .token-icon { display: none; }
+    .token-amount { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 15px; color: var(--white); }
+    .add-tokens { display: none; }
     .header-actions { display: flex; align-items: center; gap: 10px; }
-    .my-bets-btn { display: flex; align-items: center; gap: 6px; background: transparent; border: 2px solid var(--white-20); padding: 8px 14px; border-radius: 12px; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--white-70); cursor: pointer; transition: all 0.2s; }
-    .my-bets-btn:hover { border-color: var(--purple-core); color: var(--purple-glow); background: rgba(124, 58, 237, 0.1); }
+    .header-icon-btn { width: 38px; height: 38px; background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--white-70); font-size: 16px; cursor: pointer; transition: all 0.2s; }
+    .header-icon-btn:hover { background: rgba(6, 182, 212, 0.2); border-color: #06b6d4; color: var(--white); }
+    .my-bets-btn { display: none; }
 
     /* My Bets Modal */
     .my-bets-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); z-index: 300; opacity: 0; visibility: hidden; transition: all 0.3s; overflow-y: auto; }
@@ -79,65 +81,93 @@
     .no-bets-icon { font-size: 48px; margin-bottom: 16px; }
     .no-bets-title { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
 
-    /* Main */
-    .main { padding: 80px 16px 120px; max-width: 600px; margin: 0 auto; }
+    /* Main - WallStreetPredict Style */
+    .main { padding: 80px 16px 120px; max-width: 600px; margin: 0 auto; background: transparent; min-height: 100vh; }
 
-    /* Category Tabs */
-    .category-tabs { display: flex; gap: 8px; padding: 16px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+    /* Category Tabs - WallStreetPredict Style */
+    .category-tabs { display: flex; gap: 10px; padding: 16px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
     .category-tabs::-webkit-scrollbar { display: none; }
-    .category-tab { padding: 10px 18px; background: transparent; border: 2px solid var(--white-20); border-radius: 12px; font-family: inherit; font-size: 14px; font-weight: 500; color: var(--white-70); cursor: pointer; white-space: nowrap; transition: all 0.2s; }
-    .category-tab:hover { background: rgba(124, 58, 237, 0.1); border-color: var(--purple-core); color: var(--purple-glow); }
-    .category-tab.active { background: rgba(124, 58, 237, 0.15); border-color: var(--purple-core); color: var(--purple-glow); }
+    .category-tab { padding: 10px 16px; background: rgba(6, 182, 212, 0.08); border: 1px solid rgba(6, 182, 212, 0.2); border-radius: 100px; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--white-70); cursor: pointer; white-space: nowrap; transition: all 0.2s; }
+    .category-tab:hover { background: rgba(6, 182, 212, 0.15); border-color: rgba(6, 182, 212, 0.4); color: var(--white); }
+    .category-tab.active { background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); border-color: transparent; color: #fff; box-shadow: 0 2px 12px rgba(6, 182, 212, 0.3); }
 
-    /* Prediction Cards */
-    .predictions-grid { display: flex; flex-direction: column; gap: 12px; }
-    .prediction-card { background: linear-gradient(180deg, #3a3a48 0%, #2a2a35 40%, #1a1a22 100%); border: 1px solid var(--white-20); border-radius: 16px; padding: 20px; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
-    .prediction-card:hover { background: linear-gradient(180deg, #45454f 0%, #35353f 40%, #25252d 100%); border-color: var(--white-40); transform: translateY(-2px); }
-    .prediction-card.featured { border-color: var(--purple-core); background: linear-gradient(180deg, #3a3a48 0%, #2a2a35 40%, #1a1a22 100%); }
+    /* Prediction Cards - WallStreetPredict Style */
+    .predictions-grid { display: flex; flex-direction: column; gap: 16px; }
+    .prediction-card { background: linear-gradient(145deg, #0d2a3a 0%, #0a1f2e 50%, #081822 100%); border: 1px solid rgba(6, 182, 212, 0.2); border-radius: 20px; padding: 20px; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden; }
+    .prediction-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.3), transparent); }
+    .prediction-card:hover { border-color: rgba(6, 182, 212, 0.4); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(6, 182, 212, 0.15); }
+    .prediction-card.featured { border-color: rgba(168, 85, 247, 0.4); }
+    .prediction-card.featured::before { background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.4), transparent); }
     
     /* Locked prediction state */
-    .prediction-card.locked { border-color: var(--white-20); opacity: 1; }
-    .prediction-card.locked:hover { transform: none; border-color: var(--white-30); }
-    .locked-badge { position: absolute; top: 20px; right: 12px; background: #4b5563; padding: 8px 16px; border-radius: 100px; font-size: 14px; font-weight: 700; letter-spacing: 0.5px; color: #fff; z-index: 10; }
+    .prediction-card.locked { border-color: rgba(255,255,255,0.1); opacity: 0.85; }
+    .prediction-card.locked:hover { transform: none; border-color: rgba(255,255,255,0.15); box-shadow: none; }
+    .locked-badge { position: absolute; top: 16px; right: 16px; background: rgba(75, 85, 99, 0.9); padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; color: #fff; z-index: 10; }
     .locked-text { color: var(--white-70); }
-    .odds-button.disabled { opacity: 0.6; cursor: not-allowed; }
-    .odds-button.disabled:hover { background: rgba(255,255,255,0.08); border-color: var(--white-20); }
+    .odds-button.disabled { opacity: 0.5; cursor: not-allowed; }
+    .odds-button.disabled:hover { background: rgba(255,255,255,0.05); border-color: transparent; transform: none; }
+    
+    /* Source Badge */
+    .prediction-source { display: inline-flex; align-items: center; gap: 6px; background: rgba(239, 68, 68, 0.12); padding: 6px 12px; border-radius: 8px; margin-bottom: 14px; }
+    .source-icon { width: 18px; height: 18px; background: linear-gradient(135deg, #ef4444, #dc2626); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; }
+    .source-name { font-size: 12px; font-weight: 600; color: var(--white-70); letter-spacing: 0.3px; }
+    
+    /* Card Content Layout */
+    .prediction-content { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 16px; }
+    .prediction-info { flex: 1; }
+    .prediction-chart-wrap { width: 90px; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+    .mini-chart { width: 80px; height: 45px; }
+    .mini-chart-line { fill: none; stroke: var(--green); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .mini-chart-area { fill: url(#chartGradient); opacity: 0.4; }
+    
+    /* Probability Display */
+    .prediction-probability { display: flex; align-items: baseline; gap: 8px; margin-top: 10px; }
+    .probability-label { font-size: 12px; color: var(--white-50); }
+    .probability-value { font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 700; color: var(--white); }
+    .probability-change { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; }
+    .probability-change.up { color: var(--green); }
+    .probability-change.down { color: var(--red); }
+    
     .prediction-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
     .prediction-ticker-wrap { display: flex; flex-direction: row; align-items: center; gap: 12px; }
-    .prediction-ticker { background: linear-gradient(180deg, #4a4a58 0%, #3a3a48 100%); padding: 6px 14px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700; color: var(--white); border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 2px 6px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08); letter-spacing: 0.5px; }
+    .prediction-ticker { background: linear-gradient(180deg, #1a3a4a 0%, #0f2a38 100%); padding: 6px 14px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700; color: var(--white); border: 1px solid rgba(6, 182, 212, 0.2); box-shadow: 0 2px 6px rgba(0,0,0,0.3); letter-spacing: 0.5px; }
     .prediction-price { font-size: 14px; font-family: 'JetBrains Mono', monospace; font-weight: 600; }
     .prediction-category { font-size: 12px; color: var(--white-70); text-transform: uppercase; letter-spacing: 0.5px; }
     .prediction-date { font-size: 11px; color: var(--white-50); margin-left: auto; }
-    .bet-slip-date { font-size: 13px; color: var(--purple-glow); margin-top: 6px; }
-    .prediction-title { font-size: 18px; font-weight: 600; line-height: 1.4; margin-bottom: 8px; color: #fff; }
+    .bet-slip-date { font-size: 13px; color: #06b6d4; margin-top: 6px; }
+    .prediction-title { font-size: 17px; font-weight: 600; line-height: 1.4; margin-bottom: 0; color: #fff; }
     .prediction-reference { font-size: 11px; color: var(--white-50); margin-bottom: 12px; font-family: 'JetBrains Mono', monospace; display: flex; gap: 12px; flex-wrap: wrap; }
     .prediction-reference .ref-item { background: var(--white-05); padding: 4px 8px; border-radius: 6px; }
     .prediction-reference .ref-label { color: var(--white-50); }
     .prediction-reference .ref-value { color: var(--gold); font-weight: 600; }
     .prediction-reference .ref-value.positive { color: var(--green); }
     .prediction-reference .ref-value.negative { color: var(--red); }
-    .prediction-odds { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .odds-button { padding: 14px; border-radius: 12px; border: 2px solid transparent; font-family: inherit; cursor: pointer; transition: all 0.2s; text-align: center; }
-    .odds-button.yes { background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.4); }
-    .odds-button.yes:hover { background: rgba(16, 185, 129, 0.25); border-color: var(--green); }
-    .odds-button.no { background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.4); }
-    .odds-button.no:hover { background: rgba(239, 68, 68, 0.25); border-color: var(--red); }
-    .odds-label { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    
+    /* Stacked Buy Buttons - WallStreetPredict Style */
+    .prediction-odds { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+    .odds-button { padding: 16px 20px; border-radius: 14px; border: none; font-family: inherit; cursor: pointer; transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; }
+    .odds-button.yes { background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .odds-button.yes:hover { background: linear-gradient(135deg, rgba(16, 185, 129, 0.3) 0%, rgba(16, 185, 129, 0.15) 100%); border-color: var(--green); transform: translateX(2px); }
+    .odds-button.no { background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.1) 100%); border: 1px solid rgba(239, 68, 68, 0.3); }
+    .odds-button.no:hover { background: linear-gradient(135deg, rgba(239, 68, 68, 0.3) 0%, rgba(239, 68, 68, 0.15) 100%); border-color: var(--red); transform: translateX(2px); }
+    .odds-label { font-size: 15px; font-weight: 700; letter-spacing: 0.5px; }
     .odds-button.yes .odds-label { color: var(--green); }
     .odds-button.no .odds-label { color: var(--red); }
-    .odds-multiplier { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; color: var(--white); }
-    .prediction-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--white-10); }
+    .odds-price { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 700; color: var(--white); }
+    .odds-multiplier { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 700; color: var(--white); }
+    
+    .prediction-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08); }
     .prediction-volume { font-size: 12px; color: var(--white-50); }
     .prediction-volume strong { color: var(--white-70); font-family: 'JetBrains Mono', monospace; }
     .prediction-closes { font-size: 12px; color: var(--white-50); }
-    .prediction-closes .time { color: var(--purple-glow); font-weight: 600; }
+    .prediction-closes .time { color: #06b6d4; font-weight: 600; }
 
     /* Bet Slip */
     .bet-slip-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); z-index: 200; opacity: 0; visibility: hidden; transition: all 0.3s; }
     .bet-slip-overlay.show { opacity: 1; visibility: visible; }
-    .bet-slip { position: fixed; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, #1a1a24, #0d0d12); border-top-left-radius: 24px; border-top-right-radius: 24px; padding: 20px 20px 40px; z-index: 201; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); max-height: 85vh; overflow-y: auto; }
+    .bet-slip { position: fixed; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, #0d1a28, #050a0f); border-top-left-radius: 24px; border-top-right-radius: 24px; padding: 20px 20px 40px; z-index: 201; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); max-height: 85vh; overflow-y: auto; border-top: 1px solid rgba(6, 182, 212, 0.2); }
     .bet-slip-overlay.show .bet-slip { transform: translateY(0); }
-    .bet-slip-handle { width: 40px; height: 4px; background: var(--white-30); border-radius: 2px; margin: 0 auto 20px; }
+    .bet-slip-handle { width: 40px; height: 4px; background: rgba(6, 182, 212, 0.3); border-radius: 2px; margin: 0 auto 20px; }
     .bet-slip-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
     .bet-slip-title { font-size: 14px; color: var(--white-50); margin-bottom: 4px; }
     .bet-slip-question { font-size: 20px; font-weight: 600; max-width: 280px; }
@@ -286,7 +316,7 @@
     .empty-state-icon { font-size: 48px; margin-bottom: 16px; }
     .empty-state-title { font-size: 20px; font-weight: 600; color: var(--white-70); margin-bottom: 8px; }
     .loading { display: flex; align-items: center; justify-content: center; padding: 40px; }
-    .spinner { width: 40px; height: 40px; border: 3px solid var(--white-10); border-top-color: var(--purple-glow); border-radius: 50%; animation: spin 1s linear infinite; }
+    .spinner { width: 40px; height: 40px; border: 3px solid var(--white-10); border-top-color: #06b6d4; border-radius: 50%; animation: spin 1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     @media (max-width: 480px) {
@@ -298,16 +328,17 @@
       .odds-multiplier { font-size: 18px; }
     }
 
-    /* Bottom Navigation */
+    /* Bottom Navigation - WallStreetPredict Style */
     .bottom-nav {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
-      background: var(--bg-card);
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      background: linear-gradient(180deg, #0a1520 0%, #050a0f 100%);
+      border-top: 1px solid rgba(6, 182, 212, 0.15);
       display: flex;
       justify-content: space-around;
+      align-items: flex-end;
       padding: 12px 0 28px;
       max-width: 600px;
       margin: 0 auto;
@@ -321,8 +352,9 @@
       gap: 4px;
       color: var(--white-50);
       text-decoration: none;
-      font-size: 11px;
-      transition: color 0.2s;
+      font-size: 10px;
+      font-weight: 500;
+      transition: all 0.2s;
     }
 
     .nav-item:hover {
@@ -330,41 +362,50 @@
     }
 
     .nav-item.active {
-      color: var(--purple-glow);
+      color: #06b6d4;
     }
 
     .nav-item svg {
-      width: 24px;
-      height: 24px;
+      width: 22px;
+      height: 22px;
     }
 
-    /* Predictions Tab Styles */
-    .nav-item.predictions .nav-icon-wrapper {
+    /* Center Trade Button - Elevated Circle */
+    .nav-item.predictions {
       position: relative;
+      margin-top: -20px;
+    }
+    .nav-item.predictions .nav-icon-wrapper {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, #06b6d4 0%, #0891b2 50%, #0e7490 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(6, 182, 212, 0.4), 0 0 30px rgba(6, 182, 212, 0.2);
+      border: 3px solid #050a0f;
+      transition: all 0.2s;
+    }
+    .nav-item.predictions:hover .nav-icon-wrapper {
+      transform: scale(1.05);
+      box-shadow: 0 6px 25px rgba(6, 182, 212, 0.5), 0 0 40px rgba(6, 182, 212, 0.3);
     }
     .nav-item.predictions .nav-icon {
-      font-size: 20px;
+      font-size: 24px;
+      filter: none;
     }
     .nav-live-dot {
-      position: absolute;
-      top: -2px;
-      right: -6px;
-      width: 8px;
-      height: 8px;
-      background: #10b981;
-      border-radius: 50%;
-      border: 2px solid var(--bg-card);
-      animation: live-pulse 2s ease-in-out infinite;
+      display: none;
     }
-    @keyframes live-pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.7; transform: scale(1.2); }
+    .nav-item.predictions span:last-child {
+      margin-top: 6px;
     }
     .nav-item.predictions.active {
-      color: #a855f7;
+      color: #06b6d4;
     }
-    .nav-item.predictions.active .nav-icon {
-      filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.6));
+    .nav-item.predictions.active .nav-icon-wrapper {
+      background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
     }
 
     @supports (padding-bottom: env(safe-area-inset-bottom)) {
@@ -380,25 +421,24 @@
 <body>
 
   <header class="header">
-    <div class="logo" id="apehubLogo">Ape<span>Hub</span></div>
+    <div class="logo" id="apehubLogo"><span class="logo-icon">📈</span>WallStreet<span>Predict</span></div>
     <div class="header-actions">
-      <button class="my-bets-btn" onclick="openMyBets()">My Bets</button>
+      <button class="header-icon-btn">🔍</button>
       <div class="token-balance" onclick="openTokenModal()">
-        <div class="token-icon">💰</div>
-        <span class="token-amount" id="userBalance">0</span>
-        <span class="add-tokens">+</span>
+        <span class="token-amount" id="userBalance">$0.00</span>
       </div>
+      <button class="header-icon-btn" onclick="openMyBets()">👤</button>
     </div>
   </header>
 
   <main class="main">
     <div class="category-tabs">
-      <button class="category-tab active" data-category="daily">↑ Daily</button>
-      <button class="category-tab" data-category="weekly">✦ Weekly</button>
+      <button class="category-tab active" data-category="daily">📈 Daily</button>
+      <button class="category-tab" data-category="weekly">📊 Weekly</button>
       <button class="category-tab" data-category="crypto">₿ Crypto</button>
-      <button class="category-tab" data-category="earnings">$ Earnings</button>
-      <button class="category-tab" data-category="fed">% Fed</button>
-      <button class="category-tab" data-category="politics">★ Politics</button>
+      <button class="category-tab" data-category="earnings">💰 Earnings</button>
+      <button class="category-tab" data-category="fed">🏛️ Fed</button>
+      <button class="category-tab" data-category="politics">🗳️ Politics</button>
     </div>
     <div class="predictions-grid" id="predictionsGrid">
       <div class="loading"><div class="spinner"></div></div>
@@ -489,34 +529,30 @@
       </svg>
       <span>Home</span>
     </a>
-    <a href="news.html" class="nav-item">
-      <svg viewBox="0 0 16 16" fill="currentColor">
-        <path d="M8 0C8 4.418 4.418 8 0 8C4.418 8 8 11.582 8 16C8 11.582 11.582 8 16 8C11.582 8 8 4.418 8 0Z"/>
+    <a href="markets.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/>
       </svg>
-      <span>News</span>
+      <span>Watchlist</span>
     </a>
     <a href="predictions.html" class="nav-item predictions active">
       <div class="nav-icon-wrapper">
-        <span class="nav-icon">🔮</span>
+        <span class="nav-icon">�</span>
       </div>
-      <span>Predict</span>
+      <span>Trade</span>
     </a>
-    <a href="charts.html" class="nav-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M9 5v4"/>
-        <rect x="7" y="9" width="4" height="6" rx="0.5" fill="currentColor"/>
-        <path d="M9 15v4"/>
-        <path d="M15 3v2"/>
-        <rect x="13" y="5" width="4" height="8" rx="0.5"/>
-        <path d="M15 13v6"/>
+    <a href="news.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
       </svg>
-      <span>Charts</span>
+      <span>News</span>
     </a>
-    <a href="chat.html" class="nav-item">
+    <a href="analytics.html" class="nav-item">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.36 5.08L2 22l4.92-1.36C8.42 21.5 10.15 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2z"/>
+        <path d="M20 21v-8a2 2 0 00-2-2H6a2 2 0 00-2 2v8"/>
+        <rect x="4" y="3" width="16" height="8" rx="2"/>
       </svg>
-      <span>Chat</span>
+      <span>Portfolio</span>
     </a>
   </nav>
 
@@ -592,7 +628,7 @@
         const data = await res.json();
         if (data.success) {
           userBalance = data.balance;
-          document.getElementById('userBalance').textContent = userBalance.toLocaleString();
+          document.getElementById('userBalance').textContent = '$' + userBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
       } catch (err) { console.error('Error loading balance:', err); }
     }
@@ -625,7 +661,7 @@
         const data = await res.json();
         if (data.success) {
           userBalance = data.newBalance;
-          document.getElementById('userBalance').textContent = userBalance.toLocaleString();
+          document.getElementById('userBalance').textContent = '$' + userBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
           showBetSuccess(data.bet);
           loadPredictions();
         } else { alert(data.error || 'Failed to place bet'); }
@@ -748,45 +784,100 @@
       
       return refHtml;
     }
+    
+    // Helper function to get source info based on category
+    function getSourceInfo(category) {
+      const sources = {
+        'daily': { name: 'DailyEdge', icon: '📈' },
+        'weekly': { name: 'DailyEdge', icon: '📊' },
+        'crypto': { name: 'Polymarket', icon: 'P' },
+        'earnings': { name: 'Kalshi', icon: 'K' },
+        'fed': { name: 'Polymarket', icon: 'P' },
+        'politics': { name: 'Polymarket', icon: 'P' }
+      };
+      return sources[category] || { name: 'DailyEdge', icon: '📈' };
+    }
+    
+    // Generate mini chart SVG path
+    function generateMiniChartPath(isPositive) {
+      const points = [];
+      let y = 25 + Math.random() * 10;
+      for (let x = 0; x <= 80; x += 10) {
+        y = Math.max(5, Math.min(40, y + (Math.random() - (isPositive ? 0.3 : 0.7)) * 12));
+        points.push({ x, y });
+      }
+      const linePath = points.map((p, i) => (i === 0 ? `M${p.x},${p.y}` : `L${p.x},${p.y}`)).join(' ');
+      const areaPath = linePath + ` L80,45 L0,45 Z`;
+      return { line: linePath, area: areaPath };
+    }
 
     function renderPredictionCard(p, snapshot) {
       const isLocked = isDailyBettingLocked(p);
       const lockedClass = isLocked ? 'locked' : '';
-      const predictionDate = formatPredictionDate(p.resolves_at);
-      let priceHtml = '';
-      if (p.ticker && snapshot) {
-        const price = snapshot.price ? `$${parseFloat(snapshot.price).toFixed(2)}` : '';
-        const change = snapshot.change ? (snapshot.change > 0 ? '+' : '') + snapshot.change : '';
-        const changePercent = snapshot.changePercent ? (snapshot.changePercent > 0 ? '+' : '') + snapshot.changePercent + '%' : '';
-        const color = snapshot.change > 0 ? 'var(--green)' : (snapshot.change < 0 ? 'var(--red)' : 'var(--white-70)');
-        priceHtml = `<span class="prediction-price" style="color:${color}">${price} <span style="font-size:12px;">${change} (${changePercent})</span></span>`;
-      }
       
-      // Generate reference info based on question type
-      const referenceHtml = generateReferenceInfo(p, snapshot);
+      // Calculate probability from multipliers
+      const yesProbability = (1 / parseFloat(p.yes_payout_multiplier) * 100).toFixed(0);
+      const noProbability = (100 - parseFloat(yesProbability)).toFixed(0);
+      
+      // Calculate price from probability (Polymarket style)
+      const yesPrice = (yesProbability / 100).toFixed(2);
+      const noPrice = (noProbability / 100).toFixed(2);
+      
+      // Simulate change value
+      const changeValue = (Math.random() * 5 - 1).toFixed(1);
+      const isPositive = parseFloat(changeValue) >= 0;
+      
+      // Generate mini chart path
+      const chartPath = generateMiniChartPath(isPositive);
+      
+      // Get source info
+      const sourceInfo = getSourceInfo(p.category);
       
       return `
         <div class="prediction-card ${p.featured ? 'featured' : ''} ${lockedClass}" onclick="openBetSlip(${p.id})">
           ${isLocked ? '<div class="locked-badge">🔒 LOCKED</div>' : ''}
-          <div class="prediction-meta">
-            ${p.ticker ? `<div class="prediction-ticker-wrap"><span class="prediction-ticker">${p.ticker}</span>${priceHtml}</div>` : ''}
-            ${isLocked ? '' : `<span class="prediction-date">📅 ${predictionDate}</span>`}
+          
+          <div class="prediction-source">
+            <div class="source-icon">${sourceInfo.icon}</div>
+            <span class="source-name">${sourceInfo.name}</span>
           </div>
-          <div class="prediction-title">${p.title}</div>
-          ${referenceHtml}
+          
+          <div class="prediction-content">
+            <div class="prediction-info">
+              <div class="prediction-title">${p.title}</div>
+              <div class="prediction-probability">
+                <span class="probability-value">${yesProbability}%</span>
+                <span class="probability-change ${isPositive ? 'up' : 'down'}">${isPositive ? '+' : ''}${changeValue}%</span>
+              </div>
+            </div>
+            <div class="prediction-chart-wrap">
+              <svg class="mini-chart" viewBox="0 0 80 45">
+                <defs>
+                  <linearGradient id="chartGrad${p.id}" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:${isPositive ? '#10b981' : '#ef4444'};stop-opacity:0.4"/>
+                    <stop offset="100%" style="stop-color:${isPositive ? '#10b981' : '#ef4444'};stop-opacity:0"/>
+                  </linearGradient>
+                </defs>
+                <path class="mini-chart-area" d="${chartPath.area}" fill="url(#chartGrad${p.id})"/>
+                <path class="mini-chart-line" d="${chartPath.line}" style="stroke:${isPositive ? '#10b981' : '#ef4444'}"/>
+              </svg>
+            </div>
+          </div>
+          
           <div class="prediction-odds">
             <button class="odds-button yes ${isLocked ? 'disabled' : ''}" onclick="event.stopPropagation(); ${isLocked ? 'showLockedMessage()' : `openBetSlip(${p.id}, 'yes')`}">
-              <div class="odds-label">YES</div>
-              <div class="odds-multiplier">${parseFloat(p.yes_payout_multiplier).toFixed(2)}x</div>
+              <span class="odds-label">BUY YES</span>
+              <span class="odds-price">$${yesPrice}</span>
             </button>
             <button class="odds-button no ${isLocked ? 'disabled' : ''}" onclick="event.stopPropagation(); ${isLocked ? 'showLockedMessage()' : `openBetSlip(${p.id}, 'no')`}">
-              <div class="odds-label">NO</div>
-              <div class="odds-multiplier">${parseFloat(p.no_payout_multiplier).toFixed(2)}x</div>
+              <span class="odds-label">BUY NO</span>
+              <span class="odds-price">$${noPrice}</span>
             </button>
           </div>
+          
           <div class="prediction-footer">
             <div class="prediction-volume"><strong>${(p.yes_volume + p.no_volume).toLocaleString()}</strong> tokens bet</div>
-            <div class="prediction-closes">${isLocked ? '<span class="locked-text">Resolves at 4:30pm ET</span>' : `Closes <span class="time">${formatTimeLeft(p.closes_at)}</span>`}</div>
+            <div class="prediction-closes">${isLocked ? '<span class="locked-text">Resolves 4:30pm ET</span>' : `Closes <span class="time">${formatTimeLeft(p.closes_at)}</span>`}</div>
           </div>
         </div>
       `;
