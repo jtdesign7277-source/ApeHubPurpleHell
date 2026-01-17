@@ -93,7 +93,7 @@
 
     /* Prediction Cards - WallStreetPredict Style */
     .predictions-grid { display: flex; flex-direction: column; gap: 16px; }
-    .prediction-card { background: linear-gradient(145deg, #0d2a3a 0%, #0a1f2e 50%, #081822 100%); border: 1px solid rgba(6, 182, 212, 0.2); border-radius: 20px; padding: 20px; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden; }
+    .prediction-card { background: linear-gradient(180deg, #0d1a28, #050a0f); border: 1px solid rgba(6, 182, 212, 0.2); border-radius: 24px; padding: 20px; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden; }
     .prediction-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.3), transparent); }
     .prediction-card:hover { border-color: rgba(6, 182, 212, 0.4); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(6, 182, 212, 0.15); }
     .prediction-card.featured { border-color: rgba(168, 85, 247, 0.4); }
@@ -122,20 +122,20 @@
     
     /* Probability Display */
     .prediction-probability { display: flex; align-items: baseline; gap: 8px; margin-top: 10px; }
-    .probability-label { font-size: 12px; color: var(--white-50); }
-    .probability-value { font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 700; color: var(--white); }
+    .probability-label { font-size: 14px; color: var(--white-50); }
+    .probability-value { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 600; color: var(--white); }
     .probability-change { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; }
     .probability-change.up { color: var(--green); }
     .probability-change.down { color: var(--red); }
     
     .prediction-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
     .prediction-ticker-wrap { display: flex; flex-direction: row; align-items: center; gap: 12px; }
-    .prediction-ticker { background: linear-gradient(180deg, #1a3a4a 0%, #0f2a38 100%); padding: 6px 14px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700; color: var(--white); border: 1px solid rgba(6, 182, 212, 0.2); box-shadow: 0 2px 6px rgba(0,0,0,0.3); letter-spacing: 0.5px; }
+    .prediction-ticker { background: var(--white-05); padding: 6px 14px; border-radius: 10px; font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 600; color: var(--white-70); border: 2px solid var(--white-10); box-shadow: none; letter-spacing: 0.5px; }
     .prediction-price { font-size: 14px; font-family: 'JetBrains Mono', monospace; font-weight: 600; }
     .prediction-category { font-size: 12px; color: var(--white-70); text-transform: uppercase; letter-spacing: 0.5px; }
-    .prediction-date { font-size: 11px; color: var(--white-50); margin-left: auto; }
+    .prediction-date { font-size: 13px; color: #06b6d4; margin-left: auto; }
     .bet-slip-date { font-size: 13px; color: #06b6d4; margin-top: 6px; }
-    .prediction-title { font-size: 17px; font-weight: 600; line-height: 1.4; margin-bottom: 0; color: #fff; }
+    .prediction-title { font-size: 20px; font-weight: 600; line-height: 1.4; margin-bottom: 0; color: #fff; }
     .prediction-reference { font-size: 11px; color: var(--white-50); margin-bottom: 12px; font-family: 'JetBrains Mono', monospace; display: flex; gap: 12px; flex-wrap: wrap; }
     .prediction-reference .ref-item { background: var(--white-05); padding: 4px 8px; border-radius: 6px; }
     .prediction-reference .ref-label { color: var(--white-50); }
@@ -143,25 +143,23 @@
     .prediction-reference .ref-value.positive { color: var(--green); }
     .prediction-reference .ref-value.negative { color: var(--red); }
     
-    /* Stacked Buy Buttons - Polymarket Style */
-    .prediction-odds { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
-    .odds-button { padding: 12px 16px; border-radius: 10px; border: none; font-family: inherit; cursor: pointer; transition: all 0.2s; display: flex; justify-content: center; align-items: center; gap: 6px; }
-    .odds-button.yes { background: #10b981; }
-    .odds-button.yes:hover { background: #34d399; transform: scale(1.01); box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4); }
-    .odds-button.no { background: #ef4444; }
-    .odds-button.no:hover { background: #f87171; transform: scale(1.01); box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4); }
-    .odds-label { font-size: 14px; font-weight: 700; letter-spacing: 0.5px; }
-    .odds-button.yes .odds-label { color: #ffffff; }
-    .odds-button.no .odds-label { color: #ffffff; }
-    .odds-price { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700; }
-    .odds-button.yes .odds-price { color: rgba(255, 255, 255, 0.9); }
-    .odds-button.no .odds-price { color: rgba(255, 255, 255, 0.9); }
-    .odds-separator { font-size: 14px; font-weight: 400; }
-    .odds-button.yes .odds-separator { color: rgba(255, 255, 255, 0.6); }
-    .odds-button.no .odds-separator { color: rgba(255, 255, 255, 0.6); }
+    /* Stacked Buy Buttons - Matching Bet Slip Style */
+    .prediction-odds { display: flex; flex-direction: row; gap: 12px; margin-top: 16px; }
+    .odds-button { flex: 1; padding: 16px 12px; border-radius: 14px; border: 2px solid var(--white-10); background: var(--white-05); font-family: inherit; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+    .odds-button.yes { border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.08); }
+    .odds-button.yes:hover { border-color: var(--green); background: rgba(16, 185, 129, 0.15); }
+    .odds-button.yes.selected { border-color: var(--green); background: rgba(16, 185, 129, 0.15); }
+    .odds-button.no { border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.08); }
+    .odds-button.no:hover { border-color: var(--red); background: rgba(239, 68, 68, 0.15); }
+    .odds-button.no.selected { border-color: var(--red); background: rgba(239, 68, 68, 0.15); }
+    .odds-label { font-size: 16px; font-weight: 700; letter-spacing: 0.5px; }
+    .odds-button.yes .odds-label { color: var(--green); }
+    .odds-button.no .odds-label { color: var(--red); }
+    .odds-price { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 500; color: var(--white-50); }
+    .odds-separator { display: none; }
     .odds-multiplier { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700; color: var(--white); }
-    .odds-button.disabled { opacity: 0.6; cursor: not-allowed; }
-    .odds-button.disabled:hover { transform: none; box-shadow: none; }
+    .odds-button.disabled { opacity: 0.5; cursor: not-allowed; }
+    .odds-button.disabled:hover { transform: none; box-shadow: none; border-color: var(--white-10); background: var(--white-05); }
     
     .prediction-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08); }
     .prediction-volume { font-size: 12px; color: var(--white-50); }
@@ -866,14 +864,12 @@
           
           <div class="prediction-odds">
             <button class="odds-button yes ${isLocked ? 'disabled' : ''}" onclick="event.stopPropagation(); ${isLocked ? 'showLockedMessage()' : `openBetSlip(${p.id}, 'yes')`}">
-              <span class="odds-label">BUY YES</span>
-              <span class="odds-separator">|</span>
-              <span class="odds-price">$${yesPrice}</span>
+              <span class="odds-label">YES ✓</span>
+              <span class="odds-price">${(1/parseFloat(yesPrice)).toFixed(1)}x payout</span>
             </button>
             <button class="odds-button no ${isLocked ? 'disabled' : ''}" onclick="event.stopPropagation(); ${isLocked ? 'showLockedMessage()' : `openBetSlip(${p.id}, 'no')`}">
-              <span class="odds-label">BUY NO</span>
-              <span class="odds-separator">|</span>
-              <span class="odds-price">$${noPrice}</span>
+              <span class="odds-label">NO ✗</span>
+              <span class="odds-price">${(1/parseFloat(noPrice)).toFixed(1)}x payout</span>
             </button>
           </div>
           
