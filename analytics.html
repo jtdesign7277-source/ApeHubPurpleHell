@@ -451,15 +451,17 @@
     }
 
     .legend-logo {
-      width: 28px;
-      height: 28px;
-      border-radius: 6px;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #1e1e2e, #2a2a3e);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
-      font-weight: bold;
-      font-size: 10px;
+      font-weight: 700;
+      font-size: 0.65rem;
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.1);
       flex-shrink: 0;
     }
 
@@ -1731,7 +1733,7 @@
       legend.innerHTML = holdingsData.map((h, i) => `
         <div class="legend-item" data-index="${i}">
           <div class="legend-dot" style="background: ${h.color}"></div>
-          <div class="legend-logo" style="background: ${h.color}">${h.symbol.slice(0, 2)}</div>
+          <div class="legend-logo">${h.symbol.slice(0, 2)}</div>
           <div class="legend-info">
             <div class="legend-symbol">${h.symbol}</div>
             <div class="legend-name">${h.name}</div>
