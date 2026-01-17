@@ -421,7 +421,6 @@
 <body>
 
   <header class="header">
-    <div class="logo" id="apehubLogo"><span class="logo-icon">📈</span>WallStreet<span>Predict</span></div>
     <div class="header-actions">
       <button class="header-icon-btn">🔍</button>
       <div class="token-balance" onclick="openTokenModal()">
@@ -523,37 +522,35 @@
 
   <!-- Bottom Navigation -->
   <nav class="bottom-nav">
-    <a href="dashboard.html" class="nav-item">
+    <a href="javascript:history.back()" class="nav-item">
       <svg viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/>
+        <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
       </svg>
-      <span>Home</span>
+      <span>Back</span>
     </a>
-    <a href="news.html" class="nav-item">
+    <a href="#" class="nav-item" onclick="openMyBets(); return false;">
       <svg viewBox="0 0 24 24" fill="currentColor">
-        <path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l4.59-4.58L18 11l-6 6z"/>
       </svg>
-      <span>News</span>
+      <span>Open Bets</span>
     </a>
     <a href="predictions.html" class="nav-item predictions active">
       <div class="nav-icon-wrapper">
-        <span class="nav-icon">�</span>
+        <span class="nav-icon">📊</span>
       </div>
       <span>Trade</span>
     </a>
-    <a href="markets.html" class="nav-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M3 3v18h18"/>
-        <path d="M18 9l-5 5-4-4-3 3"/>
+    <a href="#" class="nav-item" onclick="openBetSlip(); return false;">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
       </svg>
-      <span>Markets</span>
+      <span>Bet Slip</span>
     </a>
-    <a href="analytics.html" class="nav-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M20 21v-8a2 2 0 00-2-2H6a2 2 0 00-2 2v8"/>
-        <rect x="4" y="3" width="16" height="8" rx="2"/>
+    <a href="#" class="nav-item" onclick="openHistory(); return false;">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M13 3a9 9 0 00-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0013 21a9 9 0 000-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>
       </svg>
-      <span>Portfolio</span>
+      <span>History</span>
     </a>
   </nav>
 
@@ -568,6 +565,7 @@
       </div>
       <div class="my-bets-tabs">
         <button class="my-bets-tab active" data-filter="active" onclick="filterMyBets('active')">Active</button>
+        <button class="my-bets-tab" data-filter="all" onclick="filterMyBets('all')">History</button>
         <button class="my-bets-tab" data-filter="won" onclick="filterMyBets('won')">Won 🎉</button>
         <button class="my-bets-tab" data-filter="lost" onclick="filterMyBets('lost')">Lost</button>
       </div>
@@ -1127,6 +1125,27 @@
     function closeMyBets() {
       document.getElementById('myBetsModal').classList.remove('show');
       document.body.style.overflow = '';
+    }
+
+    function openBetSlip() {
+      // Open the bet slip overlay (shows current pending bets)
+      const betSlip = document.getElementById('betSlipOverlay');
+      if (betSlip) {
+        betSlip.classList.add('show');
+      } else {
+        showNotification('No pending bets in slip', 'info');
+      }
+    }
+
+    function openHistory() {
+      // Open My Bets modal with history/settled bets filter
+      document.getElementById('myBetsModal').classList.add('show');
+      document.body.style.overflow = 'hidden';
+      loadMyBets();
+      // Switch to show all settled bets (won + lost)
+      setTimeout(() => {
+        filterMyBets('all');
+      }, 100);
     }
 
     async function loadMyBets() {
