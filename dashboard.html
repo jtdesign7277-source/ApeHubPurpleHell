@@ -1628,6 +1628,18 @@
       box-shadow: 0 0 16px rgba(0, 215, 117, 0.5), inset 0 0 12px rgba(0, 215, 117, 0.15);
     }
 
+    .modal-btn-remove {
+      background: rgba(255, 71, 87, 0.1);
+      border-color: var(--color-down);
+      color: var(--color-down);
+      box-shadow: 0 0 12px rgba(255, 71, 87, 0.3), inset 0 0 8px rgba(255, 71, 87, 0.1);
+    }
+
+    .modal-btn-remove:hover {
+      background: rgba(255, 71, 87, 0.2);
+      box-shadow: 0 0 16px rgba(255, 71, 87, 0.5), inset 0 0 12px rgba(255, 71, 87, 0.15);
+    }
+
     .modal-buttons {
       display: flex;
       gap: 8px;
@@ -2429,17 +2441,27 @@
           </div>
           <div class="form-group">
             <label class="form-label">Add Shares</label>
-            <input type="number" class="form-input" id="modal-shares" placeholder="0" min="0" step="any">
+            <input type="number" class="form-input" id="modal-shares" placeholder="0" min="0" step="any" onchange="updateModalCalculations()">
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Price Paid</label>
-            <input type="number" class="form-input" id="modal-cost" placeholder="$0.00" min="0" step="0.01">
+            <input type="number" class="form-input" id="modal-cost" placeholder="$0.00" min="0" step="0.01" onchange="updateModalCalculations()">
           </div>
           <div class="form-group">
             <label class="form-label">Purchase Date</label>
             <input type="date" class="form-input" id="modal-purchase-date">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Sell Shares</label>
+            <input type="number" class="form-input" id="modal-sell-shares" placeholder="0" min="0" step="any" onchange="updateModalCalculations()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Sale Price</label>
+            <input type="number" class="form-input" id="modal-sell-price" placeholder="$0.00" min="0" step="0.01" onchange="updateModalCalculations()">
           </div>
         </div>
         <div class="form-row">
@@ -2468,6 +2490,7 @@
         </div>
         <div class="modal-buttons">
           <button class="modal-btn modal-btn-cancel" onclick="closeModal()">Cancel</button>
+          <button class="modal-btn modal-btn-remove" onclick="sellFromPosition()">Sell</button>
           <button class="modal-btn modal-btn-add" onclick="addToPosition()">Add</button>
           <button class="modal-btn modal-btn-save" onclick="savePosition()">Save</button>
         </div>
@@ -3075,16 +3098,18 @@
       const existingShares = parseFloat(document.getElementById('modal-total-shares').textContent) || 0;
       const addShares = parseFloat(document.getElementById('modal-shares').value) || 0;
       const newCost = parseFloat(document.getElementById('modal-cost').value) || 0;
+      const sellShares = parseFloat(document.getElementById('modal-sell-shares').value) || 0;
       const stock = watchlist.find(s => s.symbol === currentEditSymbol) || stockDatabase.find(s => s.symbol === currentEditSymbol);
       const existing = positions[currentEditSymbol] || { shares: 0, avgCost: 0 };
       
       if (!stock) return;
       
-      // Calculate with existing + new shares
-      const totalShares = existingShares + addShares;
+      // Calculate net shares after adding and selling
+      const netAddShares = addShares - sellShares;
+      const totalShares = existingShares + netAddShares;
       const totalCostValue = (existing.shares * existing.avgCost) + (addShares * newCost);
       const newAvgCost = totalShares > 0 ? totalCostValue / totalShares : existing.avgCost;
-      const marketValue = totalShares * stock.price;
+      const marketValue = Math.max(0, totalShares) * stock.price;
       const totalReturn = marketValue - totalCostValue;
       const isGain = totalReturn >= 0;
       
@@ -3210,6 +3235,50 @@
       
       renderWatchlist();
       showToast(`Added ${newShares} shares`, 'success');
+    }
+
+    // Sell from existing position
+    function sellFromPosition() {
+      const sellShares = parseFloat(document.getElementById('modal-sell-shares').value) || 0;
+      const sellPrice = parseFloat(document.getElementById('modal-sell-price').value) || 0;
+      
+      if (sellShares <= 0) {
+        showToast('Enter shares to sell', 'removed');
+        return;
+      }
+      
+      const existing = positions[currentEditSymbol] || { shares: 0, avgCost: 0 };
+      
+      if (sellShares > existing.shares) {
+        showToast(`Can't sell ${sellShares} shares - only have ${existing.shares}`, 'removed');
+        return;
+      }
+      
+      const totalShares = existing.shares - sellShares;
+      
+      if (totalShares <= 0) {
+        delete positions[currentEditSymbol];
+        showToast(`Sold all shares of ${currentEditSymbol}`, 'success');
+      } else {
+        // Keep the same average cost since we're not changing cost basis
+        positions[currentEditSymbol] = { shares: totalShares, avgCost: existing.avgCost };
+        showToast(`Sold ${sellShares} shares of ${currentEditSymbol}`, 'success');
+      }
+      
+      saveUserData();
+      
+      // Update the display and clear sell inputs
+      document.getElementById('modal-total-shares').textContent = totalShares;
+      document.getElementById('modal-sell-shares').value = '';
+      document.getElementById('modal-sell-price').value = '';
+      updateModalCalculations();
+      
+      renderWatchlist();
+      
+      // Close modal if all shares sold
+      if (totalShares <= 0) {
+        setTimeout(closeModal, 500);
+      }
     }
 
     // Modal input listeners
