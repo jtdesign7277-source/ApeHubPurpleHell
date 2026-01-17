@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body { font-family: Arial; background: #0a0a0f; color: #fff; padding: 20px; }
+  .container { max-width: 500px; margin: 0 auto; }
+  #earnings-articles-container, #crypto-articles-container { 
+    border: 2px solid #a855f7; 
+    padding: 20px; 
+    margin: 20px 0;
+    min-height: 100px;
+    background: rgba(168,85,247,0.1);
+  }
+  .earnings-timeline-item { padding: 10px; border-left: 2px solid #a855f7; margin-left: 20px; }
+  .earnings-bloomberg-card { padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px; }
+  .earnings-bloomberg-header { display: flex; justify-content: space-between; }
+  .earnings-bloomberg-info h4 { margin: 5px 0; }
+  .company-name { font-size: 0.8em; color: rgba(255,255,255,0.6); }
+  .earnings-bloomberg-metrics { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 10px; }
+  .earnings-metric-box { text-align: center; padding: 5px; background: rgba(255,255,255,0.02); border-radius: 4px; }
+  .earnings-metric-box .label { font-size: 0.7em; color: rgba(255,255,255,0.6); }
+  .earnings-metric-box .value { font-weight: bold; margin-top: 3px; }
+  button { padding: 10px 20px; margin: 10px 0; background: #a855f7; color: white; border: none; border-radius: 4px; cursor: pointer; }
+  button:hover { background: #9333ea; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Render Function Test</h1>
+  
+  <button onclick="testRenderEarnings()">Test renderEarningsNews()</button>
+  <button onclick="testRenderCrypto()">Test renderCryptoNews()</button>
+  
+  <h2>Earnings</h2>
+  <div id="earnings-articles-container">
+    <div style="text-align: center; color: rgba(255,255,255,0.6);">No earnings data loaded</div>
+  </div>
+  
+  <h2>Crypto</h2>
+  <div id="crypto-prices-container">
+    <div style="text-align: center; color: rgba(255,255,255,0.6);">No crypto prices loaded</div>
+  </div>
+  <div id="crypto-articles-container">
+    <div style="text-align: center; color: rgba(255,255,255,0.6);">No crypto articles loaded</div>
+  </div>
+</div>
+
+<script>
+function testRenderEarnings() {
+  renderEarningsNews(null, 'today');
+}
+
+function testRenderCrypto() {
+  renderCryptoNews(null);
+}
+
+// Copy of renderEarningsNews from news.html
+function renderEarningsNews(articles, period = 'today') {
+  const container = document.getElementById('earnings-articles-container');
+  
+  if (!container) {
+    console.error('Earnings container not found');
+    return;
+  }
+
+  // Get date range for period
+  const now = new Date();
+  let from, to;
+  if (period === 'today') {
+    from = to = now.toISOString().slice(0, 10);
+  } else if (period === 'week') {
+    from = now.toISOString().slice(0, 10);
+    const weekEnd = new Date(now);
+    weekEnd.setDate(now.getDate() + 7);
+    to = weekEnd.toISOString().slice(0, 10);
+  } else if (period === 'month') {
+    from = now.toISOString().slice(0, 10);
+    to = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().slice(0, 10);
+  }
+
+  // Use fallback mock data immediately
+  const mockEarnings = [
+    { symbol: 'AAPL', date: from, hour: 'amc', epsEstimate: 2.10, revenueEstimate: 85e9 },
+    { symbol: 'MSFT', date: from, hour: 'amc', epsEstimate: 3.28, revenueEstimate: 72e9 },
+    { symbol: 'GOOGL', date: from, hour: 'amc', epsEstimate: 1.75, revenueEstimate: 92e9 },
+    { symbol: 'AMZN', date: from, hour: 'amc', epsEstimate: 1.35, revenueEstimate: 168e9 },
+    { symbol: 'NVDA', date: from, hour: 'amc', epsEstimate: 5.92, revenueEstimate: 34e9 },
+    { symbol: 'META', date: from, hour: 'amc', epsEstimate: 6.12, revenueEstimate: 40e9 },
+    { symbol: 'TSLA', date: from, hour: 'amc', epsEstimate: 0.78, revenueEstimate: 27e9 },
+    { symbol: 'NFLX', date: from, hour: 'amc', epsEstimate: 3.91, revenueEstimate: 9.4e9 }
+  ];
+  
+  let topEarnings = mockEarnings;
+  function formatEarningsDate(dateStr) {
+    const date = new Date(dateStr + 'T00:00:00');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    if (date.getTime() === today.getTime()) return 'Today';
+    if (date.getTime() === tomorrow.getTime()) return 'Tomorrow';
+    return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  }
+
+  // Get timing label
+  function getTimingLabel(hour) {
+    if (hour === 'bmo' || hour === 'amc') {
+      return hour === 'bmo' ? 'Before Open' : 'After Close';
+    }
+    return 'TBD';
+  }
+
+  container.innerHTML = `
+    <div class="earnings-section-header">
+      <div class="icon">📊</div>
+      <div class="text">
+        <h3>Earnings Calendar</h3>
+        <p>${period === 'today' ? "Today's" : period === 'week' ? 'This Week\'s' : 'This Month\'s'} reporting companies</p>
+      </div>
+      <div class="count">${topEarnings.length} reports</div>
+    </div>
+    <div class="earnings-timeline">
+      ${topEarnings.map((e, index) => {
+        const hasReported = false;
+        const beat = e.epsActual && e.epsEstimate && e.epsActual > e.epsEstimate;
+        const miss = e.epsActual && e.epsEstimate && e.epsActual < e.epsEstimate;
+        const status = hasReported ? (beat ? 'bullish' : miss ? 'bearish' : 'pending') : 'pending';
+        const timingClass = e.hour === 'bmo' ? 'bmo' : e.hour === 'amc' ? 'amc' : 'tbd';
+        
+        return `
+        <div class="earnings-timeline-item">
+          <div class="earnings-timeline-dot ${status}"></div>
+          <div class="earnings-bloomberg-card ${hasReported ? status : ''}">
+            <div class="earnings-bloomberg-header">
+              <div class="earnings-bloomberg-company">
+                <div class="earnings-bloomberg-logo ${hasReported ? status : ''}">
+                  ${e.symbol.substring(0, 3)}
+                </div>
+                <div class="earnings-bloomberg-info">
+                  <h4>
+                    ${e.symbol}
+                    ${hasReported ? `<span class="earnings-result-tag ${beat ? 'beat' : miss ? 'miss' : 'pending'}">${beat ? '▲ Beat' : miss ? '▼ Miss' : 'In-Line'}</span>` : ''}
+                  </h4>
+                  <div class="company-name">${e.symbol}</div>
+                </div>
+              </div>
+              <div class="earnings-bloomberg-timing">
+                <span class="earnings-timing-badge ${timingClass}">${getTimingLabel(e.hour)}</span>
+                <span class="earnings-date-label">${formatEarningsDate(e.date)}</span>
+              </div>
+            </div>
+            <div class="earnings-bloomberg-metrics">
+              <div class="earnings-metric-box">
+                <div class="label">Est. EPS</div>
+                <div class="value">${e.epsEstimate != null ? '$' + e.epsEstimate.toFixed(2) : '--'}</div>
+              </div>
+              <div class="earnings-metric-box">
+                <div class="label">Est. Rev</div>
+                <div class="value">${e.revenueEstimate != null ? '$' + (e.revenueEstimate / 1e9).toFixed(2) + 'B' : '--'}</div>
+              </div>
+              <div class="earnings-metric-box">
+                <div class="label">${hasReported ? 'Actual EPS' : 'Reporting'}</div>
+                <div class="value ${hasReported ? (beat ? 'bullish' : miss ? 'bearish' : '') : ''}">${hasReported && e.epsActual != null ? '$' + e.epsActual.toFixed(2) : e.date}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `}).join('')}
+    </div>
+  `;
+}
+
+function renderCryptoNews(articles) {
+  const container = document.getElementById('crypto-articles-container');
+  const pricesContainer = document.getElementById('crypto-prices-container');
+  
+  if (!container) {
+    console.error('Crypto articles container not found');
+    return;
+  }
+  
+  // Default crypto prices
+  const cryptoPrices = [
+    { symbol: 'BTC', icon: '₿', price: 98750, change: 4.2 },
+    { symbol: 'ETH', icon: 'Ξ', price: 3450, change: 3.8 },
+    { symbol: 'SOL', icon: '◎', price: 247, change: 5.1 }
+  ];
+  
+  // Render crypto prices immediately
+  if (pricesContainer) {
+    pricesContainer.innerHTML = cryptoPrices.map(crypto => `
+      <div class="crypto-price-item">
+        <span class="crypto-icon">${crypto.icon}</span>
+        <span class="crypto-ticker">${crypto.symbol}</span>
+        <span class="crypto-value">$${crypto.price.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
+        <span class="crypto-pct ${crypto.change > 0 ? 'up' : 'down'}">${crypto.change > 0 ? '+' : ''}${crypto.change.toFixed(2)}%</span>
+      </div>
+    `).join('');
+  }
+  
+  // Render crypto articles
+  if (!articles || articles.length === 0) {
+    const fallbackArticles = [
+      { headline: 'Bitcoin Reaches New All-Time Highs Above $98K', summary: 'Major institutional adoption continues to drive BTC upward as ETFs see record inflows.', datetime: Math.floor(Date.now() / 1000) - 3600, url: '#', source: 'Crypto' },
+      { headline: 'Ethereum Staking Reaches $30B in Total Value Locked', summary: 'ETH 2.0 continues to attract validators with sustainable yield opportunities.', datetime: Math.floor(Date.now() / 1000) - 7200, url: '#', source: 'Crypto' },
+      { headline: 'Solana Network Hits 4,000 TPS Milestone', summary: 'SOL ecosystem expansion driving increased developer activity and ecosystem growth.', datetime: Math.floor(Date.now() / 1000) - 10800, url: '#', source: 'Crypto' },
+      { headline: 'Bitcoin Options Volume Surges on Institutional Interest', summary: 'Derivatives market shows strong demand from professional traders positioning for volatility.', datetime: Math.floor(Date.now() / 1000) - 14400, url: '#', source: 'Crypto' }
+    ];
+    articles = fallbackArticles;
+  }
+  
+  container.innerHTML = articles.slice(0, 8).map(article => `
+    <a href="${article.url}" target="_blank" class="crypto-article" style="text-decoration: none; display: block; cursor: pointer; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+      <div class="crypto-article-time">${formatTimeAgo(article.datetime)}</div>
+      <h3 class="crypto-article-title">${article.headline}</h3>
+      <p class="crypto-article-summary">${article.summary ? article.summary.substring(0, 150) + '...' : ''}</p>
+    </a>
+  `).join('');
+}
+
+function formatTimeAgo(timestamp) {
+  const now = Date.now();
+  const diff = now - (timestamp * 1000);
+  const minutes = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+  
+  if (minutes < 1) return 'Just now';
+  if (minutes < 60) return `${minutes} min ago`;
+  if (hours < 24) return `${hours} hr ago`;
+  return `${days} day${days > 1 ? 's' : ''} ago`;
+}
+</script>
+</body>
+</html>

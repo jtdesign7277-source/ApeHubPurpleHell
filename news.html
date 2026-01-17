@@ -2704,8 +2704,8 @@
       const allArticles = await fetchAllNews();
       
       if (!allArticles || allArticles.length === 0) {
-        console.error('No articles fetched');
-        return;
+        console.error('No articles fetched - rendering with fallback data');
+        // Continue with rendering even if no articles - fallback will be used
       }
       
       // Categorize articles
