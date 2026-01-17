@@ -352,19 +352,6 @@
       return emojis[league] || '⚽';
     }
 
-    function generateStats(awayScore, homeScore) {
-      // Generate mock stats based on scores
-      const totalPoints = awayScore + homeScore;
-      const awayPct = totalPoints > 0 ? Math.round((awayScore / totalPoints) * 100) : 50;
-      const homePct = 100 - awayPct;
-      
-      return {
-        fg: { away: Math.round(35 + Math.random() * 15), home: Math.round(35 + Math.random() * 15) },
-        rebounds: { away: Math.round(30 + Math.random() * 20), home: Math.round(30 + Math.random() * 20) },
-        assists: { away: Math.round(15 + Math.random() * 15), home: Math.round(15 + Math.random() * 15) }
-      };
-    }
-
     async function loadScores() {
       const container = document.getElementById('gamesContainer');
       container.innerHTML = `
@@ -403,8 +390,6 @@
           minute: '2-digit' 
         });
 
-        const stats = generateStats(parseInt(awayScore), parseInt(homeScore));
-
         return `
           <div class="game-card ${isLive ? 'live' : ''}">
             <div class="game-header">
@@ -431,38 +416,6 @@
               </div>
               <div class="team-score ${parseInt(homeScore) > parseInt(awayScore) ? 'winning' : ''}">${hasScores ? homeScore : '-'}</div>
             </div>
-
-            ${hasScores ? `
-            <div class="game-stats">
-              <div class="stats-row">
-                <span class="stat-value left">${stats.fg.away}%</span>
-                <div class="stat-bar-container">
-                  <div class="stat-bar"><div class="stat-bar-fill away" style="width: ${stats.fg.away}%"></div></div>
-                  <span class="stat-label">FG%</span>
-                  <div class="stat-bar"><div class="stat-bar-fill home" style="width: ${stats.fg.home}%"></div></div>
-                </div>
-                <span class="stat-value right">${stats.fg.home}%</span>
-              </div>
-              <div class="stats-row">
-                <span class="stat-value left">${stats.rebounds.away}</span>
-                <div class="stat-bar-container">
-                  <div class="stat-bar"><div class="stat-bar-fill away" style="width: ${stats.rebounds.away / 60 * 100}%"></div></div>
-                  <span class="stat-label">REB</span>
-                  <div class="stat-bar"><div class="stat-bar-fill home" style="width: ${stats.rebounds.home / 60 * 100}%"></div></div>
-                </div>
-                <span class="stat-value right">${stats.rebounds.home}</span>
-              </div>
-              <div class="stats-row">
-                <span class="stat-value left">${stats.assists.away}</span>
-                <div class="stat-bar-container">
-                  <div class="stat-bar"><div class="stat-bar-fill away" style="width: ${stats.assists.away / 40 * 100}%"></div></div>
-                  <span class="stat-label">AST</span>
-                  <div class="stat-bar"><div class="stat-bar-fill home" style="width: ${stats.assists.home / 40 * 100}%"></div></div>
-                </div>
-                <span class="stat-value right">${stats.assists.home}</span>
-              </div>
-            </div>
-            ` : ''}
           </div>
         `;
       }).join('');
