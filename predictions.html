@@ -105,8 +105,13 @@
     .sport-game-status { font-size: 11px; color: #00ff88; display: flex; align-items: center; gap: 5px; }
     .sport-live-dot { width: 6px; height: 6px; background: #00ff88; border-radius: 50%; animation: pulse 1.5s infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-    .sport-team-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .sport-team-name { font-size: 15px; font-weight: 600; color: rgba(255,255,255,0.9); }
+    .sport-team-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 8px; }
+    .sport-team-name { font-size: 15px; font-weight: 600; color: rgba(255,255,255,0.9); flex: 1; }
+    .sport-score { font-size: 18px; font-weight: 700; color: rgba(255,255,255,0.9); font-family: 'JetBrains Mono', monospace; min-width: 30px; text-align: center; }
+    .sport-score.winning { color: #00ff88; }
+    .final-badge { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.7); padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+    .sport-game-card.final { opacity: 0.7; }
+    .sport-game-card.final .sport-odds-btn { pointer-events: none; opacity: 0.5; }
     .sport-odds-group { display: flex; gap: 6px; }
     .sport-odds-btn { padding: 8px 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: rgba(255,255,255,0.8); font-size: 13px; font-weight: 600; cursor: pointer; min-width: 70px; text-align: center; transition: all 0.15s; font-family: 'JetBrains Mono', monospace; }
     .sport-odds-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); }
@@ -1363,6 +1368,8 @@
     let sportsOddsCache = {};
     let sportsCacheTimestamp = {};
     const SPORTS_CACHE_DURATION = 60000;
+    let sportsScoresCache = {};
+    let sportsScoresCacheTimestamp = {};
 
     async function fetchSportsOdds(league) {
       const sportKey = SPORT_KEYS[league];
@@ -1384,6 +1391,39 @@
       } catch (error) {
         console.error('Failed to fetch sports odds:', error);
         return [];
+      }
+    }
+
+    async function fetchSportsScores(league) {
+      const sportKey = SPORT_KEYS[league];
+      if (!sportKey) return {};
+
+      if (sportsScoresCache[league] && Date.now() - sportsScoresCacheTimestamp[league] < 30000) {
+        return sportsScoresCache[league];
+      }
+
+      try {
+        const url = `${ODDS_API_BASE}/sports/${sportKey}/scores/?apiKey=${ODDS_API_KEY}&daysFrom=1`;
+        const response = await fetch(url);
+        if (!response.ok) return {};
+        const data = await response.json();
+        const scores = {};
+        data.forEach(game => {
+          if (game.scores && game.scores.length > 0) {
+            scores[game.id] = {
+              homeScore: game.scores.find(s => s.name === game.home_team)?.score || 0,
+              awayScore: game.scores.find(s => s.name === game.away_team)?.score || 0,
+              completed: game.completed,
+              lastUpdate: game.last_update
+            };
+          }
+        });
+        sportsScoresCache[league] = scores;
+        sportsScoresCacheTimestamp[league] = Date.now();
+        return scores;
+      } catch (error) {
+        console.error('Failed to fetch sports scores:', error);
+        return {};
       }
     }
 
@@ -1475,22 +1515,29 @@
     async function loadSportsGames() {
       const list = document.getElementById('sportsGamesList');
       const games = await fetchSportsOdds(currentSportsLeague);
+      const scores = await fetchSportsScores(currentSportsLeague);
 
       if (games.length === 0) {
         list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🏟️</div><div class="empty-state-title">No ${currentSportsLeague} games available</div><p>Check back soon!</p></div>`;
         return;
       }
 
-      list.innerHTML = games.map(g => `
-        <div class="sport-game-card ${g.live ? 'live' : ''}">
+      list.innerHTML = games.map(g => {
+        const score = scores[g.id];
+        const hasScore = score && (score.homeScore > 0 || score.awayScore > 0);
+        const isLive = g.live && !score?.completed;
+        
+        return `
+        <div class="sport-game-card ${isLive ? 'live' : ''} ${score?.completed ? 'final' : ''}" data-game-id="${g.id}">
           <div class="sport-game-header">
             <span class="sport-game-league">${currentSportsLeague}</span>
             <span class="sport-game-status">
-              ${g.live ? '<span class="sport-live-dot"></span>LIVE' : g.time || ''}
+              ${score?.completed ? '<span class="final-badge">FINAL</span>' : isLive ? '<span class="sport-live-dot"></span>LIVE' : g.time || ''}
             </span>
           </div>
           <div class="sport-team-row">
             <span class="sport-team-name">${g.away}</span>
+            ${hasScore ? `<span class="sport-score ${score.awayScore > score.homeScore ? 'winning' : ''}">${score.awayScore}</span>` : ''}
             <div class="sport-odds-group">
               <button class="sport-odds-btn ${g.awaySpread < 0 ? 'favorite' : ''}" onclick="addSportsBet('${g.away}', 'Spread ${g.awaySpread > 0 ? '+' : ''}${g.awaySpread}', ${g.awaySpreadOdds})">${g.awaySpread > 0 ? '+' : ''}${g.awaySpread}</button>
               <button class="sport-odds-btn ${g.awayML < 0 ? 'favorite' : ''}" onclick="addSportsBet('${g.away}', 'ML', ${g.awayML})">${formatSportsOdds(g.awayML)}</button>
@@ -1498,6 +1545,7 @@
           </div>
           <div class="sport-team-row">
             <span class="sport-team-name">${g.home}</span>
+            ${hasScore ? `<span class="sport-score ${score.homeScore > score.awayScore ? 'winning' : ''}">${score.homeScore}</span>` : ''}
             <div class="sport-odds-group">
               <button class="sport-odds-btn ${g.homeSpread < 0 ? 'favorite' : ''}" onclick="addSportsBet('${g.home}', 'Spread ${g.homeSpread > 0 ? '+' : ''}${g.homeSpread}', ${g.homeSpreadOdds})">${g.homeSpread > 0 ? '+' : ''}${g.homeSpread}</button>
               <button class="sport-odds-btn ${g.homeML < 0 ? 'favorite' : ''}" onclick="addSportsBet('${g.home}', 'ML', ${g.homeML})">${formatSportsOdds(g.homeML)}</button>
@@ -1511,7 +1559,17 @@
             </div>
           </div>
         </div>
-      `).join('');
+      `}).join('');
+      
+      // Auto-refresh scores every 30 seconds for live games
+      if (games.some(g => g.live)) {
+        setTimeout(() => {
+          if (currentCategory === 'sports') {
+            sportsScoresCacheTimestamp[currentSportsLeague] = 0; // Force refresh
+            loadSportsGames();
+          }
+        }, 30000);
+      }
     }
 
     // Sports Bet Slip State
