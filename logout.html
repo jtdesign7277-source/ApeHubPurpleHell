@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Logged Out | ApeHub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #0a0a12;
+      font-family: 'Space Grotesk', -apple-system, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Animated grid background */
+    .grid-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        linear-gradient(90deg, rgba(168, 85, 247, 0.03) 1px, transparent 1px),
+        linear-gradient(rgba(168, 85, 247, 0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      animation: gridMove 20s linear infinite;
+    }
+
+    @keyframes gridMove {
+      0% { transform: perspective(500px) rotateX(60deg) translateY(0); }
+      100% { transform: perspective(500px) rotateX(60deg) translateY(60px); }
+    }
+
+    /* Neon lines */
+    .neon-lines {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      overflow: hidden;
+    }
+
+    .neon-line {
+      position: absolute;
+      background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.6), rgba(6, 182, 212, 0.6), transparent);
+      height: 2px;
+      width: 100%;
+      animation: lineGlow 3s ease-in-out infinite;
+    }
+
+    .neon-line:nth-child(1) { top: 20%; animation-delay: 0s; }
+    .neon-line:nth-child(2) { top: 40%; animation-delay: 0.5s; }
+    .neon-line:nth-child(3) { top: 60%; animation-delay: 1s; }
+    .neon-line:nth-child(4) { top: 80%; animation-delay: 1.5s; }
+
+    .neon-line-v {
+      position: absolute;
+      background: linear-gradient(180deg, transparent, rgba(168, 85, 247, 0.4), rgba(239, 68, 68, 0.3), transparent);
+      width: 2px;
+      height: 100%;
+      animation: lineGlow 4s ease-in-out infinite;
+    }
+
+    .neon-line-v:nth-child(5) { left: 15%; animation-delay: 0.3s; }
+    .neon-line-v:nth-child(6) { left: 85%; animation-delay: 0.8s; }
+
+    @keyframes lineGlow {
+      0%, 100% { opacity: 0.2; }
+      50% { opacity: 0.8; }
+    }
+
+    /* Diamond frame */
+    .diamond-frame {
+      position: absolute;
+      width: 350px;
+      height: 350px;
+      border: 2px solid rgba(168, 85, 247, 0.3);
+      transform: rotate(45deg);
+      animation: diamondPulse 3s ease-in-out infinite;
+    }
+
+    .diamond-frame::before {
+      content: '';
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      bottom: 20px;
+      border: 1px solid rgba(6, 182, 212, 0.2);
+    }
+
+    @keyframes diamondPulse {
+      0%, 100% { 
+        box-shadow: 0 0 20px rgba(168, 85, 247, 0.3), inset 0 0 20px rgba(168, 85, 247, 0.1);
+      }
+      50% { 
+        box-shadow: 0 0 40px rgba(168, 85, 247, 0.5), inset 0 0 40px rgba(168, 85, 247, 0.2);
+      }
+    }
+
+    /* Content */
+    .content {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 40px;
+    }
+
+    /* Shield Logo */
+    .shield-logo {
+      width: 80px;
+      height: 90px;
+      margin: 0 auto 40px;
+      position: relative;
+      animation: logoGlow 2s ease-in-out infinite;
+    }
+
+    .shield-logo svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.6));
+    }
+
+    @keyframes logoGlow {
+      0%, 100% { filter: drop-shadow(0 0 15px rgba(168, 85, 247, 0.5)); }
+      50% { filter: drop-shadow(0 0 30px rgba(168, 85, 247, 0.8)); }
+    }
+
+    /* Main text */
+    .logged-out-text {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 48px;
+      font-weight: 900;
+      letter-spacing: 8px;
+      background: linear-gradient(135deg, #a855f7 0%, #06b6d4 50%, #a855f7 100%);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: textGradient 3s ease-in-out infinite;
+      text-shadow: 0 0 40px rgba(168, 85, 247, 0.5);
+      margin-bottom: 20px;
+    }
+
+    @keyframes textGradient {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    .subtitle {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 3px;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+      line-height: 1.8;
+    }
+
+    .subtitle span {
+      display: block;
+    }
+
+    /* Return button */
+    .return-btn {
+      margin-top: 50px;
+      padding: 16px 40px;
+      background: transparent;
+      border: 2px solid rgba(168, 85, 247, 0.5);
+      border-radius: 8px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      color: #a855f7;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .return-btn:hover {
+      background: rgba(168, 85, 247, 0.1);
+      border-color: #a855f7;
+      box-shadow: 0 0 30px rgba(168, 85, 247, 0.4);
+      transform: translateY(-2px);
+    }
+
+    /* Corner accents */
+    .corner {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      border: 2px solid rgba(168, 85, 247, 0.3);
+    }
+
+    .corner-tl { top: 30px; left: 30px; border-right: none; border-bottom: none; }
+    .corner-tr { top: 30px; right: 30px; border-left: none; border-bottom: none; }
+    .corner-bl { bottom: 30px; left: 30px; border-right: none; border-top: none; }
+    .corner-br { bottom: 30px; right: 30px; border-left: none; border-top: none; }
+
+    /* Scanline effect */
+    .scanline {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.1) 2px,
+        rgba(0, 0, 0, 0.1) 4px
+      );
+      pointer-events: none;
+    }
+
+    /* Vignette */
+    .vignette {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, 0.7) 100%);
+      pointer-events: none;
+    }
+
+    @media (max-width: 480px) {
+      .logged-out-text {
+        font-size: 32px;
+        letter-spacing: 4px;
+      }
+      
+      .diamond-frame {
+        width: 280px;
+        height: 280px;
+      }
+
+      .subtitle {
+        font-size: 12px;
+        letter-spacing: 2px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Background effects -->
+  <div class="grid-bg"></div>
+  <div class="neon-lines">
+    <div class="neon-line"></div>
+    <div class="neon-line"></div>
+    <div class="neon-line"></div>
+    <div class="neon-line"></div>
+    <div class="neon-line-v"></div>
+    <div class="neon-line-v"></div>
+  </div>
+  <div class="diamond-frame"></div>
+  <div class="vignette"></div>
+  <div class="scanline"></div>
+
+  <!-- Corner accents -->
+  <div class="corner corner-tl"></div>
+  <div class="corner corner-tr"></div>
+  <div class="corner corner-bl"></div>
+  <div class="corner corner-br"></div>
+
+  <!-- Main content -->
+  <div class="content">
+    <!-- Shield Logo -->
+    <div class="shield-logo">
+      <svg viewBox="0 0 80 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M40 5L75 20V50C75 70 40 85 40 85C40 85 5 70 5 50V20L40 5Z" 
+              stroke="url(#shieldGradient)" 
+              stroke-width="2" 
+              fill="rgba(168, 85, 247, 0.1)"/>
+        <circle cx="40" cy="45" r="18" stroke="url(#shieldGradient)" stroke-width="2" fill="none"/>
+        <path d="M40 35C35 35 32 38 32 43C32 48 35 50 40 50C45 50 48 48 48 53C48 58 45 60 40 60" 
+              stroke="url(#shieldGradient)" 
+              stroke-width="2.5" 
+              stroke-linecap="round"
+              fill="none"/>
+        <defs>
+          <linearGradient id="shieldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#a855f7"/>
+            <stop offset="50%" stop-color="#06b6d4"/>
+            <stop offset="100%" stop-color="#a855f7"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+
+    <h1 class="logged-out-text">LOGGED OUT</h1>
+    
+    <p class="subtitle">
+      <span>COME BACK FOR MORE,</span>
+      <span>DEGENERATE.</span>
+    </p>
+
+    <a href="landing.html" class="return-btn">RETURN TO BASE</a>
+  </div>
+
+  <script>
+    // Clear any stored tokens/session data
+    localStorage.removeItem('userToken');
+    localStorage.removeItem('base44_access_token');
+    localStorage.removeItem('token');
+    sessionStorage.clear();
+  </script>
+</body>
+</html>
