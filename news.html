@@ -114,22 +114,27 @@
     .category-tab {
       flex: 1;
       padding: 10px 4px;
-      background: var(--bg-card);
-      border: 2px solid transparent;
-      border-radius: 8px;
-      font-size: 11px;
+      background: rgba(0, 0, 0, 0.3);
+      border: none;
+      border-radius: 10px;
+      font-size: 12px;
       font-weight: 600;
-      color: var(--text-muted);
+      color: rgba(255, 255, 255, 0.7);
       white-space: nowrap;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.25s ease;
       text-align: center;
     }
 
+    .category-tab:hover {
+      color: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
     .category-tab.active {
-      background: rgba(124, 58, 237, 0.15);
-      border-color: #7c3aed;
-      color: #7c3aed;
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(139, 92, 246, 0.15));
+      color: #c084fc;
+      box-shadow: 0 2px 12px rgba(168, 85, 247, 0.3), inset 0 1px 0 rgba(255,255,255,0.1);
     }
 
     /* News Cards */
