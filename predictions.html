@@ -90,6 +90,33 @@
     .category-tab:hover { background: var(--white-10); border-color: var(--white-30); color: var(--white-70); }
     .category-tab.active { background: rgba(30, 64, 175, 0.15); border-color: #3b82f6; color: var(--white); }
 
+    /* Sports Sub-tabs */
+    .sports-sub-tabs { display: flex; gap: 6px; margin-bottom: 16px; }
+    .sports-sub-tab { padding: 8px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.5); cursor: pointer; transition: all 0.2s; }
+    .sports-sub-tab.active { background: rgba(0, 255, 136, 0.1); border-color: rgba(0, 255, 136, 0.3); color: #00ff88; }
+    .sports-sub-tab:hover { background: rgba(255,255,255,0.1); }
+
+    /* Sports Game Card */
+    .sports-games-list { display: flex; flex-direction: column; gap: 12px; }
+    .sport-game-card { background: linear-gradient(180deg, #0d1a28, #050a0f); border: 1px solid rgba(0, 255, 136, 0.15); border-radius: 16px; padding: 16px; }
+    .sport-game-card.live { border-color: rgba(0, 255, 136, 0.4); }
+    .sport-game-header { display: flex; justify-content: space-between; margin-bottom: 12px; }
+    .sport-game-league { font-size: 11px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.5px; }
+    .sport-game-status { font-size: 11px; color: #00ff88; display: flex; align-items: center; gap: 5px; }
+    .sport-live-dot { width: 6px; height: 6px; background: #00ff88; border-radius: 50%; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .sport-team-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .sport-team-name { font-size: 15px; font-weight: 600; color: rgba(255,255,255,0.9); }
+    .sport-odds-group { display: flex; gap: 6px; }
+    .sport-odds-btn { padding: 8px 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: rgba(255,255,255,0.8); font-size: 13px; font-weight: 600; cursor: pointer; min-width: 55px; text-align: center; transition: all 0.15s; font-family: 'JetBrains Mono', monospace; }
+    .sport-odds-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); }
+    .sport-odds-btn.favorite { border-color: rgba(0, 255, 136, 0.3); color: #00ff88; }
+    .sport-total-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); }
+    .sport-total-label { color: rgba(255,255,255,0.5); font-size: 12px; }
+    .sport-over-btn { border-color: rgba(255, 215, 0, 0.25); color: #ffd700; }
+    .sport-under-btn { border-color: rgba(255, 107, 107, 0.25); color: #ff6b6b; }
+    .sports-loading { text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.5); }
+
     /* Prediction Cards - WallStreetPredict Style */
     .predictions-grid { display: flex; flex-direction: column; gap: 16px; }
     .prediction-card { background: linear-gradient(180deg, #0d1a28, #050a0f); border: 1px solid rgba(6, 182, 212, 0.2); border-radius: 24px; padding: 20px; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden; }
@@ -453,6 +480,7 @@
       <button class="category-tab" data-category="earnings">💰 Earnings</button>
       <button class="category-tab" data-category="fed">🏛️ Fed</button>
       <button class="category-tab" data-category="politics">🗳️ Politics</button>
+      <button class="category-tab" data-category="sports">🏀 Sports</button>
     </div>
     <div class="predictions-grid" id="predictionsGrid">
       <div class="loading"><div class="spinner"></div></div>
@@ -645,6 +673,13 @@
 
     async function loadPredictions() {
       const grid = document.getElementById('predictionsGrid');
+      
+      // Sports category shows sports betting UI
+      if (currentCategory === 'sports') {
+        renderSportsUI();
+        return;
+      }
+      
       try {
         let url = '/api/predictions?status=open';
         if (currentCategory !== 'all') url += `&category=${currentCategory}`;
@@ -1212,6 +1247,154 @@
     document.getElementById('tokenModal').addEventListener('click', (e) => { if (e.target.id === 'tokenModal') closeTokenModal(); });
     document.getElementById('myBetsModal').addEventListener('click', (e) => { if (e.target.id === 'myBetsModal') closeMyBets(); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeBetSlip(); closeTokenModal(); closeSuccessModal(); closeMyBets(); } });
+
+    // ===== SPORTS BETTING INTEGRATION =====
+    const ODDS_API_KEY = '991bd69bd42148f1d33e00eebf65b5ee';
+    const ODDS_API_BASE = 'https://api.the-odds-api.com/v4';
+    const SPORT_KEYS = {
+      NBA: 'basketball_nba',
+      NFL: 'americanfootball_nfl',
+      NHL: 'icehockey_nhl'
+    };
+
+    let currentSportsLeague = 'NBA';
+    let sportsOddsCache = {};
+    let sportsCacheTimestamp = {};
+    const SPORTS_CACHE_DURATION = 60000;
+
+    async function fetchSportsOdds(league) {
+      const sportKey = SPORT_KEYS[league];
+      if (!sportKey) return [];
+
+      if (sportsOddsCache[league] && Date.now() - sportsCacheTimestamp[league] < SPORTS_CACHE_DURATION) {
+        return sportsOddsCache[league];
+      }
+
+      try {
+        const url = `${ODDS_API_BASE}/sports/${sportKey}/odds/?apiKey=${ODDS_API_KEY}&regions=us&markets=h2h,spreads,totals&oddsFormat=american`;
+        const response = await fetch(url);
+        if (!response.ok) return [];
+        const data = await response.json();
+        const games = parseSportsOddsData(data);
+        sportsOddsCache[league] = games;
+        sportsCacheTimestamp[league] = Date.now();
+        return games;
+      } catch (error) {
+        console.error('Failed to fetch sports odds:', error);
+        return [];
+      }
+    }
+
+    function parseSportsOddsData(data) {
+      return data.map(game => {
+        const bookmaker = game.bookmakers?.[0];
+        if (!bookmaker) return null;
+
+        const h2h = bookmaker.markets?.find(m => m.key === 'h2h');
+        const spreads = bookmaker.markets?.find(m => m.key === 'spreads');
+        const totals = bookmaker.markets?.find(m => m.key === 'totals');
+
+        const awayTeam = game.away_team;
+        const homeTeam = game.home_team;
+
+        const awayML = h2h?.outcomes?.find(o => o.name === awayTeam)?.price || 0;
+        const homeML = h2h?.outcomes?.find(o => o.name === homeTeam)?.price || 0;
+        const awaySpread = spreads?.outcomes?.find(o => o.name === awayTeam)?.point || 0;
+        const homeSpread = spreads?.outcomes?.find(o => o.name === homeTeam)?.point || 0;
+        const overData = totals?.outcomes?.find(o => o.name === 'Over');
+        const underData = totals?.outcomes?.find(o => o.name === 'Under');
+        const total = overData?.point || 0;
+        const overOdds = overData?.price || -110;
+        const underOdds = underData?.price || -110;
+
+        const gameTime = new Date(game.commence_time);
+        const now = new Date();
+        const isLive = gameTime <= now && (now - gameTime) < 3 * 60 * 60 * 1000;
+        const timeStr = gameTime.toLocaleString('en-US', { weekday: 'short', hour: 'numeric', minute: '2-digit' });
+
+        const shortName = (name) => name.split(' ').pop();
+
+        return {
+          id: game.id,
+          away: shortName(awayTeam),
+          home: shortName(homeTeam),
+          awayML, homeML, awaySpread, homeSpread,
+          total, overOdds, underOdds,
+          live: isLive,
+          time: isLive ? null : timeStr
+        };
+      }).filter(Boolean);
+    }
+
+    function formatSportsOdds(o) {
+      return o > 0 ? '+' + o : o;
+    }
+
+    function renderSportsUI() {
+      const grid = document.getElementById('predictionsGrid');
+      grid.innerHTML = `
+        <div class="sports-sub-tabs">
+          <button class="sports-sub-tab ${currentSportsLeague === 'NBA' ? 'active' : ''}" onclick="switchSportsLeague('NBA')">🏀 NBA</button>
+          <button class="sports-sub-tab ${currentSportsLeague === 'NFL' ? 'active' : ''}" onclick="switchSportsLeague('NFL')">🏈 NFL</button>
+          <button class="sports-sub-tab ${currentSportsLeague === 'NHL' ? 'active' : ''}" onclick="switchSportsLeague('NHL')">🏒 NHL</button>
+        </div>
+        <div class="sports-games-list" id="sportsGamesList">
+          <div class="sports-loading">Loading live odds...</div>
+        </div>
+      `;
+      loadSportsGames();
+    }
+
+    function switchSportsLeague(league) {
+      currentSportsLeague = league;
+      renderSportsUI();
+    }
+
+    async function loadSportsGames() {
+      const list = document.getElementById('sportsGamesList');
+      const games = await fetchSportsOdds(currentSportsLeague);
+
+      if (games.length === 0) {
+        list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🏟️</div><div class="empty-state-title">No ${currentSportsLeague} games available</div><p>Check back soon!</p></div>`;
+        return;
+      }
+
+      list.innerHTML = games.map(g => `
+        <div class="sport-game-card ${g.live ? 'live' : ''}">
+          <div class="sport-game-header">
+            <span class="sport-game-league">${currentSportsLeague}</span>
+            <span class="sport-game-status">
+              ${g.live ? '<span class="sport-live-dot"></span>LIVE' : g.time || ''}
+            </span>
+          </div>
+          <div class="sport-team-row">
+            <span class="sport-team-name">${g.away}</span>
+            <div class="sport-odds-group">
+              <button class="sport-odds-btn ${g.awaySpread < 0 ? 'favorite' : ''}" onclick="addSportsBet('${g.away}', 'Spread ${g.awaySpread > 0 ? '+' : ''}${g.awaySpread}', ${g.awaySpread})">${g.awaySpread > 0 ? '+' : ''}${g.awaySpread}</button>
+              <button class="sport-odds-btn ${g.awayML < 0 ? 'favorite' : ''}" onclick="addSportsBet('${g.away}', 'ML', ${g.awayML})">${formatSportsOdds(g.awayML)}</button>
+            </div>
+          </div>
+          <div class="sport-team-row">
+            <span class="sport-team-name">${g.home}</span>
+            <div class="sport-odds-group">
+              <button class="sport-odds-btn ${g.homeSpread < 0 ? 'favorite' : ''}" onclick="addSportsBet('${g.home}', 'Spread ${g.homeSpread > 0 ? '+' : ''}${g.homeSpread}', ${g.homeSpread})">${g.homeSpread > 0 ? '+' : ''}${g.homeSpread}</button>
+              <button class="sport-odds-btn ${g.homeML < 0 ? 'favorite' : ''}" onclick="addSportsBet('${g.home}', 'ML', ${g.homeML})">${formatSportsOdds(g.homeML)}</button>
+            </div>
+          </div>
+          <div class="sport-total-row">
+            <span class="sport-total-label">O/U ${g.total}</span>
+            <div class="sport-odds-group">
+              <button class="sport-odds-btn sport-over-btn" onclick="addSportsBet('Over ${g.total}', 'Total', ${g.overOdds})">O ${formatSportsOdds(g.overOdds)}</button>
+              <button class="sport-odds-btn sport-under-btn" onclick="addSportsBet('Under ${g.total}', 'Total', ${g.underOdds})">U ${formatSportsOdds(g.underOdds)}</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function addSportsBet(selection, type, odds) {
+      showNotification(`Added: ${selection} ${type} (${formatSportsOdds(odds)})`, 'success');
+    }
   </script>
 </body>
 </html>
