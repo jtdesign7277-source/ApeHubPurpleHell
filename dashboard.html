@@ -2439,15 +2439,21 @@
             <label class="form-label">Total Shares</label>
             <div class="form-display" id="modal-total-shares">0</div>
           </div>
+        </div>
+        <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Remove Shares</label>
-            <input type="number" class="form-input" id="modal-shares" placeholder="0" min="0" step="any" onchange="updateModalCalculations()">
+            <label class="form-label">Add Shares</label>
+            <input type="number" class="form-input" id="modal-add-shares" placeholder="0" min="0" step="any" onchange="updateModalCalculations()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Price Paid</label>
+            <input type="number" class="form-input" id="modal-cost" placeholder="$0.00" min="0" step="0.01" onchange="updateModalCalculations()">
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Price Paid</label>
-            <input type="number" class="form-input" id="modal-cost" placeholder="$0.00" min="0" step="0.01" onchange="updateModalCalculations()">
+            <label class="form-label">Remove Shares</label>
+            <input type="number" class="form-input" id="modal-shares" placeholder="0" min="0" step="any" onchange="updateModalCalculations()">
           </div>
           <div class="form-group">
             <label class="form-label">Purchase Date</label>
@@ -2480,6 +2486,7 @@
         </div>
         <div class="modal-buttons">
           <button class="modal-btn modal-btn-cancel" onclick="closeModal()">Cancel</button>
+          <button class="modal-btn modal-btn-add" onclick="addToPosition()">Add Shares</button>
           <button class="modal-btn modal-btn-remove" onclick="removeFromPosition()">Remove</button>
           <button class="modal-btn modal-btn-save" onclick="savePosition()">Save</button>
         </div>
@@ -3085,22 +3092,25 @@
 
     function updateModalCalculations() {
       const existingShares = parseFloat(document.getElementById('modal-total-shares').textContent) || 0;
+      const addShares = parseFloat(document.getElementById('modal-add-shares').value) || 0;
       const removeShares = parseFloat(document.getElementById('modal-shares').value) || 0;
-      const pricePaid = parseFloat(document.getElementById('modal-cost').value) || 0;
+      const newCost = parseFloat(document.getElementById('modal-cost').value) || 0;
       const stock = watchlist.find(s => s.symbol === currentEditSymbol) || stockDatabase.find(s => s.symbol === currentEditSymbol);
       const existing = positions[currentEditSymbol] || { shares: 0, avgCost: 0 };
       
       if (!stock) return;
       
-      // Calculate remaining shares after removal
-      const remainingShares = existingShares - removeShares;
-      const totalCostValue = (existing.shares * existing.avgCost);
-      const marketValue = Math.max(0, remainingShares) * stock.price;
+      // Calculate net shares after adding and removing
+      const netShareChange = addShares - removeShares;
+      const totalShares = existingShares + netShareChange;
+      const totalCostValue = (existing.shares * existing.avgCost) + (addShares * newCost);
+      const newAvgCost = totalShares > 0 ? totalCostValue / totalShares : existing.avgCost;
+      const marketValue = Math.max(0, totalShares) * stock.price;
       const totalReturn = marketValue - totalCostValue;
       const isGain = totalReturn >= 0;
       
-      // Update avg cost display (stays the same when removing)
-      document.getElementById('modal-avg-cost').textContent = '$' + existing.avgCost.toFixed(2);
+      // Update avg cost display
+      document.getElementById('modal-avg-cost').textContent = '$' + newAvgCost.toFixed(2);
       
       document.getElementById('modal-market-value').textContent = '$' + marketValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       document.getElementById('modal-total-cost').textContent = '$' + totalCostValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -3190,6 +3200,39 @@
       }, 4500);
     }
 
+    // Add to existing position (averages cost)
+    function addToPosition() {
+      const newShares = parseFloat(document.getElementById('modal-add-shares').value) || 0;
+      const newCost = parseFloat(document.getElementById('modal-cost').value) || 0;
+      
+      if (newShares <= 0) {
+        showToast('Enter shares to add', 'removed');
+        return;
+      }
+      
+      const existing = positions[currentEditSymbol] || { shares: 0, avgCost: 0 };
+      const totalShares = existing.shares + newShares;
+      const totalCostValue = (existing.shares * existing.avgCost) + (newShares * newCost);
+      const avgCost = totalShares > 0 ? totalCostValue / totalShares : 0;
+      
+      positions[currentEditSymbol] = { shares: totalShares, avgCost: avgCost };
+      
+      saveUserData();
+      
+      // Update the display and clear input for adding more
+      document.getElementById('modal-total-shares').textContent = totalShares;
+      document.getElementById('modal-add-shares').value = '';
+      document.getElementById('modal-cost').value = '';
+      document.getElementById('modal-avg-cost').textContent = '$' + avgCost.toFixed(2);
+      updateModalCalculations();
+      
+      // Trigger confetti celebration!
+      triggerConfetti();
+      
+      renderWatchlist();
+      showToast(`Added ${newShares} shares`, 'success');
+    }
+
     // Remove from existing position (sell shares)
     function removeFromPosition() {
       const removeShares = parseFloat(document.getElementById('modal-shares').value) || 0;
@@ -3234,6 +3277,7 @@
     }
 
     // Modal input listeners
+    document.getElementById('modal-add-shares').addEventListener('input', updateModalCalculations);
     document.getElementById('modal-shares').addEventListener('input', updateModalCalculations);
     document.getElementById('modal-cost').addEventListener('input', updateModalCalculations);
 
