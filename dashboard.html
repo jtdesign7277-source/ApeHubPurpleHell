@@ -297,6 +297,108 @@
     }
 
     /* ============================================
+       ESPN SCOREBOARD - MOBILE OPTIMIZED
+    ============================================ */
+    .espn-score-wrapper {
+      display: flex;
+      justify-content: center;
+      padding: 16px 0 8px;
+    }
+    .espn-score {
+      width: 64px;
+      height: 64px;
+      position: relative;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      user-select: none;
+      transition: transform 0.2s ease;
+      display: block;
+      text-decoration: none;
+    }
+    .espn-score:hover {
+      transform: scale(1.08);
+    }
+    .espn-score:active {
+      transform: scale(0.95);
+    }
+    .espn-score .box {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 56px;
+      height: 56px;
+      border-radius: 10px;
+      background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
+      border: 2px solid #333;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .espn-score .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .espn-score .live {
+      color: #d00;
+      font-size: 0.45rem;
+      font-weight: bold;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      animation: liveBlink 1s infinite;
+    }
+    .espn-score .time {
+      color: #666;
+      font-size: 0.4rem;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    .espn-score .team {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .espn-score .team-name {
+      color: #fff;
+      font-size: 0.55rem;
+      font-weight: 600;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    .espn-score .team-score {
+      font-size: 0.7rem;
+      font-weight: 700;
+      font-family: 'SF Mono', 'Menlo', monospace;
+    }
+    .espn-score .winning {
+      color: #00ff88;
+    }
+    .espn-score .losing {
+      color: #fff;
+    }
+    .espn-score .pulse-ring {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 62px;
+      height: 62px;
+      border-radius: 12px;
+      border: 1px solid rgba(221, 0, 0, 0.5);
+      animation: scorePulse 2s ease-out infinite;
+      pointer-events: none;
+    }
+    @keyframes liveBlink {
+      0%, 50%, 100% { opacity: 1; }
+      25%, 75% { opacity: 0.3; }
+    }
+    @keyframes scorePulse {
+      0% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+      100% { transform: translate(-50%, -50%) scale(1.25); opacity: 0; }
+    }
+
+    /* ============================================
        USER PROFILE PANEL
        ============================================ */
     .profile-overlay {
@@ -2142,6 +2244,27 @@
     <div class="top-bar">
       <a href="/landing.html" class="apehub-logo" id="apehubLogo" style="text-decoration: none;">Ape<span>Hub</span></a>
       <div class="welcome" onclick="openProfile()"><span class="welcome-text">Welcome,</span> <span id="userName">User</span> <svg class="welcome-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+    </div>
+
+    <!-- ESPN Scoreboard Icon -->
+    <div class="espn-score-wrapper">
+      <a href="/quant-globe.html" class="espn-score">
+        <div class="box">
+          <div class="header">
+            <span class="live">LIVE</span>
+            <span class="time" id="espnGameTime">Q4 2:34</span>
+          </div>
+          <div class="team">
+            <span class="team-name" id="espnTeam1">LAL</span>
+            <span class="team-score winning" id="espnScore1">112</span>
+          </div>
+          <div class="team">
+            <span class="team-name" id="espnTeam2">BOS</span>
+            <span class="team-score losing" id="espnScore2">108</span>
+          </div>
+        </div>
+        <div class="pulse-ring"></div>
+      </a>
     </div>
 
     <!-- Countdown Timer -->
@@ -4559,6 +4682,34 @@
       loadSavedAvatar();
       loadChatMessages();
       loadTheme();
+      
+      // ESPN Scoreboard live score simulation
+      let espnScore1 = 112;
+      let espnScore2 = 108;
+      
+      function updateEspnScores() {
+        const score1El = document.getElementById('espnScore1');
+        const score2El = document.getElementById('espnScore2');
+        if (!score1El || !score2El) return;
+        
+        if (Math.random() > 0.7) {
+          if (Math.random() > 0.5) {
+            espnScore1 += Math.random() > 0.7 ? 3 : 2;
+          } else {
+            espnScore2 += Math.random() > 0.7 ? 3 : 2;
+          }
+        }
+        
+        score1El.textContent = espnScore1;
+        score2El.textContent = espnScore2;
+        
+        // Update winning/losing classes
+        score1El.className = 'team-score ' + (espnScore1 > espnScore2 ? 'winning' : 'losing');
+        score2El.className = 'team-score ' + (espnScore2 > espnScore1 ? 'winning' : 'losing');
+      }
+      
+      setInterval(updateEspnScores, 3000);
+      updateEspnScores(); // Initial call
       
       // Fetch real-time data immediately (force update)
       updateIndices();
