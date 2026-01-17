@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#000000">
+  <title>Sportsbook Globe | ApeHub</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html {
+      background: #000;
+      height: 100%;
+      width: 100%;
+    }
+
+    body {
+      background: #000;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+      height: 100%;
+      height: 100vh;
+      height: 100dvh;
+      width: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      touch-action: none;
+    }
+
+    #canvas-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+
+    #canvas-container.loaded {
+      opacity: 1;
+    }
+
+    /* Back Button */
+    .back-btn {
+      position: fixed;
+      top: env(safe-area-inset-top, 16px);
+      left: 16px;
+      padding: 8px 14px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 0.75rem;
+      cursor: pointer;
+      z-index: 100;
+      transition: all 0.2s;
+      text-decoration: none;
+      margin-top: 12px;
+    }
+
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Stats Bar */
+    .stats-bar {
+      position: fixed;
+      top: env(safe-area-inset-top, 16px);
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 24px;
+      padding: 10px 20px;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 12px;
+      z-index: 100;
+      margin-top: 12px;
+      opacity: 0;
+      transition: opacity 0.8s ease 0.3s;
+    }
+
+    .stats-bar.loaded {
+      opacity: 1;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 0.5rem;
+      letter-spacing: 0.1em;
+      color: rgba(255, 255, 255, 0.4);
+      text-transform: uppercase;
+    }
+
+    .stat-value {
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    /* Sport Tabs */
+    .sport-tabs {
+      position: fixed;
+      top: calc(env(safe-area-inset-top, 16px) + 60px);
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 4px;
+      padding: 4px;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 20px;
+      z-index: 100;
+    }
+
+    .sport-tab {
+      padding: 6px 14px;
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 0.7rem;
+      font-weight: 500;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .sport-tab.active {
+      background: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    /* Games Container */
+    .games-container {
+      position: fixed;
+      bottom: 85px;
+      left: 0;
+      right: 0;
+      padding: 0 16px;
+      z-index: 100;
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+
+    .games-container.loaded {
+      opacity: 1;
+    }
+
+    .games-container.has-slip {
+      bottom: 130px;
+    }
+
+    .games-header {
+      font-size: 0.55rem;
+      letter-spacing: 0.15em;
+      color: rgba(255, 255, 255, 0.4);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .live-dot {
+      width: 5px;
+      height: 5px;
+      background: #00ff88;
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .games-scroll {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .games-scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Game Card */
+    .game-card {
+      flex-shrink: 0;
+      width: 260px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 12px;
+      scroll-snap-align: start;
+    }
+
+    .game-card.live {
+      border-color: rgba(0, 255, 136, 0.25);
+    }
+
+    .game-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .game-sport {
+      font-size: 0.55rem;
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    .game-status {
+      font-size: 0.55rem;
+      color: #00ff88;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .game-status .live-dot {
+      width: 5px;
+      height: 5px;
+    }
+
+    .team-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .team-name {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .odds-group {
+      display: flex;
+      gap: 5px;
+    }
+
+    .odds-btn {
+      padding: 6px 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 5px;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.7rem;
+      font-weight: 600;
+      cursor: pointer;
+      min-width: 50px;
+      text-align: center;
+      transition: all 0.15s;
+    }
+
+    .odds-btn:active {
+      transform: scale(0.95);
+    }
+
+    .odds-btn.favorite {
+      border-color: rgba(0, 255, 136, 0.2);
+      color: #00ff88;
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .total-label {
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 0.65rem;
+    }
+
+    .over-btn {
+      border-color: rgba(255, 215, 0, 0.2);
+      color: #ffd700;
+    }
+
+    .under-btn {
+      border-color: rgba(255, 107, 107, 0.2);
+      color: #ff6b6b;
+    }
+
+    /* Bet Slip */
+    .bet-slip {
+      position: fixed;
+      bottom: 85px;
+      left: 16px;
+      right: 16px;
+      background: rgba(0, 255, 136, 0.08);
+      border: 1px solid rgba(0, 255, 136, 0.25);
+      border-radius: 10px;
+      padding: 10px 14px;
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 101;
+    }
+
+    .bet-slip.visible {
+      display: flex;
+    }
+
+    .bet-slip-count {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 0.75rem;
+    }
+
+    .bet-slip-count span {
+      color: #00ff88;
+      font-weight: 600;
+    }
+
+    .view-slip-btn {
+      padding: 8px 16px;
+      background: #00ff88;
+      border: none;
+      border-radius: 6px;
+      color: #000;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Bottom Nav */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 70px;
+      background: rgba(0, 0, 0, 0.95);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-start;
+      padding-top: 12px;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.35);
+      font-size: 0.6rem;
+      cursor: pointer;
+      padding: 4px 12px;
+      text-decoration: none;
+    }
+
+    .nav-item.active {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .nav-item svg {
+      width: 22px;
+      height: 22px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1;
+    }
+
+    /* Mobile Adjustments */
+    @media (max-width: 768px) {
+      .game-card {
+        width: 280px;
+      }
+
+      .stats-bar {
+        gap: 16px;
+        padding: 8px 16px;
+      }
+
+      .stat-label {
+        font-size: 0.55rem;
+      }
+
+      .stat-value {
+        font-size: 1.1rem;
+      }
+
+      .team-name {
+        font-size: 0.9rem;
+      }
+
+      .odds-btn {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+      }
+
+      .bottom-nav {
+        height: calc(70px + env(safe-area-inset-bottom, 0px));
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="canvas-container"></div>
+
+  <!-- Back Button -->
+  <a href="predictions.html" class="back-btn">← Back</a>
+
+  <!-- Stats Bar -->
+  <div class="stats-bar" id="stats-bar">
+    <div class="stat-item">
+      <div class="stat-label">Live Games</div>
+      <div class="stat-value" id="live-count">4</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">Active Players</div>
+      <div class="stat-value">847</div>
+    </div>
+  </div>
+
+  <!-- Sport Tabs -->
+  <div class="sport-tabs">
+    <button class="sport-tab active" data-sport="NBA">NBA</button>
+    <button class="sport-tab" data-sport="NFL">NFL</button>
+    <button class="sport-tab" data-sport="NHL">NHL</button>
+  </div>
+
+  <!-- Games Container -->
+  <div class="games-container" id="games-container">
+    <div class="games-header">
+      <span class="live-dot"></span>
+      LIVE ODDS
+    </div>
+    <div class="games-scroll" id="games-scroll"></div>
+  </div>
+
+  <!-- Bet Slip -->
+  <div class="bet-slip" id="bet-slip">
+    <span class="bet-slip-count"><span id="slip-count">0</span> selection<span id="slip-plural">s</span></span>
+    <button class="view-slip-btn">View Slip</button>
+  </div>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <a href="predictions.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+    <a href="sportsbook-globe.html" class="nav-item active">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      Globe
+    </a>
+    <a href="#" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      My Bets
+    </a>
+    <a href="#" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </a>
+  </nav>
+
+  <script>
+    // Demo Data
+    const DEMO_DATA = {
+      NBA: [
+        { id: '1', away: 'Celtics', home: 'Lakers', awayML: -180, homeML: 150, awaySpread: -4.5, homeSpread: 4.5, total: 224.5, live: true },
+        { id: '2', away: 'Suns', home: 'Warriors', awayML: 120, homeML: -140, awaySpread: 2.5, homeSpread: -2.5, total: 231.0, time: '7:30 PM' },
+        { id: '3', away: 'Bucks', home: 'Heat', awayML: -250, homeML: 200, awaySpread: -6.5, homeSpread: 6.5, total: 218.5, time: '8:00 PM' },
+        { id: '4', away: 'Mavs', home: 'Nuggets', awayML: 160, homeML: -190, awaySpread: 4.0, homeSpread: -4.0, total: 227.0, time: '9:30 PM' },
+      ],
+      NFL: [
+        { id: '10', away: 'Bills', home: 'Chiefs', awayML: 130, homeML: -150, awaySpread: 3.0, homeSpread: -3.0, total: 47.5, time: 'Sun 4:25' },
+        { id: '11', away: 'Cowboys', home: 'Eagles', awayML: 155, homeML: -180, awaySpread: 4.0, homeSpread: -4.0, total: 44.5, time: 'Sun 8:20' },
+        { id: '12', away: 'Lions', home: '49ers', awayML: 110, homeML: -130, awaySpread: 2.5, homeSpread: -2.5, total: 51.5, time: 'Mon 8:15' },
+      ],
+      NHL: [
+        { id: '20', away: 'Maple Leafs', home: 'Bruins', awayML: 115, homeML: -135, awaySpread: 1.5, homeSpread: -1.5, total: 6.5, live: true },
+        { id: '21', away: 'Knights', home: 'Avalanche', awayML: 100, homeML: -120, awaySpread: 1.5, homeSpread: -1.5, total: 6.0, time: '9:00 PM' },
+        { id: '22', away: 'Hurricanes', home: 'Rangers', awayML: -125, homeML: 105, awaySpread: -1.5, homeSpread: 1.5, total: 5.5, time: '10:00 PM' },
+      ],
+    };
+
+    let currentSport = 'NBA';
+    let betSlip = [];
+
+    // Three.js Setup
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x000000);
+    
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    // Globe - positioned higher
+    const globeGeometry = new THREE.SphereGeometry(2, 64, 64);
+    const globeMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0x8b00ff,
+      metalness: 0.9,
+      roughness: 0.1,
+      emissive: 0x00d4ff,
+      emissiveIntensity: 0.15,
+      clearcoat: 1.0,
+      transparent: true,
+      opacity: 0.95,
+    });
+    const globe = new THREE.Mesh(globeGeometry, globeMaterial);
+    globe.position.y = 1.2;
+    scene.add(globe);
+
+    // Inner glow
+    globe.add(new THREE.Mesh(
+      new THREE.SphereGeometry(1.95, 64, 64),
+      new THREE.MeshBasicMaterial({ color: 0x00d4ff, transparent: true, opacity: 0.3, side: THREE.BackSide })
+    ));
+
+    // Wireframe
+    globe.add(new THREE.Mesh(
+      new THREE.SphereGeometry(2.02, 32, 32),
+      new THREE.MeshBasicMaterial({ color: 0x00ff88, wireframe: true, transparent: true, opacity: 0.3 })
+    ));
+
+    // Data points - random distribution
+    for (let i = 0; i < 150; i++) {
+      const phi = Math.acos(2 * Math.random() - 1);
+      const theta = Math.random() * Math.PI * 2;
+      const point = new THREE.Mesh(
+        new THREE.SphereGeometry(0.02, 8, 8),
+        new THREE.MeshBasicMaterial({ 
+          color: Math.random() > 0.5 ? 0x00d4ff : 0x00ff88, 
+          transparent: true, 
+          opacity: 0.7 
+        })
+      );
+      point.position.setFromSphericalCoords(2.05, phi, theta);
+      globe.add(point);
+    }
+
+    // Rings
+    const ringsGroup = new THREE.Group();
+    const ringGeo = new THREE.BufferGeometry();
+    const ringCount = 6000;
+    const ringPos = new Float32Array(ringCount * 3);
+    const ringColors = new Float32Array(ringCount * 3);
+    
+    for (let i = 0; i < ringCount; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const radius = 3.0 + Math.random() * 2.5;
+      ringPos[i * 3] = Math.cos(angle) * radius;
+      ringPos[i * 3 + 1] = (Math.random() - 0.5) * 0.3;
+      ringPos[i * 3 + 2] = Math.sin(angle) * radius;
+      const fade = 0.15 + Math.random() * 0.15;
+      ringColors[i * 3] = fade;
+      ringColors[i * 3 + 1] = fade * 0.9;
+      ringColors[i * 3 + 2] = fade * 1.1;
+    }
+    
+    ringGeo.setAttribute('position', new THREE.BufferAttribute(ringPos, 3));
+    ringGeo.setAttribute('color', new THREE.BufferAttribute(ringColors, 3));
+    
+    ringsGroup.add(new THREE.Points(ringGeo, new THREE.PointsMaterial({
+      size: 0.02,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.4,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    })));
+    ringsGroup.rotation.x = 0.3;
+    ringsGroup.rotation.z = 0.15;
+    ringsGroup.position.y = 1.2;
+    scene.add(ringsGroup);
+
+    // Stars with shader for round points
+    const starsGeo = new THREE.BufferGeometry();
+    const starsCount = 2500;
+    const starsPos = new Float32Array(starsCount * 3);
+    const starsSizes = new Float32Array(starsCount);
+    const starsColors = new Float32Array(starsCount * 3);
+    
+    for (let i = 0; i < starsCount; i++) {
+      const r = 20 + Math.random() * 80;
+      const t = Math.random() * Math.PI * 2;
+      const p = Math.random() * Math.PI;
+      starsPos[i * 3] = r * Math.sin(p) * Math.cos(t);
+      starsPos[i * 3 + 1] = r * Math.cos(p);
+      starsPos[i * 3 + 2] = r * Math.sin(p) * Math.sin(t);
+      starsSizes[i] = Math.random() * 1.0 + 0.2;
+      const brightness = 0.8 + Math.random() * 0.2;
+      starsColors[i * 3] = starsColors[i * 3 + 1] = starsColors[i * 3 + 2] = brightness;
+    }
+    
+    starsGeo.setAttribute('position', new THREE.BufferAttribute(starsPos, 3));
+    starsGeo.setAttribute('size', new THREE.BufferAttribute(starsSizes, 1));
+    starsGeo.setAttribute('color', new THREE.BufferAttribute(starsColors, 3));
+
+    const starsMaterial = new THREE.ShaderMaterial({
+      uniforms: { pixelRatio: { value: renderer.getPixelRatio() } },
+      vertexShader: `
+        attribute float size;
+        attribute vec3 color;
+        varying vec3 vColor;
+        uniform float pixelRatio;
+        void main() {
+          vColor = color;
+          vec4 mv = modelViewMatrix * vec4(position, 1.0);
+          gl_PointSize = size * pixelRatio * (120.0 / -mv.z);
+          gl_Position = projectionMatrix * mv;
+        }
+      `,
+      fragmentShader: `
+        varying vec3 vColor;
+        void main() {
+          vec2 c = gl_PointCoord - vec2(0.5);
+          float d = length(c);
+          if (d > 0.5) discard;
+          gl_FragColor = vec4(vColor, smoothstep(0.5, 0.0, d) * 0.9);
+        }
+      `,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+
+    scene.add(new THREE.Points(starsGeo, starsMaterial));
+
+    // Lights
+    scene.add(new THREE.AmbientLight(0x222244, 0.5));
+    const mainLight = new THREE.PointLight(0x00d4ff, 2, 50);
+    mainLight.position.set(5, 5, 5);
+    scene.add(mainLight);
+
+    camera.position.z = 7;
+
+    // Pulses
+    const activePulses = [];
+
+    function addPulse() {
+      const phi = Math.random() * Math.PI;
+      const theta = Math.random() * Math.PI * 2;
+      const pulse = new THREE.Mesh(
+        new THREE.RingGeometry(0, 0.15, 32),
+        new THREE.MeshBasicMaterial({ 
+          color: Math.random() > 0.5 ? 0x00ff88 : 0x00d4ff, 
+          transparent: true, 
+          opacity: 1, 
+          side: THREE.DoubleSide 
+        })
+      );
+      pulse.position.setFromSphericalCoords(2.08, phi, theta);
+      pulse.lookAt(globe.position);
+      pulse.userData = { start: Date.now() };
+      globe.add(pulse);
+      activePulses.push(pulse);
+    }
+
+    // Animation
+    function animate() {
+      requestAnimationFrame(animate);
+      
+      globe.rotation.y += 0.002;
+      globe.rotation.x = Math.sin(Date.now() * 0.0005) * 0.03;
+      ringsGroup.rotation.z += 0.0003;
+      ringsGroup.rotation.y -= 0.0005;
+
+      const now = Date.now();
+      for (let i = activePulses.length - 1; i >= 0; i--) {
+        const pulse = activePulses[i];
+        const prog = (now - pulse.userData.start) / 2000;
+        if (prog >= 1) {
+          globe.remove(pulse);
+          activePulses.splice(i, 1);
+        } else {
+          pulse.scale.setScalar(1 + prog * 3);
+          pulse.material.opacity = 1 - prog;
+        }
+      }
+
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // Pulse interval
+    setInterval(addPulse, 3000);
+
+    // Handle resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      starsMaterial.uniforms.pixelRatio.value = renderer.getPixelRatio();
+    });
+
+    // Show loaded state
+    setTimeout(() => {
+      container.classList.add('loaded');
+      document.getElementById('stats-bar').classList.add('loaded');
+      document.getElementById('games-container').classList.add('loaded');
+    }, 500);
+
+    // === UI Functions ===
+    function formatOdds(o) {
+      return o > 0 ? '+' + o : o;
+    }
+
+    function renderGames() {
+      const games = DEMO_DATA[currentSport] || [];
+      const scroll = document.getElementById('games-scroll');
+      document.getElementById('live-count').textContent = games.length;
+      
+      scroll.innerHTML = games.map(g => `
+        <div class="game-card ${g.live ? 'live' : ''}">
+          <div class="game-header">
+            <span class="game-sport">${currentSport}</span>
+            <span class="game-status">
+              ${g.live ? '<span class="live-dot"></span>LIVE' : g.time}
+            </span>
+          </div>
+          <div class="team-row">
+            <span class="team-name">${g.away}</span>
+            <div class="odds-group">
+              <button class="odds-btn ${g.awaySpread < 0 ? 'favorite' : ''}" onclick="addBet('${g.away}', 'spread', ${g.awaySpread})">${g.awaySpread > 0 ? '+' : ''}${g.awaySpread}</button>
+              <button class="odds-btn ${g.awayML < 0 ? 'favorite' : ''}" onclick="addBet('${g.away}', 'ML', ${g.awayML})">${formatOdds(g.awayML)}</button>
+            </div>
+          </div>
+          <div class="team-row">
+            <span class="team-name">${g.home}</span>
+            <div class="odds-group">
+              <button class="odds-btn ${g.homeSpread < 0 ? 'favorite' : ''}" onclick="addBet('${g.home}', 'spread', ${g.homeSpread})">${g.homeSpread > 0 ? '+' : ''}${g.homeSpread}</button>
+              <button class="odds-btn ${g.homeML < 0 ? 'favorite' : ''}" onclick="addBet('${g.home}', 'ML', ${g.homeML})">${formatOdds(g.homeML)}</button>
+            </div>
+          </div>
+          <div class="total-row">
+            <span class="total-label">O/U ${g.total}</span>
+            <div class="odds-group">
+              <button class="odds-btn over-btn" onclick="addBet('Over ${g.total}', 'total', -110)">O -110</button>
+              <button class="odds-btn under-btn" onclick="addBet('Under ${g.total}', 'total', -110)">U -110</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function addBet(team, type, odds) {
+      betSlip.push({ team, type, odds });
+      updateBetSlip();
+    }
+
+    function updateBetSlip() {
+      const slip = document.getElementById('bet-slip');
+      const container = document.getElementById('games-container');
+      
+      if (betSlip.length > 0) {
+        slip.classList.add('visible');
+        container.classList.add('has-slip');
+        document.getElementById('slip-count').textContent = betSlip.length;
+        document.getElementById('slip-plural').textContent = betSlip.length > 1 ? 's' : '';
+      } else {
+        slip.classList.remove('visible');
+        container.classList.remove('has-slip');
+      }
+    }
+
+    // Sport tab switching
+    document.querySelectorAll('.sport-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.sport-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentSport = tab.dataset.sport;
+        renderGames();
+      });
+    });
+
+    // Initial render
+    renderGames();
+  </script>
+</body>
+</html>
