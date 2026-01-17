@@ -3055,10 +3055,12 @@
       changeEl.textContent = (isUp ? '+' : '') + stock.changePercent.toFixed(2) + '%';
       changeEl.className = 'modal-price-change ' + (isUp ? 'up' : 'down');
       
-      // Show current total shares, clear input for adding new shares
+      // Show current total shares, clear all input fields
       document.getElementById('modal-total-shares').textContent = position.shares || 0;
+      document.getElementById('modal-add-shares').value = '';
       document.getElementById('modal-shares').value = '';
       document.getElementById('modal-cost').value = '';
+      document.getElementById('modal-price-sold').value = '';
       document.getElementById('modal-avg-cost').textContent = '$' + (position.avgCost || 0).toFixed(2);
       
       // Set default purchase date to today
