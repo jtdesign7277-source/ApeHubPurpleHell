@@ -486,8 +486,8 @@ app.get('/api/sparkline/:symbol', async (req, res) => {
   try {
     const symbol = req.params.symbol.toUpperCase();
     
-    // Fetch 1-day intraday data for sparkline
-    const response = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=5m&range=1d`);
+    // Fetch 5-day data to ensure we have Friday's data on weekends
+    const response = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=5m&range=5d`);
     const data = await response.json();
     
     const result = data?.chart?.result?.[0];
@@ -496,7 +496,11 @@ app.get('/api/sparkline/:symbol', async (req, res) => {
     }
     
     // Extract closing prices, filter out nulls
-    const closes = result.indicators.quote[0].close.filter(p => p !== null);
+    const allCloses = result.indicators.quote[0].close.filter(p => p !== null);
+    
+    // Take the last ~78 data points (roughly 1 trading day at 5-min intervals)
+    // This gives us the most recent trading day's data
+    const closes = allCloses.slice(-78);
     
     res.json({ prices: closes });
   } catch (error) {
