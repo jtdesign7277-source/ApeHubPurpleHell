@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0a0a0f">
   <title>Quant Globe | ApeHub</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <style>
@@ -10,12 +13,17 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    body {
+    html, body {
       background: #0a0a0f;
       overflow: hidden;
       font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+      height: 100%;
+      width: 100%;
+      position: fixed;
+      touch-action: none;
     }
 
     #canvas-container {
@@ -35,17 +43,19 @@
     /* Stats Bar */
     .stats-bar {
       position: fixed;
-      top: 20px;
+      top: env(safe-area-inset-top, 20px);
       left: 50%;
       transform: translateX(-50%);
       display: flex;
-      gap: 32px;
-      padding: 12px 24px;
-      background: rgba(0, 0, 0, 0.4);
+      gap: 24px;
+      padding: 10px 20px;
+      background: rgba(0, 0, 0, 0.6);
       backdrop-filter: blur(20px);
-      border-radius: 16px;
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 14px;
       border: 1px solid rgba(255, 255, 255, 0.1);
       z-index: 100;
+      margin-top: 12px;
     }
 
     .stat-item {
@@ -53,29 +63,31 @@
     }
 
     .stat-value {
-      font-size: 18px;
+      font-size: 15px;
       font-weight: 700;
       color: #fff;
+      font-variant-numeric: tabular-nums;
     }
 
     .stat-label {
-      font-size: 10px;
+      font-size: 9px;
       color: rgba(255, 255, 255, 0.5);
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 0.5px;
     }
 
     /* Back Button */
     .back-btn {
       position: fixed;
-      top: 20px;
-      left: 20px;
-      padding: 10px 16px;
-      background: rgba(0, 0, 0, 0.4);
+      top: env(safe-area-inset-top, 20px);
+      left: 16px;
+      padding: 10px 14px;
+      background: rgba(0, 0, 0, 0.6);
       backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 10px;
-      color: rgba(255, 255, 255, 0.7);
+      color: rgba(255, 255, 255, 0.8);
       font-size: 14px;
       cursor: pointer;
       z-index: 100;
@@ -382,13 +394,138 @@
         display: none;
       }
 
+      .hot-streak {
+        top: auto;
+        bottom: calc(160px + env(safe-area-inset-bottom, 0px));
+        left: 16px;
+        right: 16px;
+        max-width: none;
+      }
+
       .stats-bar {
         gap: 16px;
-        padding: 10px 16px;
+        padding: 8px 14px;
+        width: auto;
+        max-width: calc(100% - 100px);
       }
 
       .stat-value {
-        font-size: 14px;
+        font-size: 13px;
+      }
+
+      .stat-label {
+        font-size: 8px;
+      }
+
+      .place-bet-btn {
+        bottom: calc(100px + env(safe-area-inset-bottom, 0px));
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+        padding: 14px 32px;
+        font-size: 15px;
+        border-radius: 25px;
+        background: rgba(0, 215, 117, 0.15);
+      }
+
+      .back-btn {
+        margin-top: 12px;
+      }
+    }
+
+    /* Mobile Activity Feed */
+    .mobile-feed {
+      display: none;
+      position: fixed;
+      bottom: calc(160px + env(safe-area-inset-bottom, 0px));
+      left: 16px;
+      right: 16px;
+      z-index: 100;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-feed {
+        display: block;
+      }
+    }
+
+    .mobile-bet-card {
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 12px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      animation: mobileSlideUp 0.4s ease;
+      margin-bottom: 8px;
+    }
+
+    @keyframes mobileSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .mobile-bet-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .mobile-bet-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mobile-bet-position {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+
+    .mobile-bet-position.yes {
+      background: rgba(0, 215, 117, 0.2);
+      color: #00d775;
+    }
+
+    .mobile-bet-position.no {
+      background: rgba(255, 71, 87, 0.2);
+      color: #ff4757;
+    }
+
+    .mobile-bet-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .mobile-bet-user {
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .mobile-bet-market {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .mobile-bet-amount {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* Safe area support */
+    @supports (padding-bottom: env(safe-area-inset-bottom)) {
+      .place-bet-btn {
+        bottom: calc(100px + env(safe-area-inset-bottom));
       }
     }
   </style>
@@ -452,6 +589,9 @@
   <button class="place-bet-btn" onclick="window.location.href='predictions.html'">
     ⚡ Place a Bet
   </button>
+
+  <!-- Mobile Activity Feed -->
+  <div class="mobile-feed" id="mobile-feed"></div>
 
   <!-- Whale Alert -->
   <div class="whale-alert" id="whale-alert">
@@ -646,20 +786,59 @@
     let activeNow = 142;
     let leftCards = [];
     let rightCards = [];
+    let mobileCards = [];
     let nextSide = 'left';
+    const isMobile = window.innerWidth <= 768;
+
+    function createMobileBetCard(isYes, amount, user, market) {
+      const mobileFeed = document.getElementById('mobile-feed');
+      const card = document.createElement('div');
+      card.className = 'mobile-bet-card';
+      card.innerHTML = `
+        <div class="mobile-bet-row">
+          <div class="mobile-bet-left">
+            <span class="mobile-bet-position ${isYes ? 'yes' : 'no'}">${isYes ? 'YES' : 'NO'}</span>
+            <div class="mobile-bet-info">
+              <span class="mobile-bet-user">${user}</span>
+              <span class="mobile-bet-market">${market}</span>
+            </div>
+          </div>
+          <span class="mobile-bet-amount">$${amount}</span>
+        </div>
+      `;
+      
+      mobileFeed.insertBefore(card, mobileFeed.firstChild);
+      mobileCards.unshift(card);
+
+      // Keep only 2 cards on mobile
+      if (mobileCards.length > 2) {
+        const old = mobileCards.pop();
+        old.style.opacity = '0';
+        old.style.transform = 'translateY(-10px)';
+        setTimeout(() => old.remove(), 300);
+      }
+    }
 
     function createBetCard(side) {
       const isYes = Math.random() > 0.5;
       const amount = Math.floor(Math.random() * 400) + 25;
+      const user = users[Math.floor(Math.random() * users.length)];
+      const market = markets[Math.floor(Math.random() * markets.length)];
       
+      // Mobile card
+      if (isMobile) {
+        createMobileBetCard(isYes, amount, user, market);
+      }
+      
+      // Desktop cards
       const card = document.createElement('div');
       card.className = `bet-card ${side === 'right' ? 'from-right' : ''}`;
       card.innerHTML = `
         <div class="bet-header">
-          <span class="bet-user">${users[Math.floor(Math.random() * users.length)]}</span>
+          <span class="bet-user">${user}</span>
           <span class="bet-time">just now</span>
         </div>
-        <div class="bet-market">${markets[Math.floor(Math.random() * markets.length)]}</div>
+        <div class="bet-market">${market}</div>
         <div class="bet-footer">
           <span class="bet-position ${isYes ? 'yes' : 'no'}">${isYes ? 'YES' : 'NO'}</span>
           <span class="bet-amount">$${amount}</span>
