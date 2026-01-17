@@ -91,10 +91,11 @@
     .category-tab.active { background: rgba(30, 64, 175, 0.15); border-color: #3b82f6; color: var(--white); }
 
     /* Sports Sub-tabs */
-    .sports-sub-tabs { display: flex; gap: 6px; margin-bottom: 16px; }
-    .sports-sub-tab { padding: 8px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.5); cursor: pointer; transition: all 0.2s; }
+    .sports-sub-tabs { display: flex; gap: 6px; margin-bottom: 16px; overflow-x: auto; }
+    .sports-sub-tab { padding: 8px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.5); cursor: pointer; transition: all 0.2s; white-space: nowrap; text-decoration: none; }
     .sports-sub-tab.active { background: rgba(0, 255, 136, 0.1); border-color: rgba(0, 255, 136, 0.3); color: #00ff88; }
     .sports-sub-tab:hover { background: rgba(255,255,255,0.1); }
+    .sports-sub-tab.live-scores-tab { background: rgba(255, 215, 0, 0.1); border-color: rgba(255, 215, 0, 0.3); color: #ffd700; }
 
     /* Sports Game Card */
     .sports-games-list { display: flex; flex-direction: column; gap: 12px; }
@@ -1489,6 +1490,7 @@
           <button class="sports-sub-tab ${currentSportsLeague === 'NBA' ? 'active' : ''}" onclick="switchSportsLeague('NBA')">🏀 NBA</button>
           <button class="sports-sub-tab ${currentSportsLeague === 'NFL' ? 'active' : ''}" onclick="switchSportsLeague('NFL')">🏈 NFL</button>
           <button class="sports-sub-tab ${currentSportsLeague === 'NHL' ? 'active' : ''}" onclick="switchSportsLeague('NHL')">🏒 NHL</button>
+          <a href="/live-scores.html" class="sports-sub-tab live-scores-tab">📊 Live</a>
         </div>
         <div class="sports-games-list" id="sportsGamesList">
           <div class="sports-loading">Loading live odds...</div>
