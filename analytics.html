@@ -305,6 +305,435 @@
       color: var(--text-secondary);
     }
 
+    /* Professional Pie Chart Card */
+    .pro-pie-card {
+      margin: 0 16px;
+      background: linear-gradient(180deg, #12121a 0%, #0f0f14 100%);
+      border-radius: 16px;
+      border: 1px solid rgba(51, 51, 71, 0.5);
+      overflow: hidden;
+    }
+
+    .pro-pie-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(51, 51, 71, 0.5);
+      background: rgba(0,0,0,0.2);
+    }
+
+    .pro-pie-header-title {
+      color: #e2e8f0;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .market-open-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+
+    .market-open-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #22c55e;
+      animation: pulse 2s infinite;
+    }
+
+    .market-open-text {
+      color: #22c55e;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .pro-pie-content {
+      padding: 20px 16px;
+    }
+
+    /* SVG Pie Chart Container */
+    .svg-pie-container {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      margin: 0 auto 20px;
+    }
+
+    .svg-pie-chart {
+      transform: rotate(-90deg);
+    }
+
+    .svg-pie-slice {
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .svg-pie-slice.dimmed {
+      opacity: 0.3;
+    }
+
+    .svg-pie-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .pie-center-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      margin: 0 auto 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 11px;
+    }
+
+    .pie-center-value {
+      font-size: 16px;
+      font-weight: 600;
+      color: white;
+    }
+
+    .pie-center-label {
+      font-size: 11px;
+      color: #64748b;
+    }
+
+    /* Interactive Legend */
+    .pro-pie-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .legend-item:hover,
+    .legend-item.active {
+      background: rgba(51, 65, 85, 0.4);
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .legend-logo {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 10px;
+      flex-shrink: 0;
+    }
+
+    .legend-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .legend-symbol {
+      font-weight: 500;
+      color: white;
+      font-size: 13px;
+    }
+
+    .legend-name {
+      color: #475569;
+      font-size: 11px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .legend-values {
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .legend-amount {
+      font-weight: 500;
+      color: white;
+      font-size: 13px;
+    }
+
+    .legend-pct {
+      color: #64748b;
+      font-size: 11px;
+    }
+
+    /* Detail Panel */
+    .pie-detail-panel {
+      margin-top: 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(51, 51, 71, 0.3);
+      background: rgba(15, 15, 20, 0.5);
+      transition: all 0.2s ease;
+      overflow: hidden;
+    }
+
+    .pie-detail-panel.has-data {
+      border-color: rgba(71, 85, 105, 0.4);
+      background: rgba(30, 41, 59, 0.3);
+    }
+
+    .detail-empty {
+      padding: 24px 20px;
+      text-align: center;
+    }
+
+    .detail-empty-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: rgba(51, 65, 85, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+    }
+
+    .detail-empty-title {
+      color: #64748b;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .detail-empty-subtitle {
+      color: #475569;
+      font-size: 11px;
+      margin-top: 4px;
+    }
+
+    .detail-content {
+      padding: 16px;
+      display: none;
+    }
+
+    .pie-detail-panel.has-data .detail-content {
+      display: block;
+    }
+
+    .pie-detail-panel.has-data .detail-empty {
+      display: none;
+    }
+
+    .detail-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(71, 85, 105, 0.3);
+    }
+
+    .detail-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+    .detail-title {
+      font-weight: 600;
+      color: white;
+      font-size: 14px;
+    }
+
+    .detail-sector {
+      color: #64748b;
+      font-size: 11px;
+    }
+
+    .detail-stats {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .detail-stat-row {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .detail-stat-label {
+      color: #64748b;
+      font-size: 11px;
+    }
+
+    .detail-stat-value {
+      color: white;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .detail-stat-value.positive {
+      color: #22c55e;
+    }
+
+    .detail-stat-value.negative {
+      color: #ef4444;
+    }
+
+    .detail-return-box {
+      margin-top: 8px;
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    .detail-return-box.positive {
+      background: rgba(34, 197, 94, 0.1);
+    }
+
+    .detail-return-box.negative {
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    .return-box-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .return-box-label {
+      font-size: 10px;
+    }
+
+    .return-box-label.positive {
+      color: rgba(34, 197, 94, 0.7);
+    }
+
+    .return-box-label.negative {
+      color: rgba(239, 68, 68, 0.7);
+    }
+
+    .return-box-percent {
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .return-box-percent.positive {
+      color: #22c55e;
+    }
+
+    .return-box-percent.negative {
+      color: #ef4444;
+    }
+
+    .return-box-amount {
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .return-box-amount.positive {
+      color: #22c55e;
+    }
+
+    .return-box-amount.negative {
+      color: #ef4444;
+    }
+
+    .detail-buttons {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .detail-btn {
+      flex: 1;
+      padding: 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid;
+    }
+
+    .detail-btn.buy {
+      background: rgba(34, 197, 94, 0.15);
+      color: #22c55e;
+      border-color: rgba(34, 197, 94, 0.3);
+    }
+
+    .detail-btn.sell {
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    /* Pro Pie Footer */
+    .pro-pie-footer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding: 14px 16px;
+      background: rgba(0,0,0,0.3);
+      border-top: 1px solid rgba(51, 51, 71, 0.5);
+    }
+
+    .footer-stat {
+      flex: 1;
+      min-width: 70px;
+    }
+
+    .footer-stat-label {
+      font-size: 10px;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .footer-stat-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+      margin-top: 2px;
+    }
+
+    .footer-stat-value.positive {
+      color: #22c55e;
+    }
+
+    .footer-stat-value.negative {
+      color: #ef4444;
+    }
+
     /* Table View - Professional Stock Table */
     .table-container {
       margin: 0 16px;
@@ -833,13 +1262,54 @@
 
     <!-- Pie Chart View -->
     <div class="chart-view" id="pie-view">
-      <div class="chart-container">
-        <div class="chart-title">Portfolio Allocation</div>
-        <div class="chart-wrapper">
-          <canvas id="pieChart"></canvas>
+      <div class="pro-pie-card">
+        <div class="pro-pie-header">
+          <span class="pro-pie-header-title">Allocation Breakdown</span>
+          <div class="market-open-badge">
+            <div class="market-open-dot"></div>
+            <span class="market-open-text">Market Open</span>
+          </div>
+        </div>
+        
+        <div class="pro-pie-content">
+          <!-- SVG Pie Chart -->
+          <div class="svg-pie-container">
+            <svg class="svg-pie-chart" width="200" height="200" viewBox="0 0 200 200" id="svgPieChart">
+              <circle cx="100" cy="100" r="75" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="30"/>
+              <!-- Slices will be generated by JS -->
+            </svg>
+            <div class="svg-pie-center" id="pieCenterContent">
+              <div class="pie-center-value" id="pieCenterValue">$0.00</div>
+              <div class="pie-center-label" id="pieCenterLabel">Total Value</div>
+            </div>
+          </div>
+          
+          <!-- Interactive Legend -->
+          <div class="pro-pie-legend" id="proPieLegend">
+            <!-- Legend items generated by JS -->
+          </div>
+          
+          <!-- Detail Panel -->
+          <div class="pie-detail-panel" id="pieDetailPanel">
+            <div class="detail-empty">
+              <div class="detail-empty-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/>
+                </svg>
+              </div>
+              <div class="detail-empty-title">Tap on chart or legend</div>
+              <div class="detail-empty-subtitle">View stock details</div>
+            </div>
+            <div class="detail-content" id="pieDetailContent">
+              <!-- Detail content generated by JS -->
+            </div>
+          </div>
+        </div>
+        
+        <div class="pro-pie-footer" id="proPieFooter">
+          <!-- Footer stats generated by JS -->
         </div>
       </div>
-      <div class="holdings-section" id="holdings-list"></div>
     </div>
 
     <!-- Bar Chart View -->
@@ -992,7 +1462,8 @@
     let holdingsData = [];
     let totalValue = 0;
     let totalCost = 0;
-    let pieChart, barChart, lineChart;
+    let barChart, lineChart;
+    let hoveredSliceIndex = null;
 
     // Calculate and render portfolio data
     async function initializePortfolio() {
@@ -1079,32 +1550,253 @@
       }
 
       // Render all views
-      renderHoldingsList();
+      renderProPieChart();
       renderTable();
       renderCharts();
     }
 
-    // Render holdings list
-    function renderHoldingsList() {
-      const container = document.getElementById('holdings-list');
-      if (holdingsData.length === 0) {
-        container.innerHTML = '<div class="holdings-title">Holdings Breakdown</div><div style="color: var(--text-muted); padding: 20px; text-align: center;">Add shares to your watchlist to see analytics</div>';
-        return;
+    // Professional SVG Pie Chart Functions
+    function getSlicePath(startPercent, endPercent, isHovered) {
+      const radius = isHovered ? 78 : 75;
+      const innerRadius = 45;
+      const centerX = 100;
+      const centerY = 100;
+      const startAngle = (startPercent / 100) * 360 - 90;
+      const endAngle = (endPercent / 100) * 360 - 90;
+      
+      const startX = centerX + radius * Math.cos((startAngle * Math.PI) / 180);
+      const startY = centerY + radius * Math.sin((startAngle * Math.PI) / 180);
+      const endX = centerX + radius * Math.cos((endAngle * Math.PI) / 180);
+      const endY = centerY + radius * Math.sin((endAngle * Math.PI) / 180);
+      
+      const innerStartX = centerX + innerRadius * Math.cos((endAngle * Math.PI) / 180);
+      const innerStartY = centerY + innerRadius * Math.sin((endAngle * Math.PI) / 180);
+      const innerEndX = centerX + innerRadius * Math.cos((startAngle * Math.PI) / 180);
+      const innerEndY = centerY + innerRadius * Math.sin((startAngle * Math.PI) / 180);
+      
+      const largeArcFlag = endPercent - startPercent > 50 ? 1 : 0;
+      
+      return `M ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endX} ${endY} L ${innerStartX} ${innerStartY} A ${innerRadius} ${innerRadius} 0 ${largeArcFlag} 0 ${innerEndX} ${innerEndY} Z`;
+    }
+
+    function updatePieHoverState(index) {
+      hoveredSliceIndex = index;
+      
+      // Update slice styles
+      document.querySelectorAll('.svg-pie-slice').forEach((slice, i) => {
+        if (index !== null && i !== index) {
+          slice.classList.add('dimmed');
+        } else {
+          slice.classList.remove('dimmed');
+        }
+        // Update path for hover effect
+        const h = holdingsData[i];
+        if (h) {
+          slice.setAttribute('d', getSlicePath(h.startPercent, h.endPercent, i === index));
+        }
+      });
+      
+      // Update legend items
+      document.querySelectorAll('.legend-item').forEach((item, i) => {
+        if (index === i) {
+          item.classList.add('active');
+        } else {
+          item.classList.remove('active');
+        }
+      });
+      
+      // Update center content
+      const centerValue = document.getElementById('pieCenterValue');
+      const centerLabel = document.getElementById('pieCenterLabel');
+      const centerContent = document.getElementById('pieCenterContent');
+      
+      if (index !== null && holdingsData[index]) {
+        const h = holdingsData[index];
+        // Add icon
+        centerContent.innerHTML = `
+          <div class="pie-center-icon" style="background: ${h.color}">${h.symbol.slice(0, 2)}</div>
+          <div class="pie-center-value">$${h.value.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
+          <div class="pie-center-label">${((h.value / totalValue) * 100).toFixed(1)}%</div>
+        `;
+      } else {
+        centerContent.innerHTML = `
+          <div class="pie-center-value">$${totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+          <div class="pie-center-label">Total Value</div>
+        `;
       }
-      container.innerHTML = '<div class="holdings-title">Holdings Breakdown</div>' + 
-        holdingsData.map(h => `
-          <div class="holding-item">
-            <div class="holding-color" style="background: ${h.color}"></div>
-            <div class="holding-info">
-              <div class="holding-symbol">${h.symbol}</div>
-              <div class="holding-name">${h.shares.toLocaleString()} shares @ $${h.avgCost.toFixed(2)}</div>
-            </div>
-            <div class="holding-value">
-              <div class="holding-amount">$${h.value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-              <div class="holding-percent ${h.changePercent >= 0 ? 'up' : 'down'}">${h.changePercent >= 0 ? '+' : ''}${h.changePercent.toFixed(2)}%</div>
+      
+      // Update detail panel
+      const panel = document.getElementById('pieDetailPanel');
+      const detailContent = document.getElementById('pieDetailContent');
+      
+      if (index !== null && holdingsData[index]) {
+        const h = holdingsData[index];
+        panel.classList.add('has-data');
+        
+        const gainAmount = h.change;
+        const gainClass = h.changePercent >= 0 ? 'positive' : 'negative';
+        const gainSign = h.changePercent >= 0 ? '+' : '';
+        
+        detailContent.innerHTML = `
+          <div class="detail-header">
+            <div class="detail-logo" style="background: ${h.color}">${h.symbol.slice(0, 2)}</div>
+            <div>
+              <div class="detail-title">${h.symbol}</div>
+              <div class="detail-sector">${h.name}</div>
             </div>
           </div>
-        `).join('');
+          <div class="detail-stats">
+            <div class="detail-stat-row">
+              <span class="detail-stat-label">Price</span>
+              <span class="detail-stat-value">$${h.currentPrice.toFixed(2)}</span>
+            </div>
+            <div class="detail-stat-row">
+              <span class="detail-stat-label">Today</span>
+              <span class="detail-stat-value ${h.priceChangePercent >= 0 ? 'positive' : 'negative'}">${h.priceChangePercent >= 0 ? '+' : ''}${h.priceChangePercent.toFixed(1)}%</span>
+            </div>
+            <div class="detail-stat-row">
+              <span class="detail-stat-label">Shares</span>
+              <span class="detail-stat-value">${h.shares.toLocaleString()}</span>
+            </div>
+            <div class="detail-stat-row">
+              <span class="detail-stat-label">Avg Cost</span>
+              <span class="detail-stat-value">$${h.avgCost.toFixed(2)}</span>
+            </div>
+            <div class="detail-return-box ${gainClass}">
+              <div class="return-box-header">
+                <span class="return-box-label ${gainClass}">Total Return</span>
+                <span class="return-box-percent ${gainClass}">${gainSign}${h.changePercent.toFixed(1)}%</span>
+              </div>
+              <div class="return-box-amount ${gainClass}">${gainSign}$${Math.abs(gainAmount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+            </div>
+            <div class="detail-buttons">
+              <button class="detail-btn buy">Buy</button>
+              <button class="detail-btn sell">Sell</button>
+            </div>
+          </div>
+        `;
+      } else {
+        panel.classList.remove('has-data');
+      }
+    }
+
+    function renderProPieChart() {
+      if (holdingsData.length === 0) {
+        document.getElementById('svgPieChart').innerHTML = `
+          <circle cx="100" cy="100" r="75" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="30"/>
+        `;
+        document.getElementById('pieCenterContent').innerHTML = `
+          <div class="pie-center-value">$0.00</div>
+          <div class="pie-center-label">No Holdings</div>
+        `;
+        document.getElementById('proPieLegend').innerHTML = '<div style="text-align: center; color: #64748b; padding: 16px;">Add positions to see allocation</div>';
+        document.getElementById('proPieFooter').innerHTML = '';
+        return;
+      }
+      
+      // Calculate percentages and cumulative values
+      let cumulativePercent = 0;
+      holdingsData.forEach(h => {
+        h.percent = (h.value / totalValue) * 100;
+        h.startPercent = cumulativePercent;
+        cumulativePercent += h.percent;
+        h.endPercent = cumulativePercent;
+      });
+      
+      // Render SVG slices
+      const svg = document.getElementById('svgPieChart');
+      svg.innerHTML = `
+        <circle cx="100" cy="100" r="75" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="30"/>
+        ${holdingsData.map((h, i) => `
+          <path 
+            class="svg-pie-slice" 
+            data-index="${i}"
+            d="${getSlicePath(h.startPercent, h.endPercent, false)}" 
+            fill="${h.color}"
+          />
+        `).join('')}
+      `;
+      
+      // Add event listeners to slices
+      document.querySelectorAll('.svg-pie-slice').forEach(slice => {
+        slice.addEventListener('mouseenter', () => updatePieHoverState(parseInt(slice.dataset.index)));
+        slice.addEventListener('mouseleave', () => updatePieHoverState(null));
+        slice.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          updatePieHoverState(parseInt(slice.dataset.index));
+        });
+      });
+      
+      // Update center content
+      document.getElementById('pieCenterContent').innerHTML = `
+        <div class="pie-center-value">$${totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+        <div class="pie-center-label">Total Value</div>
+      `;
+      
+      // Render legend
+      const legend = document.getElementById('proPieLegend');
+      legend.innerHTML = holdingsData.map((h, i) => `
+        <div class="legend-item" data-index="${i}">
+          <div class="legend-dot" style="background: ${h.color}"></div>
+          <div class="legend-logo" style="background: ${h.color}">${h.symbol.slice(0, 2)}</div>
+          <div class="legend-info">
+            <div class="legend-symbol">${h.symbol}</div>
+            <div class="legend-name">${h.name}</div>
+          </div>
+          <div class="legend-values">
+            <div class="legend-amount">$${h.value.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
+            <div class="legend-pct">${h.percent.toFixed(1)}%</div>
+          </div>
+        </div>
+      `).join('');
+      
+      // Add event listeners to legend items
+      document.querySelectorAll('.legend-item').forEach(item => {
+        item.addEventListener('mouseenter', () => updatePieHoverState(parseInt(item.dataset.index)));
+        item.addEventListener('mouseleave', () => updatePieHoverState(null));
+        item.addEventListener('click', () => {
+          const idx = parseInt(item.dataset.index);
+          updatePieHoverState(hoveredSliceIndex === idx ? null : idx);
+        });
+      });
+      
+      // Render footer stats
+      const totalChange = totalValue - totalCost;
+      const totalChangePercent = totalCost > 0 ? ((totalChange / totalCost) * 100) : 0;
+      const changeClass = totalChange >= 0 ? 'positive' : 'negative';
+      const changeSign = totalChange >= 0 ? '+' : '';
+      
+      // Calculate win rate
+      const winners = holdingsData.filter(h => h.changePercent > 0).length;
+      const winRate = holdingsData.length > 0 ? ((winners / holdingsData.length) * 100).toFixed(1) : '0';
+      
+      document.getElementById('proPieFooter').innerHTML = `
+        <div class="footer-stat">
+          <div class="footer-stat-label">Total Value</div>
+          <div class="footer-stat-value">$${totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+        </div>
+        <div class="footer-stat">
+          <div class="footer-stat-label">Cost Basis</div>
+          <div class="footer-stat-value" style="color: #cbd5e1">$${totalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+        </div>
+        <div class="footer-stat">
+          <div class="footer-stat-label">Total Gain</div>
+          <div class="footer-stat-value ${changeClass}">${changeSign}$${Math.abs(totalChange).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+        </div>
+        <div class="footer-stat">
+          <div class="footer-stat-label">Return</div>
+          <div class="footer-stat-value ${changeClass}">${changeSign}${totalChangePercent.toFixed(1)}%</div>
+        </div>
+        <div class="footer-stat">
+          <div class="footer-stat-label">Win Rate</div>
+          <div class="footer-stat-value">${winRate}%</div>
+        </div>
+      `;
+    }
+
+    // Render holdings list (kept for backwards compatibility)
+    function renderHoldingsList() {
+      // Now handled by renderProPieChart
     }
 
     // Render table
@@ -1205,88 +1897,8 @@
       if (holdingsData.length === 0) return;
 
       // Destroy existing charts if they exist
-      if (pieChart) pieChart.destroy();
       if (barChart) barChart.destroy();
       if (lineChart) lineChart.destroy();
-
-      // Center text plugin for doughnut chart (M1 style)
-      const centerTextPlugin = {
-        id: 'centerText',
-        beforeDraw: function(chart) {
-          if (chart.config.type !== 'doughnut') return;
-          
-          const { ctx, width, height } = chart;
-          ctx.save();
-          
-          // Calculate center position
-          const centerX = width / 2;
-          const centerY = (height - 40) / 2; // Account for legend at bottom
-          
-          // Draw total value
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim() || '#fff';
-          ctx.fillStyle = textColor;
-          ctx.font = 'bold 15px -apple-system, BlinkMacSystemFont, sans-serif';
-          ctx.fillText('$' + totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), centerX, centerY - 8);
-          
-          // Draw change percentage
-          const totalChange = totalValue - totalCost;
-          const changePercent = totalCost > 0 ? ((totalChange / totalCost) * 100) : 0;
-          const sign = totalChange >= 0 ? '+' : '';
-          const upColor = getComputedStyle(document.documentElement).getPropertyValue('--color-up').trim() || '#00d775';
-          const downColor = getComputedStyle(document.documentElement).getPropertyValue('--color-down').trim() || '#ff4757';
-          const changeColor = totalChange >= 0 ? upColor : downColor;
-          
-          ctx.font = '500 11px -apple-system, BlinkMacSystemFont, sans-serif';
-          ctx.fillStyle = changeColor;
-          ctx.fillText(`${sign}$${Math.abs(totalChange).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${totalChange >= 0 ? '▲' : '▼'}${Math.abs(changePercent).toFixed(1)}%`, centerX, centerY + 10);
-          
-          ctx.restore();
-        }
-      };
-
-      // Pie Chart
-      const pieCtx = document.getElementById('pieChart').getContext('2d');
-      pieChart = new Chart(pieCtx, {
-        type: 'doughnut',
-        data: {
-          labels: holdingsData.map(h => h.symbol),
-          datasets: [{
-            data: holdingsData.map(h => h.value),
-            backgroundColor: holdingsData.map(h => h.color),
-            borderWidth: 0,
-            hoverOffset: 8,
-            spacing: 2
-          }]
-        },
-        plugins: [centerTextPlugin],
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          cutout: '65%',
-          plugins: {
-            legend: {
-              display: true,
-              position: 'bottom',
-              labels: {
-                padding: 16,
-                usePointStyle: true,
-                pointStyle: 'circle'
-              }
-            },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  const value = context.parsed;
-                  const percent = ((value / totalValue) * 100).toFixed(1);
-                  return ` $${value.toLocaleString('en-US', { minimumFractionDigits: 2 })} (${percent}%)`;
-                }
-              }
-            }
-          }
-        }
-      });
 
       // Bar Chart
       const barCtx = document.getElementById('barChart').getContext('2d');
