@@ -114,36 +114,43 @@
     }
 
     .chart-tab {
-      flex-shrink: 0;
+      flex: 1;
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 6px;
-      padding: 10px 20px;
-      border: 1px solid var(--border-color);
-      background: transparent;
-      color: var(--text-secondary);
-      font-size: 14px;
-      font-weight: 500;
+      padding: 12px 16px;
+      border: 2px solid #a87d52;
+      background: linear-gradient(180deg, #3a3a48 0%, #2a2a35 40%, #1a1a22 100%);
+      color: #c9a55c;
+      font-size: 13px;
+      font-weight: 600;
       cursor: pointer;
-      border-radius: 20px;
+      border-radius: 12px;
       transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(168, 125, 82, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08);
     }
 
     .chart-tab svg {
       width: 16px;
       height: 16px;
+      stroke: #c9a55c;
     }
 
     .chart-tab:hover {
-      border-color: var(--accent);
-      color: var(--text-primary);
+      background: linear-gradient(180deg, #45454f 0%, #35353f 40%, #25252d 100%);
+      box-shadow: 0 4px 16px rgba(168, 125, 82, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
 
     .chart-tab.active {
-      background: transparent;
-      border-color: var(--accent);
-      color: var(--accent);
-      box-shadow: 0 0 12px var(--accent-glow);
+      background: linear-gradient(180deg, #4a4a58 0%, #3a3a48 40%, #2a2a35 100%);
+      border-color: #d4a574;
+      color: #d4a574;
+      box-shadow: 0 4px 20px rgba(168, 125, 82, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    }
+
+    .chart-tab.active svg {
+      stroke: #d4a574;
     }
 
     /* Portfolio Summary Card */
