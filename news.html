@@ -2461,12 +2461,14 @@
     // Render Most Anticipated Earnings Calendar
     // Fetches real earnings calendar data from Finnhub API
     function renderEarningsNews(articles, period = 'today') {
+      console.log('renderEarningsNews called with period:', period);
       const container = document.getElementById('earnings-articles-container');
       
       if (!container) {
         console.error('Earnings container not found');
         return;
       }
+      console.log('Earnings container found:', container);
 
       // Get date range for period
       const now = new Date();
@@ -2585,6 +2587,7 @@
           `}).join('')}
         </div>
       `;
+      console.log('Earnings rendered, container innerHTML length:', container.innerHTML.length);
     }
     
     // Render Crypto News Section
