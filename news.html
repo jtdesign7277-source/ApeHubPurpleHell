@@ -2770,8 +2770,8 @@
       renderTechNews(categorized.tech.length > 0 ? categorized.tech : allArticles.filter(a => categorizeArticle(a) === 'tech' || a.headline.toLowerCase().includes('tech')).slice(0, 8));
       renderFedNews(categorized.fed.length > 0 ? categorized.fed : allArticles.slice(5, 11));
       // Render earnings calendar (fetches its own data)
-      renderEarningsNews(null, 'today');
-      renderCryptoNews(categorized.crypto.length > 0 ? categorized.crypto : allArticles.filter(a => a.headline.toLowerCase().includes('crypto') || a.headline.toLowerCase().includes('bitcoin')).slice(0, 8));
+      await renderEarningsNews(null, 'today');
+      await renderCryptoNews(categorized.crypto.length > 0 ? categorized.crypto : allArticles.filter(a => a.headline.toLowerCase().includes('crypto') || a.headline.toLowerCase().includes('bitcoin')).slice(0, 8));
       renderNewsArticles(allArticles);
     }
 
@@ -2783,7 +2783,7 @@
           earningsTabs.forEach(t => t.classList.remove('active'));
           this.classList.add('active');
           const period = this.dataset.period;
-          renderEarningsNews(null, period);
+          renderEarningsNews(null, period).catch(e => console.error('Earnings tab error:', e));
         });
       });
     });
