@@ -1050,7 +1050,7 @@
 
     .wl-search-result {
       display: grid;
-      grid-template-columns: 1fr auto auto auto;
+      grid-template-columns: 1fr auto auto;
       align-items: center;
       gap: 12px;
       padding: 14px 16px;
@@ -1086,11 +1086,6 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-    }
-
-    .wl-result-sparkline {
-      width: 80px;
-      height: 30px;
     }
 
     .wl-result-price-col {
@@ -1206,7 +1201,7 @@
 
     .wl-stock-row {
       display: grid;
-      grid-template-columns: 1fr 80px auto 24px;
+      grid-template-columns: 1fr auto 24px;
       align-items: center;
       gap: 12px;
       padding: 16px 0;
@@ -1244,14 +1239,6 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-    }
-
-    .wl-stock-sparkline {
-      width: 80px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
 
     .wl-stock-price-col {
@@ -3263,132 +3250,6 @@
     });
 
     // ============================================
-    // SPARKLINE GENERATOR - Real Yahoo Finance Data
-    // ============================================
-    
-    // Cache for sparkline data to avoid excessive API calls
-    const sparklineCache = new Map();
-    const SPARKLINE_CACHE_TTL = 60000; // 1 minute cache
-    
-    async function fetchSparklineData(symbol) {
-      const cacheKey = symbol.toUpperCase();
-      const cached = sparklineCache.get(cacheKey);
-      
-      if (cached && Date.now() - cached.timestamp < SPARKLINE_CACHE_TTL) {
-        return cached.prices;
-      }
-      
-      try {
-        const response = await fetch(`/api/sparkline/${encodeURIComponent(symbol)}`);
-        const data = await response.json();
-        
-        if (data.prices && data.prices.length > 0) {
-          sparklineCache.set(cacheKey, { prices: data.prices, timestamp: Date.now() });
-          return data.prices;
-        }
-      } catch (error) {
-        console.error(`Sparkline fetch error for ${symbol}:`, error);
-      }
-      
-      return null;
-    }
-    
-    function generateSparklineFromPrices(prices, width = 80, height = 30) {
-      if (!prices || prices.length < 2) {
-        return generateFallbackSparkline('up', width, height);
-      }
-      
-      const firstPrice = prices[0];
-      const lastPrice = prices[prices.length - 1];
-      const trend = lastPrice >= firstPrice ? 'up' : 'down';
-      
-      const minPrice = Math.min(...prices);
-      const maxPrice = Math.max(...prices);
-      const range = maxPrice - minPrice || 1;
-      
-      // Normalize prices to fit in the SVG viewport
-      const padding = 3;
-      const effectiveHeight = height - padding * 2;
-      const points = prices.map((price, i) => ({
-        x: (i / (prices.length - 1)) * width,
-        y: padding + effectiveHeight - ((price - minPrice) / range) * effectiveHeight
-      }));
-      
-      const pathData = points.map((p, i) => (i === 0 ? `M ${p.x.toFixed(2)},${p.y.toFixed(2)}` : `L ${p.x.toFixed(2)},${p.y.toFixed(2)}`)).join(' ');
-      const upColor = getComputedStyle(document.documentElement).getPropertyValue('--color-up').trim() || '#00d775';
-      const downColor = getComputedStyle(document.documentElement).getPropertyValue('--color-down').trim() || '#ff4757';
-      const color = trend === 'up' ? upColor : downColor;
-      const gradientId = `grad-${trend}-${Math.random().toString(36).substr(2, 9)}`;
-      
-      return `
-        <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
-          <defs>
-            <linearGradient id="${gradientId}" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" style="stop-color:${color};stop-opacity:0.3" />
-              <stop offset="100%" style="stop-color:${color};stop-opacity:0" />
-            </linearGradient>
-          </defs>
-          <path d="${pathData} L ${width},${height} L 0,${height} Z" fill="url(#${gradientId})" opacity="0.5"/>
-          <path d="${pathData}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          <circle cx="${points[points.length-1].x.toFixed(2)}" cy="${points[points.length-1].y.toFixed(2)}" r="2.5" fill="${color}"/>
-        </svg>
-      `;
-    }
-    
-    function generateFallbackSparkline(trend, width = 80, height = 30, symbol = '') {
-      const upColor = getComputedStyle(document.documentElement).getPropertyValue('--color-up').trim() || '#00d775';
-      const downColor = getComputedStyle(document.documentElement).getPropertyValue('--color-down').trim() || '#ff4757';
-      const color = trend === 'up' ? upColor : downColor;
-      
-      // Pre-defined sparkline patterns for weekend/offline display (simulating Friday close data)
-      const upPatterns = [
-        [14, 16, 13, 15, 12, 14, 11, 13, 10, 12, 9, 11, 8, 10, 9, 8],
-        [16, 14, 15, 12, 14, 11, 12, 10, 11, 9, 10, 8, 9, 7, 8, 6],
-        [15, 17, 14, 16, 13, 15, 12, 14, 11, 13, 10, 12, 9, 11, 8, 7]
-      ];
-      const downPatterns = [
-        [8, 10, 7, 11, 9, 12, 10, 13, 11, 14, 12, 15, 13, 16, 14, 17],
-        [6, 8, 7, 10, 8, 11, 9, 13, 10, 14, 11, 15, 12, 16, 14, 18],
-        [7, 9, 6, 10, 8, 12, 9, 14, 10, 15, 11, 16, 12, 17, 13, 19]
-      ];
-      
-      // Select a pattern deterministically based on symbol hash (consistent per symbol)
-      const patterns = trend === 'up' ? upPatterns : downPatterns;
-      let hash = 0;
-      for (let i = 0; i < symbol.length; i++) {
-        hash = ((hash << 5) - hash) + symbol.charCodeAt(i);
-        hash = hash & hash;
-      }
-      const patternIndex = Math.abs(hash) % patterns.length;
-      const points = patterns[patternIndex];
-      
-      // Scale points to fit the SVG
-      const maxVal = Math.max(...points);
-      const minVal = Math.min(...points);
-      const range = maxVal - minVal || 1;
-      const padding = 4;
-      const usableHeight = height - padding * 2;
-      const stepX = width / (points.length - 1);
-      
-      const pathPoints = points.map((val, i) => {
-        const x = i * stepX;
-        const y = padding + ((maxVal - val) / range) * usableHeight;
-        return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`;
-      }).join(' ');
-      
-      return `
-        <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
-          <path d="${pathPoints}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      `;
-    }
-    
-    // Legacy function for backwards compatibility
-    function generateSparkline(trend, width = 80, height = 30) {
-      return generateFallbackSparkline(trend, width, height, '');
-    }
-
-    // ============================================
     // FUTURES DATA (Yahoo Finance Style)
     // ============================================
     const futuresSymbols = {
@@ -3790,9 +3651,6 @@
                 <span class="wl-result-symbol">${stock.symbol}</span>
                 <span class="wl-result-name">${stock.name}</span>
               </div>
-              <div class="wl-result-sparkline" data-symbol="${stock.symbol}">
-                ${generateFallbackSparkline(stock.trend, 80, 30, stock.symbol)}
-              </div>
               <div class="wl-result-price-col">
                 <div class="wl-result-price">$${stock.price.toFixed(2)}</div>
                 <div class="wl-result-change ${isUp ? 'up' : 'down'}">
@@ -3810,23 +3668,8 @@
             </div>
           `;
         }).join('');
-        
-        // Load real sparklines for visible search results
-        loadSearchSparklines(stocks.slice(0, 10));
       }
       searchResults.classList.add('visible');
-    }
-    
-    async function loadSearchSparklines(stocks) {
-      for (const stock of stocks) {
-        const el = document.querySelector(`.wl-result-sparkline[data-symbol="${stock.symbol}"]`);
-        if (el) {
-          const prices = await fetchSparklineData(stock.symbol);
-          if (prices && prices.length > 0) {
-            el.innerHTML = generateSparklineFromPrices(prices, 80, 30);
-          }
-        }
-      }
     }
 
     // ============================================
@@ -3915,9 +3758,6 @@
                   <span class="wl-stock-symbol">${stock.symbol}</span>
                   <span class="wl-stock-name">${hasPosition ? sharesDisplay : stock.name}</span>
                 </div>
-                <div class="wl-stock-sparkline" data-symbol="${stock.symbol}">
-                  ${generateFallbackSparkline(stock.trend, 80, 32, stock.symbol)}
-                </div>
                 <div class="wl-stock-price-col">
                   <div class="wl-stock-price">$${parseFloat(livePrice).toFixed(2)}</div>
                   <div class="wl-stock-change ${isUp ? 'up' : 'down'}">
@@ -3933,9 +3773,6 @@
               </div>
             `;
           }).join('');
-          
-          // Load real sparklines asynchronously
-          loadWatchlistSparklines();
           
           updatePortfolioTotal();
         })
@@ -3954,9 +3791,6 @@
                   <span class="wl-stock-symbol">${stock.symbol}</span>
                   <span class="wl-stock-name">${hasPosition ? sharesDisplay : stock.name}</span>
                 </div>
-                <div class="wl-stock-sparkline" data-symbol="${stock.symbol}">
-                  ${generateFallbackSparkline(stock.trend, 80, 32, stock.symbol)}
-                </div>
                 <div class="wl-stock-price-col">
                   <div class="wl-stock-price">$${stock.price.toFixed(2)}</div>
                   <div class="wl-stock-change ${isUp ? 'up' : 'down'}">
@@ -3973,23 +3807,10 @@
             `;
           }).join('');
           
-          loadWatchlistSparklines();
           updatePortfolioTotal();
         });
     }
     
-    async function loadWatchlistSparklines() {
-      const sparklineEls = document.querySelectorAll('.wl-stock-sparkline[data-symbol]');
-      
-      for (const el of sparklineEls) {
-        const symbol = el.dataset.symbol;
-        const prices = await fetchSparklineData(symbol);
-        if (prices && prices.length > 0) {
-          el.innerHTML = generateSparklineFromPrices(prices, 80, 32);
-        }
-      }
-    }
-
     function updatePortfolioTotal() {
       let totalMarketValue = 0;
       let totalCost = 0;
@@ -4099,26 +3920,6 @@
       showPercentage = !showPercentage;
       localStorage.setItem('showPercentage', showPercentage);
       updateWatchlistTotal();
-    }
-
-    // ============================================
-    // MARKET SPARKLINES
-    // ============================================
-    function renderMarketSparklines() {
-      const markets = [
-        { id: 'sp500-spark', trend: 'up' },
-        { id: 'dow-spark', trend: 'up' },
-        { id: 'nasdaq-spark', trend: 'down' },
-        { id: 'russell-spark', trend: 'up' },
-        { id: 'nyse-spark', trend: 'up' }
-      ];
-      
-      markets.forEach(market => {
-        const container = document.getElementById(market.id);
-        if (container) {
-          container.innerHTML = generateSparkline(market.trend, 110, 30);
-        }
-      });
     }
 
     // ============================================
@@ -4592,8 +4393,6 @@
     });
     
     document.addEventListener('DOMContentLoaded', async function() {
-      renderMarketSparklines();
-      
       // Load user data from server first
       await loadUserData();
       
