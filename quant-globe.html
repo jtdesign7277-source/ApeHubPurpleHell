@@ -683,19 +683,20 @@
     );
     globe.add(wireframe);
 
-    // Data points on globe
-    for (let i = 0; i < 200; i++) {
-      const phi = Math.acos(-1 + (2 * i) / 200);
-      const theta = Math.sqrt(200 * Math.PI) * phi;
+    // Data points on globe - random distribution
+    for (let i = 0; i < 150; i++) {
+      // Random spherical coordinates for truly random distribution
+      const phi = Math.acos(2 * Math.random() - 1);
+      const theta = Math.random() * Math.PI * 2;
       const point = new THREE.Mesh(
-        new THREE.SphereGeometry(0.02 + Math.random() * 0.03, 8, 8),
+        new THREE.SphereGeometry(0.015 + Math.random() * 0.04, 12, 12),
         new THREE.MeshBasicMaterial({ 
           color: Math.random() > 0.5 ? 0x00d4ff : 0x00ff88, 
           transparent: true, 
-          opacity: 0.8 
+          opacity: 0.5 + Math.random() * 0.5
         })
       );
-      point.position.setFromSphericalCoords(2.05, phi, theta);
+      point.position.setFromSphericalCoords(2.05 + Math.random() * 0.02, phi, theta);
       globe.add(point);
     }
 
@@ -722,23 +723,42 @@
     rings.rotation.z = 0.15;
     scene.add(rings);
 
-    // Stars
+    // Create circular star texture for round stars
+    const starCanvas = document.createElement('canvas');
+    starCanvas.width = 32;
+    starCanvas.height = 32;
+    const starCtx = starCanvas.getContext('2d');
+    const gradient = starCtx.createRadialGradient(16, 16, 0, 16, 16, 16);
+    gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    gradient.addColorStop(0.3, 'rgba(255, 255, 255, 0.8)');
+    gradient.addColorStop(0.6, 'rgba(255, 255, 255, 0.3)');
+    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    starCtx.fillStyle = gradient;
+    starCtx.fillRect(0, 0, 32, 32);
+    const starTexture = new THREE.CanvasTexture(starCanvas);
+
+    // Stars with round texture
     const starsGeometry = new THREE.BufferGeometry();
-    const starsPositions = new Float32Array(3000 * 3);
-    for (let i = 0; i < 3000; i++) {
+    const starsPositions = new Float32Array(2000 * 3);
+    const starsSizes = new Float32Array(2000);
+    for (let i = 0; i < 2000; i++) {
       const r = 20 + Math.random() * 80;
       const t = Math.random() * Math.PI * 2;
       const p = Math.random() * Math.PI;
       starsPositions[i * 3] = r * Math.sin(p) * Math.cos(t);
       starsPositions[i * 3 + 1] = r * Math.cos(p);
       starsPositions[i * 3 + 2] = r * Math.sin(p) * Math.sin(t);
+      starsSizes[i] = 0.3 + Math.random() * 0.7;
     }
     starsGeometry.setAttribute('position', new THREE.BufferAttribute(starsPositions, 3));
     const stars = new THREE.Points(starsGeometry, new THREE.PointsMaterial({
       color: 0xffffff,
-      size: 0.5,
+      size: 1.5,
+      map: starTexture,
       transparent: true,
-      opacity: 0.8
+      opacity: 0.9,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
     }));
     scene.add(stars);
 
