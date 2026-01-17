@@ -2462,6 +2462,11 @@
     // Fetches real earnings calendar data from Finnhub API
     function renderEarningsNews(articles, period = 'today') {
       const container = document.getElementById('earnings-articles-container');
+      
+      if (!container) {
+        console.error('Earnings container not found');
+        return;
+      }
 
       // Get date range for period
       const now = new Date();
@@ -2587,6 +2592,11 @@
     function renderCryptoNews(articles) {
       const container = document.getElementById('crypto-articles-container');
       const pricesContainer = document.getElementById('crypto-prices-container');
+      
+      if (!container) {
+        console.error('Crypto articles container not found');
+        return;
+      }
       
       // Default crypto prices (Friday/latest trading data)
       const cryptoPrices = [
