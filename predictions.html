@@ -115,10 +115,6 @@
     /* Card Content Layout */
     .prediction-content { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 16px; }
     .prediction-info { flex: 1; }
-    .prediction-chart-wrap { width: 90px; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
-    .mini-chart { width: 80px; height: 45px; }
-    .mini-chart-line { fill: none; stroke: var(--green); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-    .mini-chart-area { fill: url(#chartGradient); opacity: 0.4; }
     
     /* Probability Display */
     .prediction-probability { display: flex; align-items: baseline; gap: 8px; margin-top: 10px; }
@@ -760,19 +756,6 @@
       };
       return sources[category] || { name: 'DailyEdge', icon: '📈' };
     }
-    
-    // Generate mini chart SVG path
-    function generateMiniChartPath(isPositive) {
-      const points = [];
-      let y = 25 + Math.random() * 10;
-      for (let x = 0; x <= 80; x += 10) {
-        y = Math.max(5, Math.min(40, y + (Math.random() - (isPositive ? 0.3 : 0.7)) * 12));
-        points.push({ x, y });
-      }
-      const linePath = points.map((p, i) => (i === 0 ? `M${p.x},${p.y}` : `L${p.x},${p.y}`)).join(' ');
-      const areaPath = linePath + ` L80,45 L0,45 Z`;
-      return { line: linePath, area: areaPath };
-    }
 
     function renderPredictionCard(p, snapshot) {
       const isLocked = isDailyBettingLocked(p);
@@ -790,9 +773,6 @@
       const changeValue = (Math.random() * 5 - 1).toFixed(1);
       const isPositive = parseFloat(changeValue) >= 0;
       
-      // Generate mini chart path
-      const chartPath = generateMiniChartPath(isPositive);
-      
       // Get source info
       const sourceInfo = getSourceInfo(p.category);
       
@@ -807,18 +787,6 @@
                 <span class="probability-value">${yesProbability}%</span>
                 <span class="probability-change ${isPositive ? 'up' : 'down'}">${isPositive ? '+' : ''}${changeValue}%</span>
               </div>
-            </div>
-            <div class="prediction-chart-wrap">
-              <svg class="mini-chart" viewBox="0 0 80 45">
-                <defs>
-                  <linearGradient id="chartGrad${p.id}" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" style="stop-color:${isPositive ? '#10b981' : '#ef4444'};stop-opacity:0.4"/>
-                    <stop offset="100%" style="stop-color:${isPositive ? '#10b981' : '#ef4444'};stop-opacity:0"/>
-                  </linearGradient>
-                </defs>
-                <path class="mini-chart-area" d="${chartPath.area}" fill="url(#chartGrad${p.id})"/>
-                <path class="mini-chart-line" d="${chartPath.line}" style="stroke:${isPositive ? '#10b981' : '#ef4444'}"/>
-              </svg>
             </div>
           </div>
           
