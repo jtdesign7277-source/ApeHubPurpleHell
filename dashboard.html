@@ -266,7 +266,10 @@
       align-items: center;
       gap: 4px;
       background: transparent;
-      border: 1px solid transparent;
+    }
+
+    .welcome .welcome-text {
+      color: var(--accent);
     }
 
     .welcome-arrow {
@@ -282,7 +285,6 @@
     .welcome:hover {
       color: #7c3aed;
       background: rgba(124, 58, 237, 0.05);
-      border-color: rgba(124, 58, 237, 0.4);
     }
 
     .welcome:active {
@@ -2139,7 +2141,7 @@
     <!-- Top Bar -->
     <div class="top-bar">
       <a href="/landing.html" class="apehub-logo" id="apehubLogo" style="text-decoration: none;">Ape<span>Hub</span></a>
-      <div class="welcome" onclick="openProfile()">Welcome, <span id="userName">User</span> <svg class="welcome-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+      <div class="welcome" onclick="openProfile()"><span class="welcome-text">Welcome,</span> <span id="userName">User</span> <svg class="welcome-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
     </div>
 
     <!-- Countdown Timer -->
