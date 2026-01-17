@@ -108,9 +108,10 @@
     .sport-team-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     .sport-team-name { font-size: 15px; font-weight: 600; color: rgba(255,255,255,0.9); }
     .sport-odds-group { display: flex; gap: 6px; }
-    .sport-odds-btn { padding: 8px 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: rgba(255,255,255,0.8); font-size: 13px; font-weight: 600; cursor: pointer; min-width: 55px; text-align: center; transition: all 0.15s; font-family: 'JetBrains Mono', monospace; }
+    .sport-odds-btn { padding: 8px 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: rgba(255,255,255,0.8); font-size: 13px; font-weight: 600; cursor: pointer; min-width: 70px; text-align: center; transition: all 0.15s; font-family: 'JetBrains Mono', monospace; }
     .sport-odds-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); }
     .sport-odds-btn.favorite { border-color: rgba(0, 255, 136, 0.3); color: #00ff88; }
+    .sport-odds-btn .odds-sub { font-size: 10px; opacity: 0.6; margin-left: 4px; }
     .sport-total-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); }
     .sport-total-label { color: rgba(255,255,255,0.5); font-size: 12px; }
     .sport-over-btn { border-color: rgba(255, 215, 0, 0.25); color: #ffd700; }
@@ -1497,10 +1498,10 @@
             </div>
           </div>
           <div class="sport-total-row">
-            <span class="sport-total-label">O/U ${g.total}</span>
+            <span class="sport-total-label">Total</span>
             <div class="sport-odds-group">
-              <button class="sport-odds-btn sport-over-btn" onclick="addSportsBet('Over ${g.total}', 'Total', ${g.overOdds})">O ${formatSportsOdds(g.overOdds)}</button>
-              <button class="sport-odds-btn sport-under-btn" onclick="addSportsBet('Under ${g.total}', 'Total', ${g.underOdds})">U ${formatSportsOdds(g.underOdds)}</button>
+              <button class="sport-odds-btn sport-over-btn" onclick="addSportsBet('Over ${g.total}', 'Total', ${g.overOdds})">O ${g.total} <span class="odds-sub">${formatSportsOdds(g.overOdds)}</span></button>
+              <button class="sport-odds-btn sport-under-btn" onclick="addSportsBet('Under ${g.total}', 'Total', ${g.underOdds})">U ${g.total} <span class="odds-sub">${formatSportsOdds(g.underOdds)}</span></button>
             </div>
           </div>
         </div>
