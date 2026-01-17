@@ -481,7 +481,125 @@
   </nav>
 
   <script>
-    // Demo Data
+    // The Odds API Configuration
+    const ODDS_API_KEY = '991bd69bd42148f1d33e00eebf65b5ee';
+    const ODDS_API_BASE = 'https://api.the-odds-api.com/v4';
+    
+    // Sport keys for The Odds API
+    const SPORT_KEYS = {
+      NBA: 'basketball_nba',
+      NFL: 'americanfootball_nfl',
+      NHL: 'icehockey_nhl',
+      MLB: 'baseball_mlb',
+      NCAAF: 'americanfootball_ncaaf',
+      NCAAB: 'basketball_ncaab'
+    };
+
+    // Cache for API responses
+    let oddsCache = {};
+    let cacheTimestamp = {};
+    const CACHE_DURATION = 60000; // 1 minute cache
+
+    // Fetch odds from The Odds API
+    async function fetchOdds(sport) {
+      const sportKey = SPORT_KEYS[sport];
+      if (!sportKey) return [];
+
+      // Check cache
+      if (oddsCache[sport] && Date.now() - cacheTimestamp[sport] < CACHE_DURATION) {
+        return oddsCache[sport];
+      }
+
+      try {
+        const url = `${ODDS_API_BASE}/sports/${sportKey}/odds/?apiKey=${ODDS_API_KEY}&regions=us&markets=h2h,spreads,totals&oddsFormat=american`;
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+          console.error('Odds API error:', response.status);
+          return DEMO_DATA[sport] || [];
+        }
+
+        const data = await response.json();
+        const games = parseOddsData(data, sport);
+        
+        // Cache results
+        oddsCache[sport] = games;
+        cacheTimestamp[sport] = Date.now();
+        
+        return games;
+      } catch (error) {
+        console.error('Failed to fetch odds:', error);
+        return DEMO_DATA[sport] || [];
+      }
+    }
+
+    // Parse API response into our game format
+    function parseOddsData(data, sport) {
+      return data.map(game => {
+        const bookmaker = game.bookmakers?.[0]; // Use first bookmaker (usually DraftKings or FanDuel)
+        if (!bookmaker) return null;
+
+        const h2h = bookmaker.markets?.find(m => m.key === 'h2h');
+        const spreads = bookmaker.markets?.find(m => m.key === 'spreads');
+        const totals = bookmaker.markets?.find(m => m.key === 'totals');
+
+        const awayTeam = game.away_team;
+        const homeTeam = game.home_team;
+
+        // Get moneyline odds
+        const awayML = h2h?.outcomes?.find(o => o.name === awayTeam)?.price || 0;
+        const homeML = h2h?.outcomes?.find(o => o.name === homeTeam)?.price || 0;
+
+        // Get spread odds
+        const awaySpreadData = spreads?.outcomes?.find(o => o.name === awayTeam);
+        const homeSpreadData = spreads?.outcomes?.find(o => o.name === homeTeam);
+        const awaySpread = awaySpreadData?.point || 0;
+        const homeSpread = homeSpreadData?.point || 0;
+
+        // Get totals
+        const overData = totals?.outcomes?.find(o => o.name === 'Over');
+        const underData = totals?.outcomes?.find(o => o.name === 'Under');
+        const total = overData?.point || 0;
+        const overOdds = overData?.price || -110;
+        const underOdds = underData?.price || -110;
+
+        // Format game time
+        const gameTime = new Date(game.commence_time);
+        const now = new Date();
+        const isLive = gameTime <= now && (now - gameTime) < 3 * 60 * 60 * 1000; // Within 3 hours
+        
+        const timeStr = gameTime.toLocaleString('en-US', { 
+          weekday: 'short', 
+          hour: 'numeric', 
+          minute: '2-digit'
+        });
+
+        // Shorten team names
+        const shortName = (name) => {
+          const parts = name.split(' ');
+          return parts[parts.length - 1]; // Last word (usually the team name)
+        };
+
+        return {
+          id: game.id,
+          away: shortName(awayTeam),
+          home: shortName(homeTeam),
+          awayFull: awayTeam,
+          homeFull: homeTeam,
+          awayML,
+          homeML,
+          awaySpread,
+          homeSpread,
+          total,
+          overOdds,
+          underOdds,
+          live: isLive,
+          time: isLive ? null : timeStr
+        };
+      }).filter(Boolean);
+    }
+
+    // Demo Data (fallback)
     const DEMO_DATA = {
       NBA: [
         { id: '1', away: 'Celtics', home: 'Lakers', awayML: -180, homeML: 150, awaySpread: -4.5, homeSpread: 4.5, total: 224.5, live: true },
@@ -502,6 +620,7 @@
     };
 
     let currentSport = 'NBA';
+    let currentGames = [];
     let betSlip = [];
 
     // Three.js Setup
@@ -727,17 +846,29 @@
       return o > 0 ? '+' + o : o;
     }
 
-    function renderGames() {
-      const games = DEMO_DATA[currentSport] || [];
+    async function renderGames() {
       const scroll = document.getElementById('games-scroll');
+      
+      // Show loading state
+      scroll.innerHTML = '<div style="color: rgba(255,255,255,0.5); padding: 20px; text-align: center;">Loading odds...</div>';
+      
+      // Fetch real odds from API
+      const games = await fetchOdds(currentSport);
+      currentGames = games;
+      
       document.getElementById('live-count').textContent = games.length;
+      
+      if (games.length === 0) {
+        scroll.innerHTML = '<div style="color: rgba(255,255,255,0.5); padding: 20px; text-align: center;">No games available</div>';
+        return;
+      }
       
       scroll.innerHTML = games.map(g => `
         <div class="game-card ${g.live ? 'live' : ''}">
           <div class="game-header">
             <span class="game-sport">${currentSport}</span>
             <span class="game-status">
-              ${g.live ? '<span class="live-dot"></span>LIVE' : g.time}
+              ${g.live ? '<span class="live-dot"></span>LIVE' : g.time || ''}
             </span>
           </div>
           <div class="team-row">
@@ -757,8 +888,8 @@
           <div class="total-row">
             <span class="total-label">O/U ${g.total}</span>
             <div class="odds-group">
-              <button class="odds-btn over-btn" onclick="addBet('Over ${g.total}', 'total', -110)">O -110</button>
-              <button class="odds-btn under-btn" onclick="addBet('Under ${g.total}', 'total', -110)">U -110</button>
+              <button class="odds-btn over-btn" onclick="addBet('Over ${g.total}', 'total', ${g.overOdds || -110})">O ${formatOdds(g.overOdds || -110)}</button>
+              <button class="odds-btn under-btn" onclick="addBet('Under ${g.total}', 'total', ${g.underOdds || -110})">U ${formatOdds(g.underOdds || -110)}</button>
             </div>
           </div>
         </div>
@@ -797,6 +928,11 @@
 
     // Initial render
     renderGames();
+
+    // Auto-refresh odds every 60 seconds
+    setInterval(() => {
+      renderGames();
+    }, 60000);
   </script>
 </body>
 </html>
