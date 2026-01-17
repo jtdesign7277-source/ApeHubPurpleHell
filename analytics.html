@@ -433,7 +433,7 @@
     .legend-item {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       padding: 8px 10px;
       border-radius: 8px;
       cursor: pointer;
@@ -450,27 +450,31 @@
     }
 
     .legend-logo {
-      width: 32px;
-      height: 32px;
+      width: 28px;
+      height: 28px;
       border-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
       font-weight: bold;
-      font-size: 11px;
+      font-size: 10px;
       flex-shrink: 0;
     }
 
     .legend-info {
       flex: 1;
       min-width: 0;
+      overflow: hidden;
     }
 
     .legend-symbol {
       font-weight: 600;
       color: white;
-      font-size: 14px;
+      font-size: 13px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .legend-name {
@@ -484,12 +488,14 @@
     .legend-values {
       text-align: right;
       flex-shrink: 0;
+      padding-left: 4px;
     }
 
     .legend-amount {
       font-weight: 600;
       color: white;
-      font-size: 14px;
+      font-size: 13px;
+      white-space: nowrap;
     }
 
     .legend-pct {
