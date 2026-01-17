@@ -169,4 +169,46 @@ router.get('/check-green/:symbol', async (req, res) => {
   }
 });
 
+// GET /api/market/bars/:symbol - Get intraday bars for sparkline
+router.get('/bars/:symbol', async (req, res) => {
+  try {
+    const symbol = req.params.symbol.toUpperCase();
+    const timeframe = req.query.timeframe || '5Min';
+    const limit = parseInt(req.query.limit) || 78; // ~1 trading day at 5-min intervals
+    
+    // Get bars from the last trading day
+    const end = new Date();
+    const start = new Date();
+    start.setDate(start.getDate() - 5); // Go back 5 days to ensure we get data (weekends)
+    
+    const startISO = start.toISOString();
+    const endISO = end.toISOString();
+    
+    const data = await alpacaFetch(`/v2/stocks/${symbol}/bars?timeframe=${timeframe}&start=${startISO}&end=${endISO}&limit=${limit}&sort=desc`);
+    
+    if (data.bars && data.bars.length > 0) {
+      // Reverse to get chronological order and extract close prices
+      const bars = data.bars.reverse();
+      const prices = bars.map(bar => bar.c);
+      
+      res.json({
+        success: true,
+        symbol,
+        prices,
+        bars: bars.slice(-limit) // Return last N bars
+      });
+    } else {
+      res.json({
+        success: false,
+        symbol,
+        prices: [],
+        bars: []
+      });
+    }
+  } catch (error) {
+    console.error('Error fetching bars:', error);
+    res.status(500).json({ error: 'Failed to fetch bars' });
+  }
+});
+
 module.exports = router;

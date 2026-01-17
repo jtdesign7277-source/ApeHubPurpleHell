@@ -1050,7 +1050,7 @@
 
     .wl-search-result {
       display: grid;
-      grid-template-columns: 1fr auto auto;
+      grid-template-columns: 1fr 80px auto auto;
       align-items: center;
       gap: 12px;
       padding: 14px 16px;
@@ -1086,6 +1086,14 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+
+    .wl-result-sparkline {
+      width: 80px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .wl-result-price-col {
@@ -1201,7 +1209,7 @@
 
     .wl-stock-row {
       display: grid;
-      grid-template-columns: 1fr auto 24px;
+      grid-template-columns: 1fr 80px auto 24px;
       align-items: center;
       gap: 12px;
       padding: 16px 0;
@@ -1239,6 +1247,14 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+
+    .wl-stock-sparkline {
+      width: 80px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .wl-stock-price-col {
@@ -3250,6 +3266,103 @@
     });
 
     // ============================================
+    // SPARKLINE GENERATOR - Real Alpaca Data
+    // ============================================
+    
+    // Cache for sparkline data to avoid excessive API calls
+    const sparklineCache = new Map();
+    const SPARKLINE_CACHE_TTL = 60000; // 1 minute cache
+    
+    async function fetchSparklineData(symbol) {
+      const cacheKey = symbol.toUpperCase();
+      const cached = sparklineCache.get(cacheKey);
+      
+      if (cached && Date.now() - cached.timestamp < SPARKLINE_CACHE_TTL) {
+        return cached.prices;
+      }
+      
+      try {
+        const response = await fetch(`/api/market/bars/${encodeURIComponent(symbol)}?timeframe=5Min&limit=78`);
+        const data = await response.json();
+        
+        if (data.success && data.prices && data.prices.length > 0) {
+          sparklineCache.set(cacheKey, { prices: data.prices, timestamp: Date.now() });
+          return data.prices;
+        }
+      } catch (error) {
+        console.error(`Sparkline fetch error for ${symbol}:`, error);
+      }
+      
+      return null;
+    }
+    
+    function generateSparklineFromPrices(prices, width = 80, height = 32) {
+      if (!prices || prices.length < 2) {
+        return generateFallbackSparkline('up', width, height);
+      }
+      
+      const firstPrice = prices[0];
+      const lastPrice = prices[prices.length - 1];
+      const trend = lastPrice >= firstPrice ? 'up' : 'down';
+      
+      const minPrice = Math.min(...prices);
+      const maxPrice = Math.max(...prices);
+      const range = maxPrice - minPrice || 1;
+      
+      // Normalize prices to fit in the SVG viewport
+      const padding = 4;
+      const effectiveHeight = height - padding * 2;
+      const points = prices.map((price, i) => ({
+        x: (i / (prices.length - 1)) * width,
+        y: padding + effectiveHeight - ((price - minPrice) / range) * effectiveHeight
+      }));
+      
+      const pathData = points.map((p, i) => (i === 0 ? `M${p.x.toFixed(1)},${p.y.toFixed(1)}` : `L${p.x.toFixed(1)},${p.y.toFixed(1)}`)).join(' ');
+      const color = trend === 'up' ? '#00d775' : '#ff4757';
+      
+      return `
+        <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+          <path d="${pathData}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `;
+    }
+    
+    function generateFallbackSparkline(trend, width = 80, height = 32) {
+      const color = trend === 'up' ? '#00d775' : '#ff4757';
+      // Simple placeholder line
+      const y = height / 2;
+      return `
+        <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+          <path d="M0,${y} L${width},${y}" fill="none" stroke="${color}" stroke-width="1.5" stroke-opacity="0.3" stroke-linecap="round"/>
+        </svg>
+      `;
+    }
+    
+    async function loadWatchlistSparklines() {
+      const sparklineEls = document.querySelectorAll('.wl-stock-sparkline[data-symbol]');
+      
+      for (const el of sparklineEls) {
+        const symbol = el.dataset.symbol;
+        const prices = await fetchSparklineData(symbol);
+        if (prices && prices.length > 0) {
+          el.innerHTML = generateSparklineFromPrices(prices, 80, 32);
+        }
+      }
+    }
+    
+    async function loadSearchSparklines(stocks) {
+      for (const stock of stocks) {
+        const el = document.querySelector(`.wl-result-sparkline[data-symbol="${stock.symbol}"]`);
+        if (el) {
+          const prices = await fetchSparklineData(stock.symbol);
+          if (prices && prices.length > 0) {
+            el.innerHTML = generateSparklineFromPrices(prices, 80, 30);
+          }
+        }
+      }
+    }
+
+    // ============================================
     // FUTURES DATA (Yahoo Finance Style)
     // ============================================
     const futuresSymbols = {
@@ -3651,6 +3764,9 @@
                 <span class="wl-result-symbol">${stock.symbol}</span>
                 <span class="wl-result-name">${stock.name}</span>
               </div>
+              <div class="wl-result-sparkline" data-symbol="${stock.symbol}">
+                ${generateFallbackSparkline(isUp ? 'up' : 'down', 80, 30)}
+              </div>
               <div class="wl-result-price-col">
                 <div class="wl-result-price">$${stock.price.toFixed(2)}</div>
                 <div class="wl-result-change ${isUp ? 'up' : 'down'}">
@@ -3668,6 +3784,9 @@
             </div>
           `;
         }).join('');
+        
+        // Load real sparklines for visible search results
+        loadSearchSparklines(stocks.slice(0, 10));
       }
       searchResults.classList.add('visible');
     }
@@ -3758,6 +3877,9 @@
                   <span class="wl-stock-symbol">${stock.symbol}</span>
                   <span class="wl-stock-name">${hasPosition ? sharesDisplay : stock.name}</span>
                 </div>
+                <div class="wl-stock-sparkline" data-symbol="${stock.symbol}">
+                  ${generateFallbackSparkline(isUp ? 'up' : 'down', 80, 32)}
+                </div>
                 <div class="wl-stock-price-col">
                   <div class="wl-stock-price">$${parseFloat(livePrice).toFixed(2)}</div>
                   <div class="wl-stock-change ${isUp ? 'up' : 'down'}">
@@ -3774,6 +3896,7 @@
             `;
           }).join('');
           
+          loadWatchlistSparklines();
           updatePortfolioTotal();
         })
         .catch(() => {
@@ -3791,6 +3914,9 @@
                   <span class="wl-stock-symbol">${stock.symbol}</span>
                   <span class="wl-stock-name">${hasPosition ? sharesDisplay : stock.name}</span>
                 </div>
+                <div class="wl-stock-sparkline" data-symbol="${stock.symbol}">
+                  ${generateFallbackSparkline(isUp ? 'up' : 'down', 80, 32)}
+                </div>
                 <div class="wl-stock-price-col">
                   <div class="wl-stock-price">$${stock.price.toFixed(2)}</div>
                   <div class="wl-stock-change ${isUp ? 'up' : 'down'}">
@@ -3807,6 +3933,7 @@
             `;
           }).join('');
           
+          loadWatchlistSparklines();
           updatePortfolioTotal();
         });
     }
