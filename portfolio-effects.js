@@ -19,6 +19,7 @@ function createSlotMachineValue(elementId, value, prefix = '$') {
   element.classList.add('slot-machine-value');
   
   const fullString = prefix + formattedValue;
+  let digitIndex = 0;
   
   fullString.split('').forEach((char, index) => {
     if (char === '$' || char === ',' || char === '.') {
@@ -33,10 +34,11 @@ function createSlotMachineValue(elementId, value, prefix = '$') {
       const digitInner = document.createElement('span');
       digitInner.className = 'slot-digit-inner';
       
-      // Create spinning digits (0-9 multiple times then land on target)
       const targetDigit = parseInt(char);
       const spinCount = 2; // How many full 0-9 cycles
+      const totalDigits = spinCount * 10 + targetDigit + 1; // Total spans including final
       
+      // Create spinning digits (0-9 multiple times then land on target)
       for (let spin = 0; spin < spinCount; spin++) {
         for (let d = 0; d <= 9; d++) {
           const numSpan = document.createElement('span');
@@ -45,13 +47,21 @@ function createSlotMachineValue(elementId, value, prefix = '$') {
         }
       }
       
-      // Final digit
-      const finalSpan = document.createElement('span');
-      finalSpan.textContent = targetDigit;
-      digitInner.appendChild(finalSpan);
+      // Add digits 0 up to and including target
+      for (let d = 0; d <= targetDigit; d++) {
+        const numSpan = document.createElement('span');
+        numSpan.textContent = d;
+        digitInner.appendChild(numSpan);
+      }
+      
+      // Calculate the final position (percentage to scroll to land on last digit)
+      const finalPosition = ((totalDigits - 1) / totalDigits) * 100;
+      digitInner.style.setProperty('--final-pos', `-${finalPosition}%`);
+      digitInner.style.animationDelay = `${0.1 + digitIndex * 0.05}s`;
       
       digitWrapper.appendChild(digitInner);
       element.appendChild(digitWrapper);
+      digitIndex++;
     }
   });
 }

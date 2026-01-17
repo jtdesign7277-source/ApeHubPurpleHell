@@ -18,6 +18,7 @@
   display: flex;
   flex-direction: column;
   animation: slotSpin 1.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  --final-pos: 0%;
 }
 
 .slot-digit-inner span {
@@ -25,39 +26,31 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 @keyframes slotSpin {
   0% {
-    transform: translateY(-900%);
+    transform: translateY(0);
     filter: blur(4px);
   }
-  60% {
-    filter: blur(2px);
+  20% {
+    filter: blur(3px);
   }
   80% {
-    transform: translateY(5%);
+    filter: blur(1px);
+  }
+  95% {
+    transform: translateY(calc(var(--final-pos) - 2%));
     filter: blur(0);
   }
-  90% {
-    transform: translateY(-2%);
-  }
   100% {
-    transform: translateY(0);
+    transform: translateY(var(--final-pos));
     filter: blur(0);
   }
 }
 
-/* Stagger delays for each digit */
-.slot-digit:nth-child(1) .slot-digit-inner { animation-delay: 0.1s; }
-.slot-digit:nth-child(2) .slot-digit-inner { animation-delay: 0.15s; }
-.slot-digit:nth-child(3) .slot-digit-inner { animation-delay: 0.2s; }
-.slot-digit:nth-child(4) .slot-digit-inner { animation-delay: 0.25s; }
-.slot-digit:nth-child(5) .slot-digit-inner { animation-delay: 0.3s; }
-.slot-digit:nth-child(6) .slot-digit-inner { animation-delay: 0.35s; }
-.slot-digit:nth-child(7) .slot-digit-inner { animation-delay: 0.4s; }
-.slot-digit:nth-child(8) .slot-digit-inner { animation-delay: 0.45s; }
-.slot-digit:nth-child(9) .slot-digit-inner { animation-delay: 0.5s; }
+/* Stagger delays handled by JS now */
 .slot-digit:nth-child(10) .slot-digit-inner { animation-delay: 0.55s; }
 .slot-digit:nth-child(11) .slot-digit-inner { animation-delay: 0.6s; }
 .slot-digit:nth-child(12) .slot-digit-inner { animation-delay: 0.65s; }
