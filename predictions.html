@@ -842,11 +842,6 @@
         <div class="prediction-card ${p.featured ? 'featured' : ''} ${lockedClass}" onclick="openBetSlip(${p.id})">
           ${isLocked ? '<div class="locked-badge">🔒 LOCKED</div>' : ''}
           
-          <div class="prediction-source">
-            <div class="source-icon">${sourceInfo.icon}</div>
-            <span class="source-name">${sourceInfo.name}</span>
-          </div>
-          
           <div class="prediction-content">
             <div class="prediction-info">
               <div class="prediction-title">${p.title}</div>
