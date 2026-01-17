@@ -806,7 +806,16 @@
 
     <!-- Chart Type Tabs -->
     <div class="chart-tabs">
-      <button class="chart-tab active" data-view="pie">
+      <button class="chart-tab active" data-view="table">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <path d="M3 9h18"/>
+          <path d="M3 15h18"/>
+          <path d="M9 3v18"/>
+        </svg>
+        Table
+      </button>
+      <button class="chart-tab" data-view="pie">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M21.21 15.89A10 10 0 1 1 8 2.83"/>
           <path d="M22 12A10 10 0 0 0 12 2v10z"/>
@@ -828,15 +837,6 @@
         </svg>
         Line
       </button>
-      <button class="chart-tab" data-view="table">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="3" width="18" height="18" rx="2"/>
-          <path d="M3 9h18"/>
-          <path d="M3 15h18"/>
-          <path d="M9 3v18"/>
-        </svg>
-        Table
-      </button>
     </div>
 
     <!-- Portfolio Summary -->
@@ -847,7 +847,7 @@
     </div>
 
     <!-- Pie Chart View -->
-    <div class="chart-view active" id="pie-view">
+    <div class="chart-view" id="pie-view">
       <div class="chart-container">
         <div class="chart-title">Portfolio Allocation</div>
         <div class="chart-wrapper">
@@ -886,7 +886,7 @@
     </div>
 
     <!-- Table View -->
-    <div class="chart-view" id="table-view">
+    <div class="chart-view active" id="table-view">
       <div class="table-container">
         <div class="table-header-bar">
           <div class="table-title">Your Positions</div>
