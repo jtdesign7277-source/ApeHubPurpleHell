@@ -862,8 +862,12 @@
       const totalChange = totalValue - totalCost;
       const totalChangePercent = totalCost > 0 ? ((totalChange / totalCost) * 100) : 0;
 
-      // Update summary
-      document.getElementById('total-value').textContent = '$' + totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      // Update summary with slot machine effect
+      if (typeof createSlotMachineValue === 'function' && totalValue > 0) {
+        createSlotMachineValue('total-value', totalValue);
+      } else {
+        document.getElementById('total-value').textContent = '$' + totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
       const changeEl = document.getElementById('total-change');
       const sign = totalChange >= 0 ? '+' : '';
       changeEl.textContent = `${sign}$${Math.abs(totalChange).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${sign}${totalChangePercent.toFixed(2)}%)`;
