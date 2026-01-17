@@ -107,10 +107,11 @@
     /* Chart Type Tabs */
     .chart-tabs {
       display: flex;
-      gap: 8px;
-      padding: 20px;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
+      gap: 4px;
+      padding: 16px 20px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 12px;
+      margin: 0 20px;
     }
 
     .chart-tab {
@@ -118,44 +119,47 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      padding: 12px 16px;
-      border: 2px solid #a87d52;
-      background: linear-gradient(180deg, #3a3a48 0%, #2a2a35 40%, #1a1a22 100%);
-      color: #c9a55c;
-      font-size: 13px;
-      font-weight: 600;
+      gap: 5px;
+      padding: 8px 12px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 500;
       cursor: pointer;
-      border-radius: 12px;
-      transition: all 0.2s;
-      box-shadow: 0 4px 12px rgba(168, 125, 82, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      transition: all 0.15s ease;
     }
 
     .chart-tab svg {
-      width: 16px;
-      height: 16px;
-      stroke: #c9a55c;
+      width: 14px;
+      height: 14px;
+      opacity: 0.5;
+      transition: opacity 0.15s;
     }
 
     .chart-tab:hover {
-      background: linear-gradient(180deg, #45454f 0%, #35353f 40%, #25252d 100%);
-      box-shadow: 0 4px 16px rgba(168, 125, 82, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      color: var(--text-secondary);
+      background: rgba(255,255,255,0.04);
+    }
+
+    .chart-tab:hover svg {
+      opacity: 0.7;
     }
 
     .chart-tab.active {
-      background: linear-gradient(180deg, #4a4a58 0%, #3a3a48 40%, #2a2a35 100%);
-      border-color: #d4a574;
-      color: #d4a574;
-      box-shadow: 0 4px 20px rgba(168, 125, 82, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      background: rgba(168, 85, 247, 0.15);
+      color: var(--accent);
     }
 
     .chart-tab.active svg {
-      stroke: #d4a574;
+      opacity: 1;
+      stroke: var(--accent);
     }
 
     /* Portfolio Summary Card */
     .portfolio-summary {
-      margin: 0 20px 16px;
+      margin: 16px 20px 16px;
       padding: 14px 16px;
       background: var(--card-bg);
       border-radius: 12px;
