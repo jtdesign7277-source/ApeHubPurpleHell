@@ -117,6 +117,37 @@
     .sport-under-btn { border-color: rgba(255, 107, 107, 0.25); color: #ff6b6b; }
     .sports-loading { text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.5); }
 
+    /* Sports Bet Slip Modal */
+    .sports-bet-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 200; opacity: 0; visibility: hidden; transition: all 0.3s; display: flex; align-items: flex-end; justify-content: center; }
+    .sports-bet-overlay.show { opacity: 1; visibility: visible; }
+    .sports-bet-slip { width: 100%; max-width: 500px; background: linear-gradient(180deg, #12121a, #0a0a0f); border-radius: 24px 24px 0 0; padding: 20px; padding-bottom: calc(20px + env(safe-area-inset-bottom)); transform: translateY(100%); transition: transform 0.3s ease; }
+    .sports-bet-overlay.show .sports-bet-slip { transform: translateY(0); }
+    .sports-bet-handle { width: 40px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; margin: 0 auto 16px; }
+    .sports-bet-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+    .sports-bet-title { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+    .sports-bet-pick { font-size: 14px; color: #00ff88; font-weight: 600; }
+    .sports-bet-odds { font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
+    .sports-bet-close { width: 36px; height: 36px; background: rgba(255,255,255,0.1); border: none; border-radius: 50%; color: #fff; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .sports-token-input-section { margin-bottom: 20px; }
+    .sports-token-label { font-size: 12px; color: rgba(255,255,255,0.5); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .sports-token-quick { display: flex; gap: 8px; margin-bottom: 12px; }
+    .sports-quick-btn { flex: 1; padding: 12px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 10px; color: rgba(255,255,255,0.7); font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .sports-quick-btn:hover { background: rgba(255,255,255,0.1); }
+    .sports-quick-btn.selected { border-color: #00ff88; color: #00ff88; background: rgba(0,255,136,0.1); }
+    .sports-input-row { display: flex; gap: 10px; }
+    .sports-amount-input { flex: 1; padding: 14px 16px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 12px; color: #fff; font-size: 16px; font-family: 'JetBrains Mono', monospace; }
+    .sports-amount-input:focus { outline: none; border-color: #00ff88; }
+    .sports-max-btn { padding: 14px 20px; background: rgba(0,255,136,0.15); border: 2px solid rgba(0,255,136,0.3); border-radius: 12px; color: #00ff88; font-size: 14px; font-weight: 700; cursor: pointer; }
+    .sports-payout-preview { background: rgba(255,255,255,0.03); border-radius: 12px; padding: 16px; margin-bottom: 20px; }
+    .sports-payout-row { display: flex; justify-content: space-between; margin-bottom: 10px; }
+    .sports-payout-row:last-child { margin-bottom: 0; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); }
+    .sports-payout-label { color: rgba(255,255,255,0.5); font-size: 14px; }
+    .sports-payout-value { color: #fff; font-size: 14px; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+    .sports-payout-value.profit { color: #00ff88; }
+    .sports-confirm-btn { width: 100%; padding: 18px; background: linear-gradient(135deg, #00ff88, #00d4ff); border: none; border-radius: 14px; color: #000; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+    .sports-confirm-btn:hover { transform: scale(1.02); box-shadow: 0 4px 20px rgba(0,255,136,0.3); }
+    .sports-confirm-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
     /* Prediction Cards - WallStreetPredict Style */
     .predictions-grid { display: flex; flex-direction: column; gap: 16px; }
     .prediction-card { background: linear-gradient(180deg, #0d1a28, #050a0f); border: 1px solid rgba(6, 182, 212, 0.2); border-radius: 24px; padding: 20px; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden; }
@@ -562,6 +593,48 @@
       <div class="success-details-row"><span style="color: var(--white-50)">To Win</span><span style="color: var(--green)" id="successPotential">200 tokens</span></div>
     </div>
     <button class="success-btn" onclick="closeSuccessModal()"><span>Continue</span></button>
+  </div>
+
+  <!-- Sports Bet Slip Modal -->
+  <div class="sports-bet-overlay" id="sportsBetOverlay" onclick="if(event.target===this)closeSportsBetSlip()">
+    <div class="sports-bet-slip">
+      <div class="sports-bet-handle"></div>
+      <div class="sports-bet-header">
+        <div>
+          <div class="sports-bet-title">Place Sports Bet</div>
+          <div class="sports-bet-pick" id="sportsBetPick">Lakers ML</div>
+          <div class="sports-bet-odds" id="sportsBetOdds">Odds: -150</div>
+        </div>
+        <button class="sports-bet-close" onclick="closeSportsBetSlip()">×</button>
+      </div>
+      <div class="sports-token-input-section">
+        <div class="sports-token-label">🪙 Wager Amount (Tokens)</div>
+        <div class="sports-token-quick">
+          <button class="sports-quick-btn" onclick="selectSportsAmount(50)">50</button>
+          <button class="sports-quick-btn" onclick="selectSportsAmount(100)">100</button>
+          <button class="sports-quick-btn" onclick="selectSportsAmount(250)">250</button>
+        </div>
+        <div class="sports-input-row">
+          <input type="number" class="sports-amount-input" id="sportsAmount" placeholder="Enter tokens..." min="10" oninput="updateSportsPayout()">
+          <button class="sports-max-btn" onclick="setSportsMax()">MAX</button>
+        </div>
+      </div>
+      <div class="sports-payout-preview">
+        <div class="sports-payout-row">
+          <span class="sports-payout-label">Your Wager</span>
+          <span class="sports-payout-value" id="sportsWagerDisplay">0 tokens</span>
+        </div>
+        <div class="sports-payout-row">
+          <span class="sports-payout-label">Odds</span>
+          <span class="sports-payout-value" id="sportsOddsDisplay">-110</span>
+        </div>
+        <div class="sports-payout-row">
+          <span class="sports-payout-label">Potential Win</span>
+          <span class="sports-payout-value profit" id="sportsPotentialWin">0 tokens</span>
+        </div>
+      </div>
+      <button class="sports-confirm-btn" id="sportsConfirmBtn" onclick="confirmSportsBet()" disabled>Place Bet</button>
+    </div>
   </div>
 
   <div class="modal-overlay" id="tokenModal">
@@ -1434,8 +1507,97 @@
       `).join('');
     }
 
+    // Sports Bet Slip State
+    let currentSportsBet = { selection: '', type: '', odds: 0 };
+
     function addSportsBet(selection, type, odds) {
-      showNotification(`Added: ${selection} ${type} (${formatSportsOdds(odds)})`, 'success');
+      currentSportsBet = { selection, type, odds };
+      document.getElementById('sportsBetPick').textContent = `${selection} ${type}`;
+      document.getElementById('sportsBetOdds').textContent = `Odds: ${formatSportsOdds(odds)}`;
+      document.getElementById('sportsOddsDisplay').textContent = formatSportsOdds(odds);
+      document.getElementById('sportsAmount').value = '';
+      document.querySelectorAll('.sports-quick-btn').forEach(b => b.classList.remove('selected'));
+      updateSportsPayout();
+      document.getElementById('sportsBetOverlay').classList.add('show');
+    }
+
+    function closeSportsBetSlip() {
+      document.getElementById('sportsBetOverlay').classList.remove('show');
+    }
+
+    function selectSportsAmount(amount) {
+      document.getElementById('sportsAmount').value = amount;
+      document.querySelectorAll('.sports-quick-btn').forEach(b => b.classList.remove('selected'));
+      event.target.classList.add('selected');
+      updateSportsPayout();
+    }
+
+    function setSportsMax() {
+      document.getElementById('sportsAmount').value = Math.floor(userBalance);
+      document.querySelectorAll('.sports-quick-btn').forEach(b => b.classList.remove('selected'));
+      updateSportsPayout();
+    }
+
+    function updateSportsPayout() {
+      const amount = parseInt(document.getElementById('sportsAmount').value) || 0;
+      const odds = currentSportsBet.odds;
+      
+      document.getElementById('sportsWagerDisplay').textContent = `${amount.toLocaleString()} tokens`;
+      
+      // Calculate payout based on American odds
+      let payout = 0;
+      if (odds > 0) {
+        payout = amount * (odds / 100);
+      } else if (odds < 0) {
+        payout = amount * (100 / Math.abs(odds));
+      }
+      
+      document.getElementById('sportsPotentialWin').textContent = `${Math.floor(payout).toLocaleString()} tokens`;
+      
+      const confirmBtn = document.getElementById('sportsConfirmBtn');
+      if (amount >= 10 && amount <= userBalance) {
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = `Place ${amount.toLocaleString()} Token Bet`;
+      } else if (amount > userBalance) {
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = 'Insufficient Tokens';
+      } else {
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = 'Min 10 Tokens';
+      }
+    }
+
+    async function confirmSportsBet() {
+      const amount = parseInt(document.getElementById('sportsAmount').value);
+      if (!amount || amount < 10) return;
+      if (amount > userBalance) {
+        closeSportsBetSlip();
+        openTokenModal();
+        return;
+      }
+
+      // Deduct tokens locally (would save to backend in production)
+      userBalance -= amount;
+      document.getElementById('userBalance').textContent = Math.floor(userBalance).toLocaleString();
+      
+      // Calculate winnings
+      const odds = currentSportsBet.odds;
+      let potentialWin = 0;
+      if (odds > 0) {
+        potentialWin = amount * (odds / 100);
+      } else if (odds < 0) {
+        potentialWin = amount * (100 / Math.abs(odds));
+      }
+
+      closeSportsBetSlip();
+      
+      // Show success
+      document.getElementById('successWagered').textContent = `${amount.toLocaleString()} tokens`;
+      document.getElementById('successPosition').textContent = currentSportsBet.selection;
+      document.getElementById('successPotential').textContent = `${Math.floor(potentialWin + amount).toLocaleString()} tokens`;
+      document.getElementById('successMessage').textContent = `${currentSportsBet.selection} ${currentSportsBet.type}`;
+      document.getElementById('successModal').classList.add('show');
+      createFireworks();
     }
   </script>
 </body>
