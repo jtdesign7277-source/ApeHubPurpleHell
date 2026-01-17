@@ -4,11 +4,17 @@ const router = express.Router();
 
 const ALPACA_API_KEY = process.env.ALPACA_API_KEY || 'AKZ3OS3PVBQ2WGEAVNF2MVSYV5';
 const ALPACA_SECRET_KEY = process.env.ALPACA_SECRET_KEY || '5HFdsA4Zj19zUnzgM35qGWKpqHLix3QLj23maxoXbuf8';
+// Use IEX data feed (free tier) instead of SIP
 const ALPACA_DATA_URL = 'https://data.alpaca.markets';
+const DATA_FEED = 'iex'; // Use 'iex' for free tier, 'sip' for paid
 
 // Helper to make Alpaca API requests
 async function alpacaFetch(endpoint) {
-  const response = await fetch(`${ALPACA_DATA_URL}${endpoint}`, {
+  // Add feed=iex parameter if not already present
+  const separator = endpoint.includes('?') ? '&' : '?';
+  const urlWithFeed = endpoint.includes('feed=') ? endpoint : `${endpoint}${separator}feed=${DATA_FEED}`;
+  
+  const response = await fetch(`${ALPACA_DATA_URL}${urlWithFeed}`, {
     headers: {
       'APCA-API-KEY-ID': ALPACA_API_KEY,
       'APCA-API-SECRET-KEY': ALPACA_SECRET_KEY
