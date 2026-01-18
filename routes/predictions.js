@@ -1041,6 +1041,59 @@ router.post('/admin/issue-tokens', verifyAdmin, async (req, res) => {
   }
 });
 
+// Clear User Bets (Admin) - for testing
+router.post('/admin/clear-bets', verifyAdmin, async (req, res) => {
+  try {
+    const pool = req.app.locals.pool;
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({ error: 'Email required' });
+    }
+    
+    // Get all active bets for this user
+    const betsResult = await pool.query(
+      'SELECT * FROM user_bets WHERE user_email = $1 AND status = $2',
+      [email, 'active']
+    );
+    
+    // Calculate total tokens to refund
+    const totalRefund = betsResult.rows.reduce((sum, bet) => sum + bet.tokens_wagered, 0);
+    
+    // Delete the bets
+    await pool.query('DELETE FROM user_bets WHERE user_email = $1', [email]);
+    
+    // Refund tokens
+    await pool.query(
+      'UPDATE user_tokens SET balance = balance + $1 WHERE user_email = $2',
+      [totalRefund, email]
+    );
+    
+    // Update prediction totals
+    for (const bet of betsResult.rows) {
+      const volumeColumn = bet.position === 'yes' ? 'total_yes_tokens' : 'total_no_tokens';
+      await pool.query(
+        `UPDATE predictions SET ${volumeColumn} = GREATEST(0, ${volumeColumn} - $1), total_bettors = GREATEST(0, total_bettors - 1) WHERE id = $2`,
+        [bet.tokens_wagered, bet.prediction_id]
+      );
+    }
+    
+    const newBalance = await pool.query('SELECT balance FROM user_tokens WHERE user_email = $1', [email]);
+    
+    console.log(`Admin cleared ${betsResult.rows.length} bets for ${email}, refunded ${totalRefund} tokens`);
+    
+    res.json({
+      success: true,
+      betsCleared: betsResult.rows.length,
+      tokensRefunded: totalRefund,
+      newBalance: newBalance.rows[0]?.balance || 0
+    });
+  } catch (error) {
+    console.error('Error clearing bets:', error);
+    res.status(500).json({ error: 'Failed to clear bets' });
+  }
+});
+
 // Recent Bets
 router.get('/admin/recent-bets', verifyAdmin, async (req, res) => {
   try {
