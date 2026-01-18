@@ -373,6 +373,19 @@ router.get('/bets/my', async (req, res) => {
   }
   
   try {
+    // Check if table exists first
+    const tableCheck = await pool.query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_name = 'kalshi_bets'
+      )
+    `);
+    
+    if (!tableCheck.rows[0].exists) {
+      // Table doesn't exist yet, return empty array
+      return res.json({ success: true, bets: [] });
+    }
+    
     let query = `
       SELECT * FROM kalshi_bets 
       WHERE user_email = $1
@@ -394,7 +407,8 @@ router.get('/bets/my', async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching Kalshi bets:', error);
-    res.status(500).json({ error: 'Failed to fetch bets' });
+    // Return empty array on error to not block the UI
+    res.json({ success: true, bets: [] });
   }
 });
 
