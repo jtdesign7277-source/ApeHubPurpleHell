@@ -897,11 +897,8 @@
     }
 
     // ===== KALSHI MARKETS =====
-    let kalshiEvents = [];
     let kalshiMarkets = [];
     let selectedKalshiMarket = null;
-    let currentKalshiView = 'events'; // 'events' or 'markets'
-    let currentEventTicker = null;
     let kalshiUserBets = new Set(); // Track which markets user has bet on
     
     async function loadKalshiMarkets() {
@@ -912,13 +909,13 @@
       await loadKalshiUserBets();
       
       try {
-        const res = await fetch('/api/kalshi/events?limit=50');
+        // Fetch markets directly with odds
+        const res = await fetch('/api/kalshi/markets?limit=100');
         const data = await res.json();
         
-        if (data.success && data.events) {
-          kalshiEvents = data.events;
-          currentKalshiView = 'events';
-          renderKalshiEvents();
+        if (data.success && data.markets) {
+          kalshiMarkets = data.markets;
+          renderKalshiMarketsFlat();
         } else {
           throw new Error(data.error || 'Failed to load Kalshi markets');
         }
@@ -939,98 +936,24 @@
       } catch (err) { console.error('Error loading Kalshi user bets:', err); }
     }
     
-    function renderKalshiEvents() {
+    function renderKalshiMarketsFlat() {
       const grid = document.getElementById('predictionsGrid');
-      if (kalshiEvents.length === 0) {
-        grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🔮</div><div class="empty-state-title">No Kalshi events available</div><p>Check back soon for live prediction markets!</p></div>`;
+      if (kalshiMarkets.length === 0) {
+        grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🔮</div><div class="empty-state-title">No Kalshi markets available</div><p>Check back soon for live prediction markets!</p></div>`;
         return;
       }
       
-      grid.innerHTML = kalshiEvents.map(event => renderKalshiEventCard(event)).join('');
-    }
-    
-    function renderKalshiEventCard(event) {
-      const categoryIcons = {
-        'Politics': '🗳️',
-        'Science and Technology': '🔬',
-        'Climate and Weather': '🌡️',
-        'World': '🌍',
-        'Economics': '📊',
-        'Sports': '⚽',
-        'Culture': '🎭'
-      };
-      const icon = categoryIcons[event.category] || '🔮';
-      
-      return `
-        <div class="prediction-card kalshi-card" onclick="openKalshiEvent('${event.event_ticker}')">
-          <div class="kalshi-source">
-            <span class="kalshi-badge">K</span>
-            <span class="source-name">Kalshi</span>
-          </div>
-          
-          <div class="prediction-content">
-            <div class="prediction-info">
-              <div class="prediction-title">${event.title}</div>
-              ${event.sub_title ? `<div class="kalshi-subtitle">${event.sub_title}</div>` : ''}
-            </div>
-          </div>
-          
-          <div class="prediction-footer">
-            <div class="prediction-category">${icon} ${event.category}</div>
-            <div class="kalshi-view-btn">View Markets →</div>
-          </div>
-        </div>
-      `;
-    }
-    
-    async function openKalshiEvent(eventTicker) {
-      const grid = document.getElementById('predictionsGrid');
-      grid.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-      currentEventTicker = eventTicker;
-      
-      try {
-        const res = await fetch(`/api/kalshi/event/${eventTicker}/markets`);
-        const data = await res.json();
-        
-        if (data.success && data.markets) {
-          kalshiMarkets = data.markets;
-          currentKalshiView = 'markets';
-          renderKalshiMarketsList(data.event);
-        } else {
-          throw new Error(data.error || 'Failed to load markets');
-        }
-      } catch (err) {
-        console.error('Error loading event markets:', err);
-        grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⚠️</div><div class="empty-state-title">Failed to load markets</div><p>${err.message}</p><button class="kalshi-back-btn" onclick="loadKalshiMarkets()">← Back to Events</button></div>`;
-      }
-    }
-    
-    function renderKalshiMarketsList(event) {
-      const grid = document.getElementById('predictionsGrid');
-      
-      let html = `
-        <div class="kalshi-markets-header">
-          <button class="kalshi-back-btn" onclick="loadKalshiMarkets()">← Back</button>
-          <div class="kalshi-event-title">${event?.title || 'Markets'}</div>
-        </div>
-      `;
-      
-      if (kalshiMarkets.length === 0) {
-        html += `<div class="empty-state"><div class="empty-state-icon">📊</div><div class="empty-state-title">No markets in this event</div></div>`;
-      } else {
-        html += kalshiMarkets.map(market => renderKalshiMarketCard(market)).join('');
-      }
-      
-      grid.innerHTML = html;
+      grid.innerHTML = kalshiMarkets.map(market => renderKalshiMarketCard(market)).join('');
     }
     
     function renderKalshiMarketCard(market) {
-      const hasBet = kalshiUserBets.has(market.kalshi_ticker);
-      const yesPct = market.yesProbability || 50;
+      const hasBet = kalshiUserBets.has(market.kalshi_ticker || market.id);
+      const yesPct = market.yesProbability || Math.round((market.yesPrice || 0.5) * 100);
       const noPct = 100 - yesPct;
-      const yesMultiplier = market.yes_payout_multiplier?.toFixed(2) || '2.00';
-      const noMultiplier = market.no_payout_multiplier?.toFixed(2) || '2.00';
-      const closeTime = market.closes_at ? formatTimeLeft(market.closes_at) : 'TBD';
+      const yesMultiplier = (market.yes_payout_multiplier || (1 / (market.yesPrice || 0.5))).toFixed(2);
+      const noMultiplier = (market.no_payout_multiplier || (1 / (1 - (market.yesPrice || 0.5)))).toFixed(2);
+      const closeTime = market.closes_at || market.closeTime ? formatTimeLeft(market.closes_at || market.closeTime) : 'TBD';
+      const ticker = market.kalshi_ticker || market.id;
       
       return `
         <div class="prediction-card kalshi-market-card ${hasBet ? 'has-bet' : ''}">
@@ -1051,11 +974,11 @@
           </div>
           
           <div class="prediction-odds">
-            <button class="odds-button yes ${hasBet ? 'disabled' : ''}" onclick="event.stopPropagation(); ${hasBet ? 'showAlreadyBetMessage()' : `openKalshiBetSlip('${market.kalshi_ticker}', 'yes')`}">
+            <button class="odds-button yes ${hasBet ? 'disabled' : ''}" onclick="event.stopPropagation(); ${hasBet ? 'showAlreadyBetMessage()' : `openKalshiBetSlip('${ticker}', 'yes')`}">
               <span class="odds-label">YES ✓</span>
               <span class="odds-price">${yesMultiplier}x payout</span>
             </button>
-            <button class="odds-button no ${hasBet ? 'disabled' : ''}" onclick="event.stopPropagation(); ${hasBet ? 'showAlreadyBetMessage()' : `openKalshiBetSlip('${market.kalshi_ticker}', 'no')`}">
+            <button class="odds-button no ${hasBet ? 'disabled' : ''}" onclick="event.stopPropagation(); ${hasBet ? 'showAlreadyBetMessage()' : `openKalshiBetSlip('${ticker}', 'no')`}">
               <span class="odds-label">NO ✗</span>
               <span class="odds-price">${noMultiplier}x payout</span>
             </button>
@@ -1163,9 +1086,7 @@
           closeBetSlip();
           showBetSuccess(data.bet);
           // Refresh the markets list
-          if (currentEventTicker) {
-            openKalshiEvent(currentEventTicker);
-          }
+          loadKalshiMarkets();
         } else { 
           alert(data.error || 'Failed to place bet'); 
         }
