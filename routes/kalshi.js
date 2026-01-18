@@ -286,9 +286,31 @@ router.post('/bet', async (req, res) => {
       throw new Error('Market not found on Kalshi');
     }
     
-    if (market.status !== 'open') {
-      throw new Error('This market is no longer open for betting');
+    // Accept both 'open' and 'active' as valid statuses
+    if (!['open', 'active'].includes(market.status)) {
+      throw new Error(`This market is no longer open for betting (status: ${market.status})`);
     }
+    
+    // Ensure kalshi_bets table exists
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS kalshi_bets (
+        id SERIAL PRIMARY KEY,
+        user_email VARCHAR(255) NOT NULL,
+        kalshi_ticker VARCHAR(255) NOT NULL,
+        event_ticker VARCHAR(255),
+        market_title TEXT,
+        position VARCHAR(10) NOT NULL,
+        tokens_wagered INTEGER NOT NULL,
+        potential_payout INTEGER NOT NULL,
+        payout_multiplier DECIMAL(10,2) NOT NULL,
+        kalshi_status VARCHAR(50) DEFAULT 'active',
+        status VARCHAR(50) DEFAULT 'active',
+        result VARCHAR(50),
+        placed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        resolved_at TIMESTAMP,
+        UNIQUE(user_email, kalshi_ticker)
+      )
+    `);
     
     // Calculate odds based on current Kalshi prices
     const yesPrice = market.yes_ask ? market.yes_ask / 100 : 0.5;
