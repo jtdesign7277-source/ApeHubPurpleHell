@@ -231,6 +231,15 @@
     .prediction-closes { font-size: 12px; color: var(--white-50); }
     .prediction-closes .time { color: #06b6d4; font-weight: 600; }
 
+    /* Kalshi Card Styles */
+    .kalshi-card { border-color: rgba(139, 92, 246, 0.25); }
+    .kalshi-card:hover { border-color: rgba(139, 92, 246, 0.5); box-shadow: 0 8px 32px rgba(139, 92, 246, 0.15); }
+    .kalshi-source { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+    .kalshi-badge { width: 22px; height: 22px; background: linear-gradient(135deg, #8b5cf6, #6d28d9); border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; }
+    .kalshi-subtitle { font-size: 13px; color: var(--white-50); margin-top: 8px; }
+    .kalshi-view-btn { font-size: 13px; font-weight: 600; color: #8b5cf6; transition: color 0.2s; }
+    .kalshi-card:hover .kalshi-view-btn { color: #a78bfa; }
+
     /* Bet Slip - Centered Modal Style (matches sports bet slip) */
     .bet-slip-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 200; opacity: 0; visibility: hidden; transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
     .bet-slip-overlay.show { opacity: 1; visibility: visible; }
@@ -539,6 +548,7 @@
       <button class="category-tab active" data-category="daily">📈 Daily</button>
       <button class="category-tab" data-category="weekly">📊 Weekly</button>
       <button class="category-tab" data-category="crypto">₿ Crypto</button>
+      <button class="category-tab" data-category="kalshi">🔮 Kalshi</button>
     </div>
     <div class="predictions-grid" id="predictionsGrid">
       <div class="loading"><div class="spinner"></div></div>
@@ -793,6 +803,12 @@
         return;
       }
       
+      // Kalshi category fetches from Kalshi API
+      if (currentCategory === 'kalshi') {
+        await loadKalshiMarkets();
+        return;
+      }
+      
       try {
         let url = '/api/predictions?status=open';
         if (currentCategory !== 'all') url += `&category=${currentCategory}`;
@@ -860,6 +876,79 @@
         if (data.success && data.url) { window.location.href = data.url; }
         else { alert(data.error || 'Failed to start purchase'); }
       } catch (err) { console.error('Error purchasing tokens:', err); alert('Failed to process purchase. Please try again.'); }
+    }
+
+    // ===== KALSHI MARKETS =====
+    let kalshiMarkets = [];
+    
+    async function loadKalshiMarkets() {
+      const grid = document.getElementById('predictionsGrid');
+      grid.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+      
+      try {
+        const res = await fetch('/api/kalshi/events?limit=50');
+        const data = await res.json();
+        
+        if (data.success && data.events) {
+          kalshiMarkets = data.events;
+          renderKalshiMarkets();
+        } else {
+          throw new Error(data.error || 'Failed to load Kalshi markets');
+        }
+      } catch (err) {
+        console.error('Error loading Kalshi markets:', err);
+        grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⚠️</div><div class="empty-state-title">Failed to load Kalshi markets</div><p>${err.message}</p></div>`;
+      }
+    }
+    
+    function renderKalshiMarkets() {
+      const grid = document.getElementById('predictionsGrid');
+      if (kalshiMarkets.length === 0) {
+        grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🔮</div><div class="empty-state-title">No Kalshi markets available</div><p>Check back soon for live prediction markets!</p></div>`;
+        return;
+      }
+      
+      grid.innerHTML = kalshiMarkets.map(event => renderKalshiCard(event)).join('');
+    }
+    
+    function renderKalshiCard(event) {
+      // Get category icon
+      const categoryIcons = {
+        'Politics': '🗳️',
+        'Science and Technology': '🔬',
+        'Climate and Weather': '🌡️',
+        'World': '🌍',
+        'Economics': '📊',
+        'Sports': '⚽',
+        'Culture': '🎭'
+      };
+      const icon = categoryIcons[event.category] || '🔮';
+      
+      return `
+        <div class="prediction-card kalshi-card" onclick="openKalshiDetails('${event.event_ticker}')">
+          <div class="kalshi-source">
+            <span class="kalshi-badge">K</span>
+            <span class="source-name">Kalshi</span>
+          </div>
+          
+          <div class="prediction-content">
+            <div class="prediction-info">
+              <div class="prediction-title">${event.title}</div>
+              ${event.sub_title ? `<div class="kalshi-subtitle">${event.sub_title}</div>` : ''}
+            </div>
+          </div>
+          
+          <div class="prediction-footer">
+            <div class="prediction-category">${icon} ${event.category}</div>
+            <div class="kalshi-view-btn">View Markets →</div>
+          </div>
+        </div>
+      `;
+    }
+    
+    function openKalshiDetails(eventTicker) {
+      // For now, show alert - later can expand to show markets within event
+      alert(`Coming soon: View markets for ${eventTicker}\n\nKalshi integration is in progress. You'll be able to see odds and place bets on Kalshi markets soon!`);
     }
 
     function renderPredictions() {
