@@ -1157,20 +1157,20 @@
     }
 
     function showBetSuccess(bet) {
-      const predictionResolves = selectedPrediction?.resolves_at;
       closeBetSlip();
       document.getElementById('successPosition').textContent = bet.position.toUpperCase();
       document.getElementById('successPosition').style.color = bet.position === 'yes' ? 'var(--green)' : 'var(--red)';
       document.getElementById('successWagered').textContent = `${bet.tokens_wagered.toLocaleString()} tokens`;
       document.getElementById('successPotential').textContent = `${bet.potential_payout.toLocaleString()} tokens`;
-      document.getElementById('successTime').textContent = formatCurrentTime();
-      const dateStr = formatPredictionDate(predictionResolves);
-      document.getElementById('successResolves').textContent = dateStr ? `${dateStr} 4:30pm ET` : '4:30pm ET';
       document.getElementById('successModal').classList.add('show');
+      document.body.style.overflow = 'hidden';
       launchFireworks();
     }
 
-    function closeSuccessModal() { document.getElementById('successModal').classList.remove('show'); }
+    function closeSuccessModal() { 
+      document.getElementById('successModal').classList.remove('show'); 
+      document.body.style.overflow = '';
+    }
     function showPurchaseSuccess(tokens) { loadBalance(); alert(`🎉 Success! ${tokens} tokens added to your account!`); launchFireworks(); }
 
     function launchFireworks() {
