@@ -1684,12 +1684,39 @@
       list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--white-50);">Loading bets...</div>';
       
       try {
-        const res = await fetch(`/api/predictions/bets/my?email=${encodeURIComponent(userEmail)}`);
-        const data = await res.json();
-        if (data.success) {
-          myBets = data.bets;
-          renderMyBets();
+        // Load both regular predictions bets AND Kalshi bets
+        const [predictionsRes, kalshiRes] = await Promise.all([
+          fetch(`/api/predictions/bets/my?email=${encodeURIComponent(userEmail)}`),
+          fetch(`/api/kalshi/bets/my?email=${encodeURIComponent(userEmail)}`)
+        ]);
+        
+        const predictionsData = await predictionsRes.json();
+        const kalshiData = await kalshiRes.json();
+        
+        // Merge bets from both sources
+        myBets = [];
+        
+        if (predictionsData.success && predictionsData.bets) {
+          myBets = [...predictionsData.bets];
         }
+        
+        if (kalshiData.success && kalshiData.bets) {
+          // Transform Kalshi bets to match the format
+          const kalshiBets = kalshiData.bets.map(bet => ({
+            ...bet,
+            prediction_title: bet.market_title || bet.kalshi_ticker,
+            ticker: 'KALSHI',
+            category: 'kalshi',
+            resolves_at: null, // Kalshi markets don't have resolves_at in our schema
+            tokens_won: bet.status === 'won' ? bet.potential_payout : 0
+          }));
+          myBets = [...myBets, ...kalshiBets];
+        }
+        
+        // Sort by placed_at descending (newest first)
+        myBets.sort((a, b) => new Date(b.placed_at) - new Date(a.placed_at));
+        
+        renderMyBets();
       } catch (err) {
         console.error('Error loading bets:', err);
         list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--red);">Failed to load bets</div>';
