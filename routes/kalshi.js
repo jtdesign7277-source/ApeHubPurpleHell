@@ -2,10 +2,40 @@ const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
 
-// Kalshi API Configuration
+// Kalshi API Configuration (predictions)
 const KALSHI_API_BASE = 'https://api.elections.kalshi.com/trade-api/v2';
 const KALSHI_API_KEY = process.env.KALSHI_API_KEY;
 const KALSHI_PRIVATE_KEY = process.env.KALSHI_PRIVATE_KEY;
+
+// Kalshi Sports API Configuration
+const KALSHI_SPORTS_API_KEY = process.env.KALSHI_SPORTS_API_KEY || 'e8f3a285-5f0c-4eb1-a1c6-3e5b53dffacf';
+const KALSHI_SPORTS_PRIVATE_KEY = process.env.KALSHI_SPORTS_PRIVATE_KEY || `-----BEGIN RSA PRIVATE KEY-----
+MIIEogIBAAKCAQEA1zOY84Xs0Qgqq2mFiuwzYARmo0iq/ZbsO26RnqIZrot5Zo5B
+UiUNVGrDAP/RIf0FL1jkRs0/vomtyqYPEgFpmDN4H0NEcikitc7sr8YEe4ECEVGY
+nRq10TVQzuKyWQEL8c64KwOYJf7afh5ETbyLCik4p3PDaFJoOqp78gaWncwmCnOZ
+ZGYVwuV2ZdD9lObSjG4xjccZN6su1DZyUvRp6pZ43crr2eXDsVrzsrqLtsU6H859
+O1/1NmusY2VAZJO41JP3wt52s4FSv28FayfiuaAc7ruYjZT5iaN5VvNz24b02nSF
+IAuLCHzZmPew9QwpNvmkEBtlpgYyN6AjbcLChwIDAQABAoIBAA783KHWlE1j8zd9
+oZEGWExPTNKsb0mQEaMl/+WmG9cd3EukjATA6IfA6RSQZyv7J4708u5swbbEd00j
+eZiNw/aXXGiuUlMHww9vJOmCXLI5TuqOiJbQfb80pmHHmheRd20qMjC/ZFZTxJB/
+YnnDhYTPUCR2xIeRzbPgRxeZFoj7cSdwignORNvqIfJM3rZKnftYSgBcf+7LAWbk
+1daFmkVsvBqV96/n8dCTz1PDREka73eCRknsIVL8zxbZpQplk0U3qLt+kMzSDhXU
+xOsdpv/dK8oQ30Yl5LiHpCm5uZqAw01gCBFiqMomIOI5dQZa0TB6iS3nM+ua9LWo
+O685+NECgYEA84JTFAwb76BcxOIWK2ChnoG1qyVJTJrG+DYRxCJk72svk1VFpsWS
+y2cHg6DQ1NPeeOkJemblCV0vrzMAF4boC5RXojmBPHM1XB8uld/aB7x2rSwFTjuB
+0eCPj2owH/x2M3CV7h2wMl0YyZoVeR7WfWUnOCkVjlCbGjtJSHua0y8CgYEA4j2M
+Z9Lg8s4RPFyg8hI+kdcbA178Da0V27AFkTD8BMAuoV6Z0d1vfxgmKYSKTr/MFNCX
+7ayUKlKsjSo4yD6JKhzBVomb9Ch3xcybJHzIb8JHkyNjQy1/JgdlWcd9dkvHbFvw
+8WEj+odebumbiNF9DuPg8tLBA3dboiZaCHZ8ECkCgYBDrfo3PTJahKCkHA57We0x
+p+19NuzLfM1GWYjQkZqqLIlZkr68HnexTt54yC6iqIxR4LtAqO6JjrvdHviskVNX
+PJCqxv7TdVXkV8pT35ayxb/aW7zRxJpNYfOksafUjA+yNl2Fg/zf0p48EjZbpqWI
+zp967XhPSLoDLW0t1yTuAwKBgBvRKYRSf2obQC9FzFw3Ng5EfoPJmAAuefOLDwQt
+G6+R2anpscwGCAF+fKK6My8/kd41T5jfkVAq3iB1QooMdl0BMBxtywkYOLHPWHwC
+A7sKDjbfMQM/gtSwMBv71UdIRfriyxtCsGPLZScJ/h+yckf0aOIyW50Lfe7P/F3y
+A4sRAoGANBGuttj4e6C12A6ovthrp4jT05V/WDefp/kw2v8Xis4wbpY4HRMzlVch
+kmSMB1Wv2tXcCpoDrvjavKu4QnG06LQ40wRi8OA0U8nUC15Ao+c8r8FM68MIw6GS
+biWOPlPmzjmKFK/rxNaR2eYKtKlLOPVO+89J8IClJqQOFRUzuDQ=
+-----END RSA PRIVATE KEY-----`;
 
 // Generate signature for Kalshi API requests
 function signRequest(timestamp, method, path) {
@@ -20,6 +50,19 @@ function signRequest(timestamp, method, path) {
   
   // Handle the private key (may need to replace escaped newlines)
   const privateKey = KALSHI_PRIVATE_KEY.replace(/\\n/g, '\n');
+  const signature = sign.sign(privateKey, 'base64');
+  
+  return signature;
+}
+
+// Generate signature for Sports Kalshi API
+function signSportsRequest(timestamp, method, path) {
+  const message = `${timestamp}${method}${path}`;
+  const sign = crypto.createSign('RSA-SHA256');
+  sign.update(message);
+  sign.end();
+  
+  const privateKey = KALSHI_SPORTS_PRIVATE_KEY.replace(/\\n/g, '\n');
   const signature = sign.sign(privateKey, 'base64');
   
   return signature;
@@ -57,10 +100,44 @@ async function kalshiRequest(method, path, body = null) {
   return response.json();
 }
 
+// Make authenticated request to Kalshi Sports API (separate credentials)
+async function kalshiSportsRequest(method, path, body = null) {
+  const timestamp = Math.floor(Date.now() / 1000).toString();
+  const signature = signSportsRequest(timestamp, method, path);
+  
+  const headers = {
+    'Content-Type': 'application/json',
+    'KALSHI-ACCESS-KEY': KALSHI_SPORTS_API_KEY,
+    'KALSHI-ACCESS-SIGNATURE': signature,
+    'KALSHI-ACCESS-TIMESTAMP': timestamp
+  };
+  
+  const options = {
+    method,
+    headers
+  };
+  
+  if (body && method !== 'GET') {
+    options.body = JSON.stringify(body);
+  }
+  
+  const response = await fetch(`${KALSHI_API_BASE}${path}`, options);
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('Kalshi Sports API error:', response.status, errorText);
+    throw new Error(`Kalshi Sports API error: ${response.status}`);
+  }
+  
+  return response.json();
+}
+
 // Cache for markets (5 minute TTL)
 let marketsCache = null;
 let marketsCacheTime = 0;
 let eventMarketsCache = {}; // Cache markets by event ticker
+let sportsMarketsCache = null;
+let sportsMarketsCacheTime = 0;
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 // Helper to transform Kalshi market to our format
@@ -126,6 +203,68 @@ router.get('/markets', async (req, res) => {
   } catch (error) {
     console.error('Error fetching Kalshi markets:', error);
     res.status(500).json({ error: 'Failed to fetch markets', details: error.message });
+  }
+});
+
+// GET /api/kalshi/sports - Fetch sports markets from Kalshi (using sports API key)
+router.get('/sports', async (req, res) => {
+  try {
+    const { league } = req.query; // NBA, NFL, NHL, etc.
+    const now = Date.now();
+    
+    // Return cached data if fresh
+    if (sportsMarketsCache && (now - sportsMarketsCacheTime) < CACHE_TTL) {
+      let markets = sportsMarketsCache;
+      if (league) {
+        markets = markets.filter(m => 
+          m.title?.toLowerCase().includes(league.toLowerCase()) ||
+          m.event_ticker?.toLowerCase().includes(league.toLowerCase())
+        );
+      }
+      return res.json({ success: true, markets, cached: true });
+    }
+    
+    // Fetch sports markets from Kalshi - search for sports-related markets
+    // Kalshi sports markets often have tickers containing team names or league names
+    const data = await kalshiSportsRequest('GET', '/markets?status=open&limit=200');
+    
+    // Filter for sports-related markets
+    const sportsKeywords = ['nba', 'nfl', 'nhl', 'mlb', 'basketball', 'football', 'hockey', 'baseball', 
+                           'super bowl', 'championship', 'playoff', 'finals', 'match', 'game', 'win', 
+                           'lakers', 'celtics', 'warriors', 'chiefs', 'eagles', 'bills', 'cowboys',
+                           'yankees', 'dodgers', 'mets', 'braves', 'sports', 'player', 'mvp', 'score'];
+    
+    const allMarkets = data.markets?.map(transformKalshiMarket) || [];
+    
+    // Filter to sports markets
+    let sportsMarkets = allMarkets.filter(m => {
+      const titleLower = (m.title || '').toLowerCase();
+      const tickerLower = (m.kalshi_ticker || '').toLowerCase();
+      return sportsKeywords.some(keyword => 
+        titleLower.includes(keyword) || tickerLower.includes(keyword)
+      );
+    });
+    
+    // Mark as sports category
+    sportsMarkets = sportsMarkets.map(m => ({ ...m, category: 'sports' }));
+    
+    // Cache the results
+    sportsMarketsCache = sportsMarkets;
+    sportsMarketsCacheTime = now;
+    
+    // Filter by league if specified
+    let markets = sportsMarkets;
+    if (league) {
+      markets = markets.filter(m => 
+        m.title?.toLowerCase().includes(league.toLowerCase()) ||
+        m.event_ticker?.toLowerCase().includes(league.toLowerCase())
+      );
+    }
+    
+    res.json({ success: true, markets, total: sportsMarkets.length, cached: false });
+  } catch (error) {
+    console.error('Error fetching Kalshi sports markets:', error);
+    res.status(500).json({ error: 'Failed to fetch sports markets', details: error.message });
   }
 });
 
