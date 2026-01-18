@@ -764,10 +764,12 @@
         window.history.replaceState({}, '', '/predictions.html');
       }
 
-      // Auto-refresh every 5 seconds
+      // Auto-refresh every 5 seconds (but not for Kalshi - it has its own cache)
       setInterval(() => {
         loadBalance();
-        loadPredictions();
+        if (currentCategory !== 'kalshi') {
+          loadPredictions();
+        }
       }, 5000);
     });
 
