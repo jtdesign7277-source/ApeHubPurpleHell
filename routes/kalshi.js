@@ -306,11 +306,17 @@ router.post('/bet', async (req, res) => {
         kalshi_status VARCHAR(50) DEFAULT 'active',
         status VARCHAR(50) DEFAULT 'active',
         result VARCHAR(50),
+        tokens_won INTEGER DEFAULT 0,
         placed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         resolved_at TIMESTAMP,
         UNIQUE(user_email, kalshi_ticker)
       )
     `);
+    
+    // Ensure tokens_won column exists (for tables created before this update)
+    await client.query(`
+      ALTER TABLE kalshi_bets ADD COLUMN IF NOT EXISTS tokens_won INTEGER DEFAULT 0
+    `).catch(() => {});
     
     // Calculate odds based on current Kalshi prices
     const yesPrice = market.yes_ask ? market.yes_ask / 100 : 0.5;

@@ -1692,6 +1692,9 @@
       list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--white-50);">Loading bets...</div>';
       
       try {
+        // First, sync Kalshi bet resolutions to check for settled markets
+        await fetch('/api/kalshi/sync-resolutions', { method: 'POST' }).catch(() => {});
+        
         // Load both regular predictions bets AND Kalshi bets
         const [predictionsRes, kalshiRes] = await Promise.all([
           fetch(`/api/predictions/bets/my?email=${encodeURIComponent(userEmail)}`),
@@ -1750,7 +1753,12 @@
       }
       
       if (filteredBets.length === 0) {
-        list.innerHTML = '';
+        const emptyMsg = currentBetFilter === 'active' 
+          ? 'No open bets. Place a bet to get started!' 
+          : currentBetFilter === 'settled' 
+            ? 'No settled bets yet. Your completed bets will appear here.' 
+            : 'No bets yet. Start betting on predictions!';
+        list.innerHTML = `<div class="no-bets"><div class="no-bets-icon">${currentBetFilter === 'settled' ? '📊' : '🎯'}</div><div class="no-bets-title">${emptyMsg}</div></div>`;
         return;
       }
       
