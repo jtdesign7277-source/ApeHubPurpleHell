@@ -793,20 +793,41 @@
       const amount = parseInt(document.getElementById('betAmount').value);
       if (!amount || amount < 10) { alert('Minimum bet is 10 tokens'); return; }
       if (amount > userBalance) { alert('Insufficient tokens! Purchase more to continue.'); openTokenModal(); return; }
+      
+      // Check if user email is set
+      if (!userEmail) {
+        userEmail = prompt('Enter your email to place bets:');
+        if (!userEmail) { alert('Email is required to place bets'); return; }
+        localStorage.setItem('userEmail', userEmail);
+      }
+      
+      // Disable button while processing
+      const confirmBtn = document.getElementById('confirmBetBtn');
+      confirmBtn.disabled = true;
+      confirmBtn.style.opacity = '0.5';
+      
       try {
+        console.log('Placing bet:', { email: userEmail, predictionId: selectedPrediction.id, position: selectedPosition, amount: amount });
         const res = await fetch('/api/predictions/bet', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: userEmail, predictionId: selectedPrediction.id, position: selectedPosition, amount: amount })
         });
         const data = await res.json();
+        console.log('Bet response:', data);
         if (data.success) {
           userBalance = data.newBalance;
           document.getElementById('userBalance').textContent = Math.floor(userBalance).toLocaleString();
           showBetSuccess(data.bet);
           loadPredictions();
         } else { alert(data.error || 'Failed to place bet'); }
-      } catch (err) { console.error('Error placing bet:', err); alert('Failed to place bet. Please try again.'); }
+      } catch (err) { 
+        console.error('Error placing bet:', err); 
+        alert('Failed to place bet. Please try again.'); 
+      } finally {
+        confirmBtn.disabled = false;
+        confirmBtn.style.opacity = '1';
+      }
     }
 
     async function purchaseTokens() {
@@ -1103,6 +1124,8 @@
     }
 
     function confirmBet() {
+      console.log('confirmBet called', { selectedPrediction, selectedPosition });
+      if (!selectedPrediction) { alert('No prediction selected'); return; }
       if (!selectedPosition) { alert('Please select YES or NO'); return; }
       const amount = parseInt(document.getElementById('betAmount').value);
       if (!amount || amount < 10) { alert('Please enter a bet amount (minimum 10 tokens)'); return; }
