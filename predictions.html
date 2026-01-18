@@ -240,21 +240,52 @@
     .kalshi-view-btn { font-size: 13px; font-weight: 600; color: #8b5cf6; transition: color 0.2s; }
     .kalshi-card:hover .kalshi-view-btn { color: #a78bfa; }
     
-    /* Kalshi Markets List */
-    .kalshi-markets-header { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-    .kalshi-back-btn { padding: 10px 16px; background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 10px; color: #a78bfa; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-    .kalshi-back-btn:hover { background: rgba(139, 92, 246, 0.25); border-color: rgba(139, 92, 246, 0.5); }
-    .kalshi-event-title { font-size: 18px; font-weight: 700; color: var(--white); flex: 1; }
-    .kalshi-market-card { border-color: rgba(139, 92, 246, 0.2); }
-    .kalshi-market-card:hover { border-color: rgba(139, 92, 246, 0.4); }
-    .kalshi-market-card .prediction-odds { display: flex; gap: 8px; margin: 16px 0; }
-    .kalshi-market-card .odds-button { flex: 1; padding: 14px 12px; background: rgba(255,255,255,0.03); border: 2px solid rgba(255,255,255,0.1); border-radius: 12px; cursor: pointer; transition: all 0.2s; text-align: center; }
-    .kalshi-market-card .odds-button.yes:hover { border-color: var(--green); background: rgba(16, 185, 129, 0.1); }
-    .kalshi-market-card .odds-button.no:hover { border-color: var(--red); background: rgba(239, 68, 68, 0.1); }
-    .kalshi-market-card .odds-label { display: block; font-size: 14px; font-weight: 700; margin-bottom: 4px; }
-    .kalshi-market-card .odds-button.yes .odds-label { color: var(--green); }
-    .kalshi-market-card .odds-button.no .odds-label { color: var(--red); }
-    .kalshi-market-card .odds-price { display: block; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--white-70); }
+    /* Kalshi Market Card - Polymarket/Kalshi Style */
+    .kalshi-market-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 16px; cursor: default; }
+    .kalshi-market-card:hover { border-color: #d1d5db; box-shadow: 0 4px 12px rgba(0,0,0,0.08); transform: none; }
+    .kalshi-market-card.has-bet { border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.02); }
+    
+    .kalshi-category { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .kalshi-category-icon { width: 32px; height: 32px; background: linear-gradient(135deg, #ef4444, #dc2626); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    .kalshi-category-label { font-size: 12px; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; }
+    
+    .kalshi-title { font-size: 16px; font-weight: 600; color: #111827; margin-bottom: 14px; line-height: 1.4; }
+    
+    /* Option Buttons Row */
+    .kalshi-options { display: flex; gap: 8px; margin-bottom: 10px; }
+    .kalshi-option-btn { flex: 1; padding: 12px 8px; border-radius: 10px; border: none; cursor: pointer; transition: all 0.2s; text-align: center; font-family: inherit; }
+    .kalshi-option-btn.yes-option { background: #10b981; color: #fff; }
+    .kalshi-option-btn.no-option { background: #06b6d4; color: #fff; }
+    .kalshi-option-btn:hover { transform: scale(1.02); filter: brightness(1.1); }
+    .kalshi-option-btn.disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .kalshi-option-name { font-size: 12px; font-weight: 500; opacity: 0.9; margin-bottom: 2px; }
+    .kalshi-option-price { font-size: 18px; font-weight: 700; }
+    
+    /* Payout Row */
+    .kalshi-payouts { display: flex; gap: 8px; margin-bottom: 12px; }
+    .kalshi-payout { flex: 1; text-align: center; font-size: 12px; color: #10b981; font-weight: 500; }
+    .kalshi-payout.no-payout { color: #06b6d4; }
+    
+    /* Footer */
+    .kalshi-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid #f3f4f6; }
+    .kalshi-volume { font-size: 13px; font-weight: 600; color: #374151; }
+    .kalshi-live { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #10b981; }
+    .kalshi-live-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: pulse 1.5s infinite; }
+    .kalshi-expand { width: 28px; height: 28px; background: #f3f4f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #6b7280; cursor: pointer; border: none; }
+    .kalshi-expand:hover { background: #e5e7eb; }
+    
+    /* Multi-option markets */
+    .kalshi-multi-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+    .kalshi-multi-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .kalshi-multi-label { flex: 1; font-size: 14px; color: #374151; font-weight: 500; }
+    .kalshi-multi-pct { font-size: 15px; font-weight: 700; color: #111827; min-width: 45px; text-align: right; }
+    .kalshi-mini-btns { display: flex; gap: 4px; }
+    .kalshi-mini-btn { padding: 6px 12px; border-radius: 6px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+    .kalshi-mini-btn.yes { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+    .kalshi-mini-btn.no { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+    .kalshi-mini-btn:hover { transform: scale(1.05); }
+    .kalshi-mini-btn.yes:hover { background: #10b981; color: #fff; }
+    .kalshi-mini-btn.no:hover { background: #ef4444; color: #fff; }
 
     /* Bet Slip - Centered Modal Style (matches sports bet slip) */
     .bet-slip-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 200; opacity: 0; visibility: hidden; transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
@@ -948,48 +979,123 @@
     
     function renderKalshiMarketCard(market) {
       const hasBet = kalshiUserBets.has(market.kalshi_ticker || market.id);
-      const yesPct = market.yesProbability || Math.round((market.yesPrice || 0.5) * 100);
-      const noPct = 100 - yesPct;
-      const yesMultiplier = (market.yes_payout_multiplier || (1 / (market.yesPrice || 0.5))).toFixed(2);
-      const noMultiplier = (market.no_payout_multiplier || (1 / (1 - (market.yesPrice || 0.5)))).toFixed(2);
-      const closeTime = market.closes_at || market.closeTime ? formatTimeLeft(market.closes_at || market.closeTime) : 'TBD';
+      const yesPrice = market.yesPrice || 0.5;
+      const noPrice = 1 - yesPrice;
+      const yesCents = Math.round(yesPrice * 100);
+      const noCents = Math.round(noPrice * 100);
+      const yesPayout = Math.round(100 / yesPrice);
+      const noPayout = Math.round(100 / noPrice);
+      const volume = market.volume || 0;
       const ticker = market.kalshi_ticker || market.id;
+      const title = market.title || '';
       
-      return `
-        <div class="prediction-card kalshi-market-card ${hasBet ? 'has-bet' : ''}">
-          ${hasBet ? '<div class="bet-placed-badge">✓ BET PLACED</div>' : ''}
-          <div class="kalshi-source">
-            <span class="kalshi-badge">K</span>
-            <span class="source-name">Kalshi</span>
-          </div>
-          
-          <div class="prediction-content">
-            <div class="prediction-info">
-              <div class="prediction-title">${market.title}</div>
-              <div class="prediction-probability">
-                <span class="probability-value">${yesPct}%</span>
-                <span class="probability-label">chance</span>
-              </div>
+      // Detect if it's a sports game (has team matchup style title)
+      const isGameMatchup = title.includes(' at ') || title.includes(' vs ');
+      
+      // Get category icon based on title content
+      let categoryIcon = '🔮';
+      let categoryLabel = 'Prediction';
+      if (title.toLowerCase().includes('football') || title.toLowerCase().includes('nfl')) {
+        categoryIcon = '🏈';
+        categoryLabel = 'Pro Football';
+      } else if (title.toLowerCase().includes('basketball') || title.toLowerCase().includes('nba')) {
+        categoryIcon = '🏀';
+        categoryLabel = 'Basketball';
+      } else if (title.toLowerCase().includes('politics') || title.toLowerCase().includes('president')) {
+        categoryIcon = '🗳️';
+        categoryLabel = 'Politics';
+      } else if (title.toLowerCase().includes('crypto') || title.toLowerCase().includes('bitcoin')) {
+        categoryIcon = '₿';
+        categoryLabel = 'Crypto';
+      } else if (title.toLowerCase().includes('weather') || title.toLowerCase().includes('climate')) {
+        categoryIcon = '🌡️';
+        categoryLabel = 'Climate';
+      }
+      
+      // Parse team names for matchup style
+      let team1 = 'Yes';
+      let team2 = 'No';
+      if (isGameMatchup) {
+        const parts = title.split(/ at | vs /i);
+        if (parts.length === 2) {
+          team1 = parts[0].replace(/^(Pro Football|NBA|NFL)\s*/i, '').trim().split(' ').pop() || parts[0];
+          team2 = parts[1].trim().split(' ')[0] || parts[1];
+        }
+      }
+      
+      // Format volume
+      const formatVolume = (v) => {
+        if (v >= 1000000) return '$' + (v / 1000000).toFixed(1) + 'M';
+        if (v >= 1000) return '$' + (v / 1000).toFixed(0) + 'K';
+        return '$' + v.toLocaleString();
+      };
+      
+      if (isGameMatchup) {
+        // Matchup style card (like "Los Angeles R at Chicago")
+        return `
+          <div class="kalshi-market-card ${hasBet ? 'has-bet' : ''}">
+            ${hasBet ? '<div class="bet-placed-badge">✓ BET PLACED</div>' : ''}
+            
+            <div class="kalshi-category">
+              <div class="kalshi-category-icon">${categoryIcon}</div>
+              <span class="kalshi-category-label">${categoryLabel}</span>
+            </div>
+            
+            <div class="kalshi-title">${title}</div>
+            
+            <div class="kalshi-options">
+              <button class="kalshi-option-btn yes-option ${hasBet ? 'disabled' : ''}" onclick="event.stopPropagation(); ${hasBet ? 'showAlreadyBetMessage()' : `openKalshiBetSlip('${ticker}', 'yes')`}">
+                <div class="kalshi-option-name">${team1}</div>
+                <div class="kalshi-option-price">${yesCents}¢</div>
+              </button>
+              <button class="kalshi-option-btn no-option ${hasBet ? 'disabled' : ''}" onclick="event.stopPropagation(); ${hasBet ? 'showAlreadyBetMessage()' : `openKalshiBetSlip('${ticker}', 'no')`}">
+                <div class="kalshi-option-name">${team2}</div>
+                <div class="kalshi-option-price">${noCents}¢</div>
+              </button>
+            </div>
+            
+            <div class="kalshi-payouts">
+              <div class="kalshi-payout">$100 → $${yesPayout}</div>
+              <div class="kalshi-payout no-payout">$100 → $${noPayout}</div>
+            </div>
+            
+            <div class="kalshi-footer">
+              <div class="kalshi-volume">${formatVolume(volume)}</div>
+              <button class="kalshi-expand">⊕</button>
             </div>
           </div>
-          
-          <div class="prediction-odds">
-            <button class="odds-button yes ${hasBet ? 'disabled' : ''}" onclick="event.stopPropagation(); ${hasBet ? 'showAlreadyBetMessage()' : `openKalshiBetSlip('${ticker}', 'yes')`}">
-              <span class="odds-label">YES ✓</span>
-              <span class="odds-price">${yesMultiplier}x payout</span>
-            </button>
-            <button class="odds-button no ${hasBet ? 'disabled' : ''}" onclick="event.stopPropagation(); ${hasBet ? 'showAlreadyBetMessage()' : `openKalshiBetSlip('${ticker}', 'no')`}">
-              <span class="odds-label">NO ✗</span>
-              <span class="odds-price">${noMultiplier}x payout</span>
-            </button>
+        `;
+      } else {
+        // Standard Yes/No style card
+        return `
+          <div class="kalshi-market-card ${hasBet ? 'has-bet' : ''}">
+            ${hasBet ? '<div class="bet-placed-badge">✓ BET PLACED</div>' : ''}
+            
+            <div class="kalshi-category">
+              <div class="kalshi-category-icon">${categoryIcon}</div>
+              <span class="kalshi-category-label">${categoryLabel}</span>
+            </div>
+            
+            <div class="kalshi-title">${title}</div>
+            
+            <div class="kalshi-multi-options">
+              <div class="kalshi-multi-row">
+                <span class="kalshi-multi-label">Yes</span>
+                <span class="kalshi-multi-pct">${yesCents}%</span>
+                <div class="kalshi-mini-btns">
+                  <button class="kalshi-mini-btn yes ${hasBet ? 'disabled' : ''}" onclick="event.stopPropagation(); ${hasBet ? 'showAlreadyBetMessage()' : `openKalshiBetSlip('${ticker}', 'yes')`}">Yes</button>
+                  <button class="kalshi-mini-btn no ${hasBet ? 'disabled' : ''}" onclick="event.stopPropagation(); ${hasBet ? 'showAlreadyBetMessage()' : `openKalshiBetSlip('${ticker}', 'no')`}">No</button>
+                </div>
+              </div>
+            </div>
+            
+            <div class="kalshi-footer">
+              <div class="kalshi-volume">${formatVolume(volume)}</div>
+              <button class="kalshi-expand">⊕</button>
+            </div>
           </div>
-          
-          <div class="prediction-footer">
-            <div class="prediction-volume"><strong>${(market.volume || 0).toLocaleString()}</strong> volume</div>
-            <div class="prediction-closes">Closes <span class="time">${closeTime}</span></div>
-          </div>
-        </div>
-      `;
+        `;
+      }
     }
     
     async function openKalshiBetSlip(marketTicker, position) {
