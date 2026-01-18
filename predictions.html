@@ -239,6 +239,22 @@
     .kalshi-subtitle { font-size: 13px; color: var(--white-50); margin-top: 8px; }
     .kalshi-view-btn { font-size: 13px; font-weight: 600; color: #8b5cf6; transition: color 0.2s; }
     .kalshi-card:hover .kalshi-view-btn { color: #a78bfa; }
+    
+    /* Kalshi Markets List */
+    .kalshi-markets-header { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .kalshi-back-btn { padding: 10px 16px; background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 10px; color: #a78bfa; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .kalshi-back-btn:hover { background: rgba(139, 92, 246, 0.25); border-color: rgba(139, 92, 246, 0.5); }
+    .kalshi-event-title { font-size: 18px; font-weight: 700; color: var(--white); flex: 1; }
+    .kalshi-market-card { border-color: rgba(139, 92, 246, 0.2); }
+    .kalshi-market-card:hover { border-color: rgba(139, 92, 246, 0.4); }
+    .kalshi-market-card .prediction-odds { display: flex; gap: 8px; margin: 16px 0; }
+    .kalshi-market-card .odds-button { flex: 1; padding: 14px 12px; background: rgba(255,255,255,0.03); border: 2px solid rgba(255,255,255,0.1); border-radius: 12px; cursor: pointer; transition: all 0.2s; text-align: center; }
+    .kalshi-market-card .odds-button.yes:hover { border-color: var(--green); background: rgba(16, 185, 129, 0.1); }
+    .kalshi-market-card .odds-button.no:hover { border-color: var(--red); background: rgba(239, 68, 68, 0.1); }
+    .kalshi-market-card .odds-label { display: block; font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .kalshi-market-card .odds-button.yes .odds-label { color: var(--green); }
+    .kalshi-market-card .odds-button.no .odds-label { color: var(--red); }
+    .kalshi-market-card .odds-price { display: block; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--white-70); }
 
     /* Bet Slip - Centered Modal Style (matches sports bet slip) */
     .bet-slip-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 200; opacity: 0; visibility: hidden; transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
@@ -881,19 +897,28 @@
     }
 
     // ===== KALSHI MARKETS =====
+    let kalshiEvents = [];
     let kalshiMarkets = [];
+    let selectedKalshiMarket = null;
+    let currentKalshiView = 'events'; // 'events' or 'markets'
+    let currentEventTicker = null;
+    let kalshiUserBets = new Set(); // Track which markets user has bet on
     
     async function loadKalshiMarkets() {
       const grid = document.getElementById('predictionsGrid');
       grid.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+      
+      // Load user's Kalshi bets
+      await loadKalshiUserBets();
       
       try {
         const res = await fetch('/api/kalshi/events?limit=50');
         const data = await res.json();
         
         if (data.success && data.events) {
-          kalshiMarkets = data.events;
-          renderKalshiMarkets();
+          kalshiEvents = data.events;
+          currentKalshiView = 'events';
+          renderKalshiEvents();
         } else {
           throw new Error(data.error || 'Failed to load Kalshi markets');
         }
@@ -903,18 +928,28 @@
       }
     }
     
-    function renderKalshiMarkets() {
+    async function loadKalshiUserBets() {
+      if (!userEmail) return;
+      try {
+        const res = await fetch(`/api/kalshi/bets/my?email=${encodeURIComponent(userEmail)}`);
+        const data = await res.json();
+        if (data.bets) {
+          kalshiUserBets = new Set(data.bets.filter(b => b.status === 'active').map(b => b.kalshi_ticker));
+        }
+      } catch (err) { console.error('Error loading Kalshi user bets:', err); }
+    }
+    
+    function renderKalshiEvents() {
       const grid = document.getElementById('predictionsGrid');
-      if (kalshiMarkets.length === 0) {
-        grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🔮</div><div class="empty-state-title">No Kalshi markets available</div><p>Check back soon for live prediction markets!</p></div>`;
+      if (kalshiEvents.length === 0) {
+        grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🔮</div><div class="empty-state-title">No Kalshi events available</div><p>Check back soon for live prediction markets!</p></div>`;
         return;
       }
       
-      grid.innerHTML = kalshiMarkets.map(event => renderKalshiCard(event)).join('');
+      grid.innerHTML = kalshiEvents.map(event => renderKalshiEventCard(event)).join('');
     }
     
-    function renderKalshiCard(event) {
-      // Get category icon
+    function renderKalshiEventCard(event) {
       const categoryIcons = {
         'Politics': '🗳️',
         'Science and Technology': '🔬',
@@ -927,7 +962,7 @@
       const icon = categoryIcons[event.category] || '🔮';
       
       return `
-        <div class="prediction-card kalshi-card" onclick="openKalshiDetails('${event.event_ticker}')">
+        <div class="prediction-card kalshi-card" onclick="openKalshiEvent('${event.event_ticker}')">
           <div class="kalshi-source">
             <span class="kalshi-badge">K</span>
             <span class="source-name">Kalshi</span>
@@ -948,9 +983,201 @@
       `;
     }
     
-    function openKalshiDetails(eventTicker) {
-      // For now, show alert - later can expand to show markets within event
-      alert(`Coming soon: View markets for ${eventTicker}\n\nKalshi integration is in progress. You'll be able to see odds and place bets on Kalshi markets soon!`);
+    async function openKalshiEvent(eventTicker) {
+      const grid = document.getElementById('predictionsGrid');
+      grid.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+      currentEventTicker = eventTicker;
+      
+      try {
+        const res = await fetch(`/api/kalshi/event/${eventTicker}/markets`);
+        const data = await res.json();
+        
+        if (data.success && data.markets) {
+          kalshiMarkets = data.markets;
+          currentKalshiView = 'markets';
+          renderKalshiMarketsList(data.event);
+        } else {
+          throw new Error(data.error || 'Failed to load markets');
+        }
+      } catch (err) {
+        console.error('Error loading event markets:', err);
+        grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⚠️</div><div class="empty-state-title">Failed to load markets</div><p>${err.message}</p><button class="kalshi-back-btn" onclick="loadKalshiMarkets()">← Back to Events</button></div>`;
+      }
+    }
+    
+    function renderKalshiMarketsList(event) {
+      const grid = document.getElementById('predictionsGrid');
+      
+      let html = `
+        <div class="kalshi-markets-header">
+          <button class="kalshi-back-btn" onclick="loadKalshiMarkets()">← Back</button>
+          <div class="kalshi-event-title">${event?.title || 'Markets'}</div>
+        </div>
+      `;
+      
+      if (kalshiMarkets.length === 0) {
+        html += `<div class="empty-state"><div class="empty-state-icon">📊</div><div class="empty-state-title">No markets in this event</div></div>`;
+      } else {
+        html += kalshiMarkets.map(market => renderKalshiMarketCard(market)).join('');
+      }
+      
+      grid.innerHTML = html;
+    }
+    
+    function renderKalshiMarketCard(market) {
+      const hasBet = kalshiUserBets.has(market.kalshi_ticker);
+      const yesPct = market.yesProbability || 50;
+      const noPct = 100 - yesPct;
+      const yesMultiplier = market.yes_payout_multiplier?.toFixed(2) || '2.00';
+      const noMultiplier = market.no_payout_multiplier?.toFixed(2) || '2.00';
+      const closeTime = market.closes_at ? formatTimeLeft(market.closes_at) : 'TBD';
+      
+      return `
+        <div class="prediction-card kalshi-market-card ${hasBet ? 'has-bet' : ''}">
+          ${hasBet ? '<div class="bet-placed-badge">✓ BET PLACED</div>' : ''}
+          <div class="kalshi-source">
+            <span class="kalshi-badge">K</span>
+            <span class="source-name">Kalshi</span>
+          </div>
+          
+          <div class="prediction-content">
+            <div class="prediction-info">
+              <div class="prediction-title">${market.title}</div>
+              <div class="prediction-probability">
+                <span class="probability-value">${yesPct}%</span>
+                <span class="probability-label">chance</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="prediction-odds">
+            <button class="odds-button yes ${hasBet ? 'disabled' : ''}" onclick="event.stopPropagation(); ${hasBet ? 'showAlreadyBetMessage()' : `openKalshiBetSlip('${market.kalshi_ticker}', 'yes')`}">
+              <span class="odds-label">YES ✓</span>
+              <span class="odds-price">${yesMultiplier}x payout</span>
+            </button>
+            <button class="odds-button no ${hasBet ? 'disabled' : ''}" onclick="event.stopPropagation(); ${hasBet ? 'showAlreadyBetMessage()' : `openKalshiBetSlip('${market.kalshi_ticker}', 'no')`}">
+              <span class="odds-label">NO ✗</span>
+              <span class="odds-price">${noMultiplier}x payout</span>
+            </button>
+          </div>
+          
+          <div class="prediction-footer">
+            <div class="prediction-volume"><strong>${(market.volume || 0).toLocaleString()}</strong> volume</div>
+            <div class="prediction-closes">Closes <span class="time">${closeTime}</span></div>
+          </div>
+        </div>
+      `;
+    }
+    
+    async function openKalshiBetSlip(marketTicker, position) {
+      // Fetch fresh market data for live odds
+      try {
+        const res = await fetch(`/api/kalshi/market/${marketTicker}`);
+        const data = await res.json();
+        
+        if (!data.success || !data.market) {
+          throw new Error('Failed to load market');
+        }
+        
+        selectedKalshiMarket = data.market;
+        selectedPosition = position;
+        
+        // Update bet slip UI
+        document.getElementById('betSlipQuestion').textContent = selectedKalshiMarket.title;
+        document.getElementById('betSlipDate').textContent = `Closes: ${formatTimeLeft(selectedKalshiMarket.closes_at)}`;
+        
+        const yesMultiplier = selectedKalshiMarket.yes_payout_multiplier?.toFixed(2) || '2.00';
+        const noMultiplier = selectedKalshiMarket.no_payout_multiplier?.toFixed(2) || '2.00';
+        document.getElementById('yesMultiplier').textContent = `${yesMultiplier}x payout`;
+        document.getElementById('noMultiplier').textContent = `${noMultiplier}x payout`;
+        
+        // Update position buttons
+        document.getElementById('positionYes').classList.toggle('selected', position === 'yes');
+        document.getElementById('positionNo').classList.toggle('selected', position === 'no');
+        
+        // Clear and update amount
+        document.getElementById('betAmount').value = '';
+        document.querySelectorAll('.token-quick-btn').forEach(b => b.classList.remove('selected'));
+        updateKalshiPayoutPreview();
+        
+        // Update confirm button
+        document.getElementById('confirmBetBtn').textContent = `Place ${position.toUpperCase()} Bet`;
+        document.getElementById('confirmBetBtn').onclick = placeKalshiBet;
+        
+        // Show bet slip
+        document.getElementById('betSlipOverlay').classList.add('show');
+        document.body.style.overflow = 'hidden';
+        
+      } catch (err) {
+        console.error('Error opening Kalshi bet slip:', err);
+        alert('Failed to load market data. Please try again.');
+      }
+    }
+    
+    function updateKalshiPayoutPreview() {
+      const amount = parseInt(document.getElementById('betAmount').value) || 0;
+      const multiplier = selectedPosition === 'yes' 
+        ? selectedKalshiMarket?.yes_payout_multiplier || 2
+        : selectedKalshiMarket?.no_payout_multiplier || 2;
+      const payout = Math.floor(amount * multiplier);
+      
+      document.getElementById('previewBet').textContent = `${amount} tokens`;
+      document.getElementById('previewMultiplier').textContent = `${multiplier.toFixed(2)}x`;
+      document.getElementById('previewPayout').textContent = `${payout} tokens`;
+    }
+    
+    async function placeKalshiBet() {
+      if (!selectedKalshiMarket || !selectedPosition) return;
+      
+      const amount = parseInt(document.getElementById('betAmount').value);
+      if (!amount || amount < 10) { alert('Minimum bet is 10 tokens'); return; }
+      if (amount > userBalance) { alert('Insufficient tokens! Purchase more to continue.'); openTokenModal(); return; }
+      
+      if (!userEmail) {
+        userEmail = prompt('Enter your email to place bets:');
+        if (!userEmail) { alert('Email is required to place bets'); return; }
+        localStorage.setItem('userEmail', userEmail);
+      }
+      
+      const confirmBtn = document.getElementById('confirmBetBtn');
+      confirmBtn.disabled = true;
+      confirmBtn.style.opacity = '0.5';
+      
+      try {
+        const res = await fetch('/api/kalshi/bet', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            email: userEmail, 
+            marketTicker: selectedKalshiMarket.kalshi_ticker, 
+            position: selectedPosition, 
+            amount: amount 
+          })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          userBalance = data.newBalance;
+          document.getElementById('userBalance').textContent = Math.floor(userBalance).toLocaleString();
+          kalshiUserBets.add(selectedKalshiMarket.kalshi_ticker);
+          closeBetSlip();
+          showBetSuccess(data.bet);
+          // Refresh the markets list
+          if (currentEventTicker) {
+            openKalshiEvent(currentEventTicker);
+          }
+        } else { 
+          alert(data.error || 'Failed to place bet'); 
+        }
+      } catch (err) { 
+        console.error('Error placing Kalshi bet:', err); 
+        alert('Failed to place bet. Please try again.'); 
+      } finally {
+        confirmBtn.disabled = false;
+        confirmBtn.style.opacity = '1';
+        // Reset confirm button for regular predictions
+        document.getElementById('confirmBetBtn').onclick = confirmBet;
+      }
     }
 
     function renderPredictions() {
@@ -1184,6 +1411,9 @@
       selectedPrediction = predictions.find(p => p.id === predictionId);
       if (!selectedPrediction) return;
       
+      // Clear Kalshi selection when opening regular bet slip
+      selectedKalshiMarket = null;
+      
       // Check if betting is locked for this prediction
       if (isDailyBettingLocked(selectedPrediction)) {
         showLockedMessage();
@@ -1201,6 +1431,9 @@
       updatePayoutPreview();
       document.getElementById('positionYes').classList.toggle('selected', position === 'yes');
       document.getElementById('positionNo').classList.toggle('selected', position === 'no');
+      
+      // Restore confirm button for regular bets
+      document.getElementById('confirmBetBtn').onclick = confirmBet;
       document.getElementById('betSlipOverlay').classList.add('show');
       document.body.style.overflow = 'hidden';
     }
@@ -1349,7 +1582,12 @@
           document.querySelectorAll('.token-quick-btn').forEach(b => b.classList.remove('selected'));
           btn.classList.add('selected');
           document.getElementById('betAmount').value = btn.dataset.amount;
-          updatePayoutPreview();
+          // Update payout preview for either regular predictions or Kalshi
+          if (selectedKalshiMarket) {
+            updateKalshiPayoutPreview();
+          } else {
+            updatePayoutPreview();
+          }
         });
       });
     }
@@ -1357,7 +1595,12 @@
     function setupBetAmountInput() {
       document.getElementById('betAmount').addEventListener('input', () => {
         document.querySelectorAll('.token-quick-btn').forEach(b => b.classList.remove('selected'));
-        updatePayoutPreview();
+        // Update payout preview for either regular predictions or Kalshi
+        if (selectedKalshiMarket) {
+          updateKalshiPayoutPreview();
+        } else {
+          updatePayoutPreview();
+        }
       });
     }
 
