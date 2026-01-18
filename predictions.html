@@ -595,7 +595,7 @@
       <button class="category-tab active" data-category="daily">📈 Daily</button>
       <button class="category-tab" data-category="weekly">📊 Weekly</button>
       <button class="category-tab" data-category="crypto">₿ Crypto</button>
-      <button class="category-tab" data-category="kalshi">🔮 Kalshi</button>
+      <button class="category-tab" data-category="kalshi">🔮 All</button>
     </div>
     <div class="predictions-grid" id="predictionsGrid">
       <div class="loading"><div class="spinner"></div></div>
@@ -811,13 +811,10 @@
         window.history.replaceState({}, '', '/predictions.html');
       }
 
-      // Auto-refresh every 5 seconds (but not for Kalshi - it has its own cache)
+      // Auto-refresh balance every 30 seconds (Kalshi has server-side cache)
       setInterval(() => {
         loadBalance();
-        if (currentCategory !== 'kalshi') {
-          loadPredictions();
-        }
-      }, 5000);
+      }, 30000);
     });
 
     async function loadUserBets() {
@@ -852,22 +849,9 @@
         return;
       }
       
-      // Kalshi category fetches from Kalshi API
-      if (currentCategory === 'kalshi') {
-        await loadKalshiMarkets();
-        return;
-      }
-      
-      try {
-        let url = '/api/predictions?status=open';
-        if (currentCategory !== 'all') url += `&category=${currentCategory}`;
-        const res = await fetch(url);
-        const data = await res.json();
-        if (data.success) { predictions = data.predictions; renderPredictions(); }
-      } catch (err) {
-        console.error('Error loading predictions:', err);
-        grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⚠️</div><div class="empty-state-title">Failed to load predictions</div><p>Please try again later</p></div>`;
-      }
+      // All categories now use Kalshi data with filtering
+      await loadKalshiMarkets();
+    }
     }
 
     async function placeBet() {
@@ -929,6 +913,7 @@
 
     // ===== KALSHI MARKETS =====
     let kalshiMarkets = [];
+    let allKalshiMarkets = []; // Store all markets for filtering
     let selectedKalshiMarket = null;
     let kalshiUserBets = new Set(); // Track which markets user has bet on
     
@@ -945,15 +930,76 @@
         const data = await res.json();
         
         if (data.success && data.markets) {
-          kalshiMarkets = data.markets;
+          allKalshiMarkets = data.markets;
+          
+          // Filter markets based on current category
+          kalshiMarkets = filterKalshiByCategory(allKalshiMarkets, currentCategory);
+          
           renderKalshiMarketsFlat();
         } else {
           throw new Error(data.error || 'Failed to load Kalshi markets');
         }
       } catch (err) {
         console.error('Error loading Kalshi markets:', err);
-        grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⚠️</div><div class="empty-state-title">Failed to load Kalshi markets</div><p>${err.message}</p></div>`;
+        grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⚠️</div><div class="empty-state-title">Failed to load markets</div><p>${err.message}</p></div>`;
       }
+    }
+    
+    function filterKalshiByCategory(markets, category) {
+      if (category === 'kalshi' || category === 'all') {
+        return markets;
+      }
+      
+      return markets.filter(market => {
+        const title = (market.title || '').toLowerCase();
+        const ticker = (market.kalshi_ticker || market.id || '').toLowerCase();
+        
+        switch (category) {
+          case 'daily':
+            // Show sports, daily events, short-term markets
+            const now = new Date();
+            const closeTime = market.closes_at || market.closeTime;
+            if (closeTime) {
+              const closes = new Date(closeTime);
+              const hoursUntilClose = (closes - now) / (1000 * 60 * 60);
+              // Markets closing within 24 hours
+              if (hoursUntilClose > 0 && hoursUntilClose <= 24) return true;
+            }
+            // Sports games are typically daily
+            if (title.includes('football') || title.includes('nfl') || 
+                title.includes('basketball') || title.includes('nba') ||
+                title.includes('game') || title.includes(' at ')) return true;
+            return false;
+            
+          case 'weekly':
+            // Show markets closing within 7 days
+            const nowWeekly = new Date();
+            const closeTimeWeekly = market.closes_at || market.closeTime;
+            if (closeTimeWeekly) {
+              const closes = new Date(closeTimeWeekly);
+              const hoursUntilClose = (closes - nowWeekly) / (1000 * 60 * 60);
+              // Markets closing between 1-7 days
+              if (hoursUntilClose > 24 && hoursUntilClose <= 168) return true;
+            }
+            // Championship, weekly events
+            if (title.includes('championship') || title.includes('winner') ||
+                title.includes('weekly') || title.includes('week')) return true;
+            return false;
+            
+          case 'crypto':
+            // Show crypto-related markets
+            if (title.includes('bitcoin') || title.includes('btc') ||
+                title.includes('ethereum') || title.includes('eth') ||
+                title.includes('crypto') || title.includes('blockchain') ||
+                title.includes('dogecoin') || title.includes('solana') ||
+                ticker.includes('btc') || ticker.includes('eth') ||
+                ticker.includes('crypto')) return true;
+            return false;
+            
+          default:
+            return true;
+        }
+      });
     }
     
     async function loadKalshiUserBets() {
@@ -970,7 +1016,14 @@
     function renderKalshiMarketsFlat() {
       const grid = document.getElementById('predictionsGrid');
       if (kalshiMarkets.length === 0) {
-        grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🔮</div><div class="empty-state-title">No Kalshi markets available</div><p>Check back soon for live prediction markets!</p></div>`;
+        const categoryNames = {
+          'daily': 'daily',
+          'weekly': 'weekly', 
+          'crypto': 'crypto',
+          'kalshi': 'Kalshi'
+        };
+        const catName = categoryNames[currentCategory] || '';
+        grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🔮</div><div class="empty-state-title">No ${catName} markets available</div><p>Check back soon for live prediction markets!</p></div>`;
         return;
       }
       
