@@ -556,12 +556,6 @@
   </header>
 
   <main class="main">
-    <div class="category-tabs">
-      <button class="category-tab active" data-category="daily">📈 Daily</button>
-      <button class="category-tab" data-category="weekly">📊 Weekly</button>
-      <button class="category-tab" data-category="crypto">₿ Crypto</button>
-      <button class="category-tab" data-category="kalshi">🔮 All</button>
-    </div>
     <div class="predictions-grid" id="predictionsGrid">
       <div class="loading"><div class="spinner"></div></div>
     </div>
@@ -739,7 +733,7 @@
     let userBalance = 0;
     let predictions = [];
     let userBetPredictionIds = new Set(); // Track predictions user already bet on
-    let currentCategory = 'daily';
+    let currentCategory = 'kalshi'; // Show all Kalshi markets
     let selectedPrediction = null;
     let selectedPosition = null;
     let selectedPackage = 'popular';
