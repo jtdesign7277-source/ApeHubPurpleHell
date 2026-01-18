@@ -681,7 +681,7 @@
       </div>
       <span>Predict</span>
     </a>
-    <a href="#" class="nav-item" onclick="openBetSlip(); return false;">
+    <a href="#" class="nav-item" onclick="showBetSlipView(); return false;">
       <svg viewBox="0 0 24 24" fill="currentColor">
         <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
       </svg>
@@ -1263,13 +1263,14 @@
       document.body.style.overflow = '';
     }
 
-    function openBetSlip() {
-      // Open the bet slip overlay (shows current pending bets)
-      const betSlip = document.getElementById('betSlipOverlay');
-      if (betSlip) {
-        betSlip.classList.add('show');
+    function showBetSlipView() {
+      // This is for the bottom nav "Bet Slip" button - show pending bets info
+      // If there's a selected prediction, show the bet slip; otherwise show a message
+      if (selectedPrediction) {
+        document.getElementById('betSlipOverlay').classList.add('show');
+        document.body.style.overflow = 'hidden';
       } else {
-        showNotification('No pending bets in slip', 'info');
+        showNotification('Select a prediction to place a bet', 'info');
       }
     }
 
