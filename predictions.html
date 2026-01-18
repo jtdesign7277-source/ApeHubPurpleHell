@@ -171,6 +171,10 @@
     .odds-button.disabled { opacity: 0.5; cursor: not-allowed; }
     .odds-button.disabled:hover { background: rgba(255,255,255,0.05); border-color: transparent; transform: none; }
     
+    /* Already bet state */
+    .prediction-card.has-bet { border-color: rgba(16, 185, 129, 0.3); }
+    .bet-placed-badge { position: absolute; top: 16px; right: 16px; background: rgba(16, 185, 129, 0.9); padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; color: #fff; z-index: 10; }
+    
     /* Source Badge */
     .prediction-source { display: inline-flex; align-items: center; gap: 6px; background: rgba(239, 68, 68, 0.12); padding: 6px 12px; border-radius: 8px; margin-bottom: 14px; }
     .source-icon { width: 18px; height: 18px; background: linear-gradient(135deg, #ef4444, #dc2626); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; }
@@ -712,6 +716,7 @@
     let userEmail = localStorage.getItem('userEmail') || '';
     let userBalance = 0;
     let predictions = [];
+    let userBetPredictionIds = new Set(); // Track predictions user already bet on
     let currentCategory = 'daily';
     let selectedPrediction = null;
     let selectedPosition = null;
@@ -730,12 +735,13 @@
       logoTapTimer = setTimeout(() => { logoTapCount = 0; }, 1500);
     });
 
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
       if (!userEmail) {
         userEmail = prompt('Enter your email to start betting:');
         if (userEmail) localStorage.setItem('userEmail', userEmail);
       }
       loadBalance();
+      await loadUserBets(); // Load which predictions user has already bet on
       loadPredictions();
       setupCategoryTabs();
       setupTokenQuickSelect();
@@ -754,6 +760,17 @@
         loadPredictions();
       }, 5000);
     });
+
+    async function loadUserBets() {
+      if (!userEmail) return;
+      try {
+        const res = await fetch(`/api/predictions/bets/my?email=${encodeURIComponent(userEmail)}`);
+        const data = await res.json();
+        if (data.bets) {
+          userBetPredictionIds = new Set(data.bets.map(b => b.prediction_id));
+        }
+      } catch (err) { console.error('Error loading user bets:', err); }
+    }
 
     async function loadBalance() {
       if (!userEmail) return;
@@ -818,6 +835,7 @@
         if (data.success) {
           userBalance = data.newBalance;
           document.getElementById('userBalance').textContent = Math.floor(userBalance).toLocaleString();
+          userBetPredictionIds.add(selectedPrediction.id); // Mark this prediction as bet on
           showBetSuccess(data.bet);
           loadPredictions();
         } else { alert(data.error || 'Failed to place bet'); }
@@ -963,6 +981,7 @@
     function renderPredictionCard(p, snapshot) {
       const isLocked = isDailyBettingLocked(p);
       const lockedClass = isLocked ? 'locked' : '';
+      const hasBet = userBetPredictionIds.has(p.id);
       
       // Calculate probability from multipliers
       const yesProbability = (1 / parseFloat(p.yes_payout_multiplier) * 100).toFixed(0);
@@ -980,8 +999,9 @@
       const sourceInfo = getSourceInfo(p.category);
       
       return `
-        <div class="prediction-card ${p.featured ? 'featured' : ''} ${lockedClass}" onclick="openBetSlip(${p.id})">
+        <div class="prediction-card ${p.featured ? 'featured' : ''} ${lockedClass} ${hasBet ? 'has-bet' : ''}" onclick="${hasBet ? 'showAlreadyBetMessage()' : `openBetSlip(${p.id})`}">
           ${isLocked ? '<div class="locked-badge">🔒 LOCKED</div>' : ''}
+          ${hasBet ? '<div class="bet-placed-badge">✓ BET PLACED</div>' : ''}
           
           <div class="prediction-content">
             <div class="prediction-info">
@@ -1052,6 +1072,10 @@
 
     function showLockedMessage() {
       alert('🔒 Betting Closed!\n\nDaily predictions lock at 9:30am ET when the market opens. Check back tonight at 8pm ET for tomorrow\'s predictions!');
+    }
+
+    function showAlreadyBetMessage() {
+      alert('✓ Already Bet!\n\nYou have already placed a bet on this prediction. Check your Open Bets to see your position.');
     }
 
     function formatTimeLeft(dateStr) {
